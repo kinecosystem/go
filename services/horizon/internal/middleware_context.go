@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	gctx "github.com/goji/context"
-	"github.com/stellar/go/services/horizon/internal/context/requestid"
-	"github.com/stellar/go/services/horizon/internal/httpx"
+	"github.com/kinecosystem/go/services/horizon/internal/context/requestid"
+	"github.com/kinecosystem/go/services/horizon/internal/httpx"
 	"github.com/zenazn/goji/web"
 	"golang.org/x/net/context"
 )

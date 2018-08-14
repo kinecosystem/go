@@ -2,10 +2,10 @@
 package trades
 
 import (
-	"github.com/stellar/go/keypair"
-	. "github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/support/time"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/keypair"
+	. "github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/support/time"
+	"github.com/kinecosystem/go/xdr"
 )
 
 //GetTestAsset generates an issuer on the fly and creates a CreditAlphanum4 Asset with given code

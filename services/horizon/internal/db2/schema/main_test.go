@@ -3,8 +3,8 @@ package schema
 import (
 	"testing"
 
-	"github.com/stellar/go/support/db"
-	"github.com/stellar/go/support/db/dbtest"
+	"github.com/kinecosystem/go/support/db"
+	"github.com/kinecosystem/go/support/db/dbtest"
 	"github.com/stretchr/testify/assert"
 )
 

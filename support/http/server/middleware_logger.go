@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/middleware"
-	"github.com/stellar/go/support/log"
+	"github.com/kinecosystem/go/support/log"
 )
 
 func loggerMiddleware(requestIDKey interface{}, next http.Handler, w http.ResponseWriter, r *http.Request) {

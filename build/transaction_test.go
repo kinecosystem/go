@@ -3,7 +3,7 @@ package build
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/xdr"
 )
 
 var _ = Describe("Transaction Mutators:", func() {

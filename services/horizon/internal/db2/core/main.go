@@ -4,9 +4,9 @@ package core
 
 import (
 	"github.com/guregu/null"
-	"github.com/stellar/go/strkey"
-	"github.com/stellar/go/support/db"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/strkey"
+	"github.com/kinecosystem/go/support/db"
+	"github.com/kinecosystem/go/xdr"
 )
 
 // Account is a row of data from the `accounts` table

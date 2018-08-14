@@ -1,10 +1,10 @@
 package build
 
 import (
-	"github.com/stellar/go/amount"
-	"github.com/stellar/go/price"
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/amount"
+	"github.com/kinecosystem/go/price"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/xdr"
 )
 
 // CreateOffer creates a new offer

@@ -3,15 +3,15 @@ package horizon
 import (
 	"net/http"
 
-	"github.com/stellar/go/services/horizon/internal/db2"
-	"github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/services/horizon/internal/render/hal"
-	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
-	"github.com/stellar/go/services/horizon/internal/render/sse"
-	"github.com/stellar/go/services/horizon/internal/resource"
-	"github.com/stellar/go/services/horizon/internal/txsub"
-	halRender "github.com/stellar/go/support/render/hal"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/services/horizon/internal/db2"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
+	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
+	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
+	"github.com/kinecosystem/go/services/horizon/internal/resource"
+	"github.com/kinecosystem/go/services/horizon/internal/txsub"
+	halRender "github.com/kinecosystem/go/support/render/hal"
+	"github.com/kinecosystem/go/support/render/problem"
 )
 
 // This file contains the actions:

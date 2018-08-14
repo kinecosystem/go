@@ -1,7 +1,7 @@
 package resource
 
 import (
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/xdr"
 	"golang.org/x/net/context"
 )
 

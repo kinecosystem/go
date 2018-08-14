@@ -11,7 +11,7 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/xdr"
 )
 
 // Parse  calculates and returns the best rational approximation of the given

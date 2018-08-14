@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 
-	"github.com/stellar/go/support/errors"
+	"github.com/kinecosystem/go/support/errors"
 )
 
 // Exec executes the query that has been previously configured on the

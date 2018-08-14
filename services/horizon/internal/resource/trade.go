@@ -3,10 +3,10 @@ package resource
 import (
 	"fmt"
 
-	"github.com/stellar/go/amount"
-	"github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/services/horizon/internal/httpx"
-	"github.com/stellar/go/services/horizon/internal/render/hal"
+	"github.com/kinecosystem/go/amount"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/services/horizon/internal/httpx"
+	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
 	"golang.org/x/net/context"
 )
 

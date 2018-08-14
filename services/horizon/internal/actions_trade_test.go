@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stellar/go/services/horizon/internal/db2/history"
-	. "github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/services/horizon/internal/resource"
-	. "github.com/stellar/go/services/horizon/internal/test/trades"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	. "github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/services/horizon/internal/resource"
+	. "github.com/kinecosystem/go/services/horizon/internal/test/trades"
+	"github.com/kinecosystem/go/xdr"
 )
 
 func TestTradeActions_Index(t *testing.T) {

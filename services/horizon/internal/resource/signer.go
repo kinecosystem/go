@@ -1,7 +1,7 @@
 package resource
 
 import (
-	"github.com/stellar/go/services/horizon/internal/db2/core"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"golang.org/x/net/context"
 )
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/segmentio/go-loggly"
 	"github.com/sirupsen/logrus"
-	"github.com/stellar/go/support/http/mutil"
+	"github.com/kinecosystem/go/support/http/mutil"
 	"golang.org/x/net/context"
 )
 

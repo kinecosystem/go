@@ -14,8 +14,8 @@ import (
 
 	"time"
 
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/support/log"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/support/log"
 )
 
 var extractBinName = regexp.MustCompile(`^(?P<bin>[a-z-]+)-(?P<tag>.+)$`)
@@ -333,7 +333,7 @@ func repoName() string {
 	if os.Getenv("REPO") != "" {
 		return os.Getenv("REPO")
 	}
-	return "github.com/stellar/go"
+	return "github.com/kinecosystem/go"
 
 }
 

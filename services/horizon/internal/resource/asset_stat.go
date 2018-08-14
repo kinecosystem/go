@@ -1,10 +1,10 @@
 package resource
 
 import (
-	"github.com/stellar/go/amount"
-	"github.com/stellar/go/services/horizon/internal/db2/assets"
-	"github.com/stellar/go/services/horizon/internal/render/hal"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/amount"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/assets"
+	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
+	"github.com/kinecosystem/go/xdr"
 	"golang.org/x/net/context"
 )
 
