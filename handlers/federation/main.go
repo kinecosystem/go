@@ -15,7 +15,7 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/stellar/go/support/db"
+	"github.com/kinecosystem/go/support/db"
 )
 
 // Driver represents a data source against which federation queries can be

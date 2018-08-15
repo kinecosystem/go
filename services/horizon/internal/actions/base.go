@@ -5,10 +5,10 @@ import (
 
 	gctx "github.com/goji/context"
 
-	"github.com/stellar/go/services/horizon/internal/render"
-	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
-	"github.com/stellar/go/services/horizon/internal/render/sse"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/services/horizon/internal/render"
+	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
+	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
+	"github.com/kinecosystem/go/support/render/problem"
 	"github.com/zenazn/goji/web"
 	"golang.org/x/net/context"
 )

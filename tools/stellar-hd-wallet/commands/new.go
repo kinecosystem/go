@@ -5,7 +5,7 @@ import (
 
 	"github.com/bartekn/go-bip39"
 	"github.com/spf13/cobra"
-	"github.com/stellar/go/support/errors"
+	"github.com/kinecosystem/go/support/errors"
 )
 
 const DefaultEntropySize = 256

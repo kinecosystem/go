@@ -10,11 +10,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
-	"github.com/stellar/go/services/friendbot/internal"
-	"github.com/stellar/go/support/config"
-	"github.com/stellar/go/support/http/server"
-	"github.com/stellar/go/support/log"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/services/friendbot/internal"
+	"github.com/kinecosystem/go/support/config"
+	"github.com/kinecosystem/go/support/http/server"
+	"github.com/kinecosystem/go/support/log"
+	"github.com/kinecosystem/go/support/render/problem"
 )
 
 // Config represents the configuration of a friendbot server

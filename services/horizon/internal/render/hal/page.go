@@ -1,7 +1,7 @@
 package hal
 
 import (
-	sUrl "github.com/stellar/go/support/url"
+	sUrl "github.com/kinecosystem/go/support/url"
 	"net/url"
 	"strconv"
 )

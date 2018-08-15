@@ -1,12 +1,12 @@
 package server
 
 import (
-	"github.com/stellar/go/services/bifrost/bitcoin"
-	"github.com/stellar/go/services/bifrost/database"
-	"github.com/stellar/go/services/bifrost/queue"
-	"github.com/stellar/go/services/bifrost/sse"
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/support/log"
+	"github.com/kinecosystem/go/services/bifrost/bitcoin"
+	"github.com/kinecosystem/go/services/bifrost/database"
+	"github.com/kinecosystem/go/services/bifrost/queue"
+	"github.com/kinecosystem/go/services/bifrost/sse"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/support/log"
 )
 
 // onNewBitcoinTransaction checks if transaction is valid and adds it to

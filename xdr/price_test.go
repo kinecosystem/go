@@ -1,7 +1,7 @@
 package xdr_test
 
 import (
-	. "github.com/stellar/go/xdr"
+	. "github.com/kinecosystem/go/xdr"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

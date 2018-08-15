@@ -3,10 +3,10 @@ package operations
 import (
 	"time"
 
-	"github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/services/horizon/internal/resource/base"
-	"github.com/stellar/go/services/horizon/internal/render/hal"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/services/horizon/internal/resource/base"
+	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
+	"github.com/kinecosystem/go/xdr"
 	"golang.org/x/net/context"
 )
 
