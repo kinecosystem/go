@@ -427,7 +427,8 @@ imports:
   subpackages:
   - unix
 - name: gopkg.in/fatih/set.v0
-  version: 27c40922c40b43fe04554d8223a402af3ea333f3
+  version: 2c768e3c5489976167bfc42b5c7c92ca783f4389
+  repo: https://github.com/fatih/set
 - name: gopkg.in/gavv/httpexpect.v1
   version: 40724cf1e4a08b670b14a02deff693a91f3aa9a0
   repo: https://gopkg.in/gavv/httpexpect.v1
