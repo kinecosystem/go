@@ -257,9 +257,8 @@ func (a *App) Tick() {
 	go func() { a.submitter.Tick(a.ctx); wg.Done() }()
 	wg.Wait()
 
+	// Execute SSE only if there were in changes to ledger or history
 	newLedgerState := ledger.CurrentState()
-
-	// Run sse only if changes in history happend
 	if newLedgerState.CoreLatest > initialLedgerState.CoreLatest ||
 		newLedgerState.HistoryLatest > initialLedgerState.HistoryLatest {
 		sse.Tick()
