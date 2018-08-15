@@ -239,6 +239,10 @@ func (a *App) Tick() {
 	var wg sync.WaitGroup
 	log.Debug("ticking app")
 	// update ledger state and stellar-core info in parallel
+
+	// Getting current ledger as reference, to avoid running sse tick in case of no ledger change
+	initialLedgerState := ledger.CurrentState()
+
 	wg.Add(2)
 	go func() { a.UpdateLedgerState(); wg.Done() }()
 	go func() { a.UpdateStellarCoreInfo(); wg.Done() }()
@@ -253,7 +257,13 @@ func (a *App) Tick() {
 	go func() { a.submitter.Tick(a.ctx); wg.Done() }()
 	wg.Wait()
 
-	sse.Tick()
+	newLedgerState := ledger.CurrentState()
+
+	// Run sse only if changes in history happend
+	if newLedgerState.CoreLatest > initialLedgerState.CoreLatest ||
+		newLedgerState.HistoryLatest > initialLedgerState.HistoryLatest {
+		sse.Tick()
+	}
 
 	// finally, update metrics
 	a.UpdateMetrics()
