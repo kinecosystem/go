@@ -13,8 +13,8 @@ func initHorizonDb(app *App) {
 	if err != nil {
 		log.Panic(err)
 	}
-	session.DB.SetMaxIdleConns(4)
-	session.DB.SetMaxOpenConns(12)
+	session.DB.SetMaxIdleConns(app.config.HorizonDBMaxIdleConnections)
+	session.DB.SetMaxOpenConns(app.config.HorizonDBMaxOpenConnections)
 
 	app.historyQ = &history.Q{session}
 }
@@ -26,8 +26,8 @@ func initCoreDb(app *App) {
 		log.Panic(err)
 	}
 
-	session.DB.SetMaxIdleConns(4)
-	session.DB.SetMaxOpenConns(12)
+	session.DB.SetMaxIdleConns(app.config.CoreDBMaxIdleConnections)
+	session.DB.SetMaxOpenConns(app.config.CoreDBMaxOpenConnections)
 	app.coreQ = &core.Q{session}
 }
 
