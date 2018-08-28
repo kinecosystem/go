@@ -77,6 +77,23 @@ func (action *EffectIndexAction) SSE(stream sse.Stream) {
 	)
 }
 
+// GetTopic is a method for actions.SSE
+func (action *EffectIndexAction) GetTopic() string {
+	if res := action.GetString("account_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("ledger_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("tx_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("op_id"); res != "" {
+		return res
+	}
+	return ""
+}
+
 func (action *EffectIndexAction) loadParams() {
 	action.ValidateCursor()
 	action.PagingParams = action.GetPageQuery()

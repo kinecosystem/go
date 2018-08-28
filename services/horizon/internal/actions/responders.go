@@ -18,4 +18,5 @@ type Raw interface {
 // to be MimeEventStream.
 type SSE interface {
 	SSE(sse.Stream)
+	GetTopic() string
 }

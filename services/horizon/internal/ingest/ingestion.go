@@ -3,18 +3,31 @@ package ingest
 import (
 	"encoding/json"
 	"fmt"
+	"math"
+	"strconv"
 	"time"
 
-	"math"
-
 	sq "github.com/Masterminds/squirrel"
+	"github.com/cskr/pubsub"
 	"github.com/guregu/null"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/sqx"
+	"github.com/kinecosystem/go/services/horizon/internal/log"
+	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/support/errors"
 	"github.com/kinecosystem/go/xdr"
 )
+
+const (
+	pubsubCommitTopic    = "commit"
+	pubsubCommitCapacity = 0
+	pubsubStubValue      = 0
+)
+
+// Pubsub functionaly for history database ingestion.
+// This is required for invoking SSE clients to get updates on database changes.
+var commitPubsub = pubsub.New(pubsubCommitCapacity)
 
 // ClearAll clears the entire history database
 func (ingest *Ingestion) ClearAll() error {
@@ -173,6 +186,25 @@ func (ingest *Ingestion) UpdateAccountIDs(tables []TableName) error {
 	return nil
 }
 
+// Return a channel which emits a message when ingections were committed to the database
+func (ingest *Ingestion) getCommitChannel() chan interface{} {
+	return commitPubsub.SubOnce(pubsubCommitTopic)
+}
+
+// Listen until the insert action committed to the DB and then publish to sse subscriptors and
+// then publish the topic that was ingested.
+func (ingest *Ingestion) waitAndPublish(committed chan interface{}, topic string) {
+	l := log.WithFields(log.F{"topic": topic, "channel": committed})
+	l.Info("Waiting for topic")
+	select {
+	case <-committed:
+		sse.Publish(topic)
+	case <-time.After(10 * time.Second):
+		l.Errorf("Failed to get publish approval, releasing channel")
+		sse.Publish(topic)
+	}
+}
+
 // Ledger adds a ledger to the current ingestion
 func (ingest *Ingestion) Ledger(
 	id int64,
@@ -180,6 +212,11 @@ func (ingest *Ingestion) Ledger(
 	txs int,
 	ops int,
 ) {
+
+	// Wait for data to be committed to database, then notify subscribes.
+	go ingest.waitAndPublish(ingest.getCommitChannel(), "ledger")
+	go ingest.waitAndPublish(ingest.getCommitChannel(), strconv.FormatInt(id, 10))
+
 	ingest.builders[LedgersTableName].Values(
 		CurrentVersion,
 		id,
@@ -226,6 +263,9 @@ func (ingest *Ingestion) Operation(
 // `history_operation_participants` table.
 func (ingest *Ingestion) OperationParticipants(op int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
+		// Wait for data to be committed to database, then notify subscribes.
+		go ingest.waitAndPublish(ingest.getCommitChannel(), aid.Address())
+
 		ingest.builders[OperationParticipantsTableName].Values(op, Address(aid.Address()))
 	}
 }
@@ -256,6 +296,8 @@ func (ingest *Ingestion) Trade(
 	trade xdr.ClaimOfferAtom,
 	ledgerClosedAt int64,
 ) error {
+	// Wait for data to be committed to database, then notify subscribes.
+	go ingest.waitAndPublish(ingest.getCommitChannel(), "order_book")
 
 	q := history.Q{Session: ingest.DB}
 
@@ -316,6 +358,9 @@ func (ingest *Ingestion) Transaction(
 	// Enquote empty signatures
 	signatures := tx.Base64Signatures()
 
+	// Wait for data to be committed to database, then notify subscribes.
+	go ingest.waitAndPublish(ingest.getCommitChannel(), tx.TransactionHash)
+
 	ingest.builders[TransactionsTableName].Values(
 		id,
 		tx.TransactionHash,
@@ -343,6 +388,8 @@ func (ingest *Ingestion) Transaction(
 // `history_transaction_participants` table.
 func (ingest *Ingestion) TransactionParticipants(tx int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
+		// Wait for data to be committed to database, then notify subscribes.
+		go ingest.waitAndPublish(ingest.getCommitChannel(), aid.Address())
 		ingest.builders[TransactionParticipantsTableName].Values(tx, Address(aid.Address()))
 	}
 }
@@ -470,7 +517,8 @@ func (ingest *Ingestion) commit() error {
 	if err != nil {
 		return err
 	}
-
+	// Update subscribers that commit is done to the DB.
+	commitPubsub.Pub(pubsubStubValue, pubsubCommitTopic)
 	return nil
 }
 
