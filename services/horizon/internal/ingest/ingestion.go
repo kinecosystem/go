@@ -3,6 +3,7 @@ package ingest
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"math"
@@ -12,6 +13,7 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/sqx"
+	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/support/errors"
 	"github.com/kinecosystem/go/xdr"
 )
@@ -199,6 +201,8 @@ func (ingest *Ingestion) Ledger(
 		header.Data.LedgerVersion,
 		header.DataXDR(),
 	)
+	// Notify about update in ledger
+	sse.Publish(strconv.FormatInt(id, 10))
 }
 
 // Operation ingests the provided operation data into a new row in the
@@ -227,6 +231,8 @@ func (ingest *Ingestion) Operation(
 func (ingest *Ingestion) OperationParticipants(op int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
 		ingest.builders[OperationParticipantsTableName].Values(op, Address(aid.Address()))
+		// Notify about update in participants
+		sse.Publish(aid.Address())
 	}
 }
 
@@ -336,6 +342,8 @@ func (ingest *Ingestion) Transaction(
 		time.Now().UTC(),
 		time.Now().UTC(),
 	)
+	// Notify about update in transaction
+	sse.Publish(tx.TransactionHash)
 }
 
 // TransactionParticipants ingests the provided account ids as participants of
@@ -344,6 +352,8 @@ func (ingest *Ingestion) Transaction(
 func (ingest *Ingestion) TransactionParticipants(tx int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
 		ingest.builders[TransactionParticipantsTableName].Values(tx, Address(aid.Address()))
+		// Notify about update in transaction participants
+		sse.Publish(aid.Address())
 	}
 }
 

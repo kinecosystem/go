@@ -2,9 +2,11 @@ package actions
 
 import (
 	"net/http"
+	"strconv"
 
 	gctx "github.com/goji/context"
 
+	"github.com/kinecosystem/go/services/horizon/internal/log"
 	"github.com/kinecosystem/go/services/horizon/internal/render"
 	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
@@ -58,7 +60,20 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
+
+		channel := sse.Pumped()
+
+		// If SSE request is related to a specific topic (tx_id, account_id etc.), subscribe this
+		// handler to that topic so request will only be triggered by this topic. Unsubscribed when
+		// done.
+		if topic := base.getTopic(); topic != "" {
+			channel = sse.Subscribe(topic)
+			log.Infof("Subscribed to topic: %s", topic)
+			defer sse.Unsubscribe(topic)
+		}
+
 		action, ok := action.(SSE)
+
 		if !ok {
 			goto NotAcceptable
 		}
@@ -102,7 +117,7 @@ func (base *Base) Execute(action interface{}) {
 			select {
 			case <-base.Ctx.Done():
 				return
-			case <-sse.Pumped():
+			case <-channel:
 				//no-op, continue onto the next iteration
 			}
 		}
@@ -127,6 +142,25 @@ func (base *Base) Execute(action interface{}) {
 NotAcceptable:
 	problem.Render(base.Ctx, base.W, hProblem.NotAcceptable)
 	return
+}
+
+// Get an if from requests in order to use it as q topic in SSE pubsub.
+func (base *Base) getTopic() string {
+	var topic string = ""
+	if base.GetString("account_id") != "" {
+		topic = base.GetString("account_id")
+	}
+	if base.GetString("id") != "" {
+		topic = base.GetString("id")
+	}
+	if base.GetInt32("ledger_id") != 0 {
+		topic = strconv.Itoa(int(base.GetInt32("ledger_id")))
+	}
+	if base.GetString("tx_id") != "" {
+		topic = base.GetString("tx_id")
+	}
+
+	return topic
 }
 
 // Do executes the provided func iff there is no current error for the action.
