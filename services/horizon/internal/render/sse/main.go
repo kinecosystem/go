@@ -139,14 +139,14 @@ var sse_pubsub = pubsub.New(100000)
 // SSE connection can subscribe to a topic which is ususllay an id (account, ledger, tx)
 // Once a change in database happens, Publish is used by ingestor so channel is notified.
 func Subscribe(topic string) chan interface{} {
-	log.Infof("Subscribed to topic: %s", topic)
+	log.WithField("topic", topic).Info("Subscribed to topic")
 	return sse_pubsub.Sub(topic)
 }
 
 // Unsubscribe to a topic, fir example when SSE connectio is closed. Reference counting is used in
 // order to decide if channel should stay alive or closed.
 func Unsubscribe(channel chan interface{}, topic string) {
-	log.Debugf("Unsubscribed from topic: %s", topic)
+	log.WithField("topic", topic).Info("Unsubscribed from topic")
 	sse_pubsub.Unsub(channel, topic)
 }
 
@@ -154,7 +154,7 @@ func Unsubscribe(channel chan interface{}, topic string) {
 // submission is required in order to avoid edge cases when DB is not modified yet because of delays
 // in DB update (long queue in connection pool, netwok delays etc.)
 func Publish(topic string) {
-	log.Infof("Publish on topic: %s", topic)
+	log.WithField("topic", topic).Info("Publish on topic")
 	sse_pubsub.Pub(0, topic)
 }
 

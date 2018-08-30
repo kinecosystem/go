@@ -41,27 +41,29 @@ func TestSsePubsubMultipleChannels(t *testing.T) {
 
 	ht.App.ticks.Stop()
 
-	channel_a := sse.Subscribe("a")
-	channel_b := sse.Subscribe("b")
+	channelA := sse.Subscribe("a")
+	channelB := sse.Subscribe("b")
 
 	sse.Publish("a")
 
-	success := false
-	for {
+	select {
+	case <-channelA:
 		select {
-		case <-channel_a:
-			success = true
-			// no-op.  Success!
-		case <-channel_b:
-			t.Error("channel_b shouldnt trigger")
+		case <-channelA:
+			t.Error("channelA shouldnt trigger")
+			t.FailNow()
+		case <-channelB:
+			t.Error("channelB shouldnt trigger")
 			t.FailNow()
 		case <-time.After(2 * time.Second):
-			if !success {
-				t.Error("channel_a did not trigger")
-				t.FailNow()
-			}
-			return
+			// no-op. Success!
 		}
+	case <-channelB:
+		t.Error("channelB shouldnt trigger")
+		t.FailNow()
+	case <-time.After(2 * time.Second):
+		t.Error("channelA did not trigger")
+		t.FailNow()
 	}
 
 }

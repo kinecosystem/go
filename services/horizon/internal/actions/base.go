@@ -6,7 +6,6 @@ import (
 
 	gctx "github.com/goji/context"
 
-	"github.com/kinecosystem/go/services/horizon/internal/log"
 	"github.com/kinecosystem/go/services/horizon/internal/render"
 	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
@@ -67,7 +66,6 @@ func (base *Base) Execute(action interface{}) {
 		// done.
 		if topic := base.getTopic(); topic != "" {
 			channel = sse.Subscribe(topic)
-			log.Infof("Subscribed to topic: %s", topic)
 			defer sse.Unsubscribe(channel, topic)
 		}
 
@@ -143,19 +141,17 @@ NotAcceptable:
 	return
 }
 
-// Get an if from requests in order to use it as q topic in SSE pubsub.
+// Get sse request topic to be used as pubsub topic.
 func (base *Base) getTopic() string {
 	var topic string = ""
-	if base.GetString("account_id") != "" {
+	switch {
+	case base.GetString("account_id") != "":
 		topic = base.GetString("account_id")
-	}
-	if base.GetString("id") != "" {
+	case base.GetString("id") != "":
 		topic = base.GetString("id")
-	}
-	if base.GetInt32("ledger_id") != 0 {
+	case base.GetInt32("ledger_id") != 0:
 		topic = strconv.Itoa(int(base.GetInt32("ledger_id")))
-	}
-	if base.GetString("tx_id") != "" {
+	case base.GetString("tx_id") != "":
 		topic = base.GetString("tx_id")
 	}
 

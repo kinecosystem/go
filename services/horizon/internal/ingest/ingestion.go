@@ -176,6 +176,32 @@ func (ingest *Ingestion) UpdateAccountIDs(tables []TableName) error {
 	return nil
 }
 
+// Subscribe to channel that informs after table has updated in DB.
+func (ingest *Ingestion) getBuilderSubscriptionChannel(tableName TableName) chan interface{} {
+	return ingest.builders[tableName].Subscribe()
+}
+
+// Listen until the insert action finalizes in the DB and then publish to sse subscriptors.
+// If publish will be done beore DB finalize writing, clients may query the DB for old state
+// and will not get the latest update.
+func (ingest *Ingestion) waitAndPublish(channel chan interface{}, topic string) {
+	go func() {
+		log.WithField("topic", topic).Debug("waiting for topic")
+		for {
+			select {
+			case <-channel:
+				log.WithField("topic", topic).Debug("publish on topic")
+				sse.Publish(topic)
+				return
+			case <-time.After(5 * time.Second):
+				log.WithField("topic", topic).Errorf("Failed to get publish approval, releasing channel")
+				sse.Publish(topic)
+				return
+			}
+		}
+	}()
+}
+
 // Ledger adds a ledger to the current ingestion
 func (ingest *Ingestion) Ledger(
 	id int64,
@@ -183,8 +209,7 @@ func (ingest *Ingestion) Ledger(
 	txs int,
 	ops int,
 ) {
-	channel := ingest.builders[LedgersTableName].Subscribe()
-	ingest.waitAndPublish(channel, strconv.FormatInt(id, 10))
+	ingest.waitAndPublish(ingest.getBuilderSubscriptionChannel(LedgersTableName), strconv.FormatInt(id, 10))
 
 	ingest.builders[LedgersTableName].Values(
 		CurrentVersion,
@@ -232,28 +257,9 @@ func (ingest *Ingestion) Operation(
 // `history_operation_participants` table.
 func (ingest *Ingestion) OperationParticipants(op int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
-		channel := ingest.builders[OperationParticipantsTableName].Subscribe()
-		ingest.waitAndPublish(channel, aid.Address())
+		ingest.waitAndPublish(ingest.getBuilderSubscriptionChannel(OperationParticipantsTableName), aid.Address())
 		ingest.builders[OperationParticipantsTableName].Values(op, Address(aid.Address()))
 	}
-}
-
-func (ingest *Ingestion) waitAndPublish(channel chan interface{}, topic string) {
-	go func() {
-		log.Debugf("waiting for topic %s", topic)
-		for {
-			select {
-			case <-channel:
-				log.Debugf("publish on topic %s", topic)
-				sse.Publish(topic)
-				return
-			case <-time.After(5 * time.Second):
-				log.Errorf("Failed to get publish approval on topic %s, releasing channel", topic)
-				sse.Publish(topic)
-				return
-			}
-		}
-	}()
 }
 
 // Rollback aborts this ingestions transaction
@@ -342,8 +348,7 @@ func (ingest *Ingestion) Transaction(
 	// Enquote empty signatures
 	signatures := tx.Base64Signatures()
 
-	channel := ingest.builders[TransactionsTableName].Subscribe()
-	ingest.waitAndPublish(channel, tx.TransactionHash)
+	ingest.waitAndPublish(ingest.getBuilderSubscriptionChannel(TransactionsTableName), tx.TransactionHash)
 
 	ingest.builders[TransactionsTableName].Values(
 		id,
@@ -373,8 +378,7 @@ func (ingest *Ingestion) Transaction(
 // `history_transaction_participants` table.
 func (ingest *Ingestion) TransactionParticipants(tx int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
-		channel := ingest.builders[TransactionParticipantsTableName].Subscribe()
-		ingest.waitAndPublish(channel, aid.Address())
+		ingest.waitAndPublish(ingest.getBuilderSubscriptionChannel(TransactionParticipantsTableName), aid.Address())
 		ingest.builders[TransactionParticipantsTableName].Values(tx, Address(aid.Address()))
 	}
 }
