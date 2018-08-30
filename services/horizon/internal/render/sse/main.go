@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 
+	pubsub "github.com/cskr/pubsub"
 	"github.com/kinecosystem/go/support/log"
 	"golang.org/x/net/context"
 )
@@ -35,7 +35,7 @@ type Eventable interface {
 
 // Pumped returns a channel that will be closed the next time the input pump
 // sends.  It can be used similar to `ctx.Done()`, like so:  `<-sse.Pumped()`
-func Pumped() <-chan struct{} {
+func Pumped() <-chan interface{} {
 	return nextTick
 }
 
@@ -44,7 +44,7 @@ func Pumped() <-chan struct{} {
 func Tick() {
 	lock.Lock()
 	prev := nextTick
-	nextTick = make(chan struct{})
+	nextTick = make(chan interface{})
 	lock.Unlock()
 	close(prev)
 }
@@ -121,7 +121,7 @@ var helloEvent = Event{
 }
 
 var lock sync.Mutex
-var nextTick chan struct{}
+var nextTick chan interface{}
 
 func getJSON(val interface{}) string {
 	js, err := json.Marshal(val)
@@ -133,57 +133,33 @@ func getJSON(val interface{}) string {
 	return string(js)
 }
 
-// Support notifying open SSE requests via channel based on related changes done
-// in the History database. Channel also includes reference counting for safe removal.
-type PubsubChannel struct {
-	channel        chan struct{}
-	referenceCount int
-}
-
-var pubsub_channels = make(map[string]PubsubChannel)
+// TODO: make pubsub channels number configurable
+var sse_pubsub = pubsub.New(100000)
 
 // SSE connection can subscribe to a topic which is ususllay an id (account, ledger, tx)
 // Once a change in database happens, Publish is used by ingestor so channel is notified.
-func Subscribe(topic string) chan struct{} {
-	if _, ok := pubsub_channels[topic]; !ok {
-		pubsub_channels[topic] = PubsubChannel{make(chan struct{}), 1}
-	} else {
-		pubsub_channels[topic] = PubsubChannel{pubsub_channels[topic].channel, pubsub_channels[topic].referenceCount + 1}
-	}
-	log.Infof("Subscribe to topic: %s", topic)
-	return pubsub_channels[topic].channel
+func Subscribe(topic string) chan interface{} {
+	log.Infof("Subscribed to topic: %s", topic)
+	return sse_pubsub.Sub(topic)
 }
 
 // Unsubscribe to a topic, fir example when SSE connectio is closed. Reference counting is used in
 // order to decide if channel should stay alive or closed.
-func Unsubscribe(topic string) {
-	if pubsubChannel, ok := pubsub_channels[topic]; ok {
-		if pubsubChannel.referenceCount == 1 {
-			close(pubsubChannel.channel)
-			delete(pubsub_channels, topic)
-		} else {
-			pubsub_channels[topic] = PubsubChannel{pubsub_channels[topic].channel, pubsub_channels[topic].referenceCount - 1}
-		}
-	}
+func Unsubscribe(channel chan interface{}, topic string) {
+	log.Debugf("Unsubscribed from topic: %s", topic)
+	sse_pubsub.Unsub(channel, topic)
 }
 
 // Publish to channel, can be used by ingestor mostly to notify on DB changes. Delay in channel
 // submission is required in order to avoid edge cases when DB is not modified yet because of delays
 // in DB update (long queue in connection pool, netwok delays etc.)
 func Publish(topic string) {
-	if pubsubChannel, ok := pubsub_channels[topic]; ok {
-		go func() {
-			// TODO: This behavior assumes that data is written in DB at max 1/2 sec after added to write Q.
-			var s struct{}
-			time.Sleep(500 * time.Millisecond)
-			pubsubChannel.channel <- s
-			log.Infof("Publish to topic: %s", topic)
-		}()
-	}
+	log.Infof("Publish on topic: %s", topic)
+	sse_pubsub.Pub(0, topic)
 }
 
 func init() {
 	lock.Lock()
-	nextTick = make(chan struct{})
+	nextTick = make(chan interface{})
 	lock.Unlock()
 }

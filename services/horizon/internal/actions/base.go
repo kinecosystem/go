@@ -60,8 +60,7 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
-
-		channel := sse.Pumped()
+		var channel chan interface{}
 
 		// If SSE request is related to a specific topic (tx_id, account_id etc.), subscribe this
 		// handler to that topic so request will only be triggered by this topic. Unsubscribed when
@@ -69,7 +68,7 @@ func (base *Base) Execute(action interface{}) {
 		if topic := base.getTopic(); topic != "" {
 			channel = sse.Subscribe(topic)
 			log.Infof("Subscribed to topic: %s", topic)
-			defer sse.Unsubscribe(topic)
+			defer sse.Unsubscribe(channel, topic)
 		}
 
 		action, ok := action.(SSE)

@@ -13,6 +13,7 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/sqx"
+	"github.com/kinecosystem/go/services/horizon/internal/log"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/support/errors"
 	"github.com/kinecosystem/go/xdr"
@@ -182,6 +183,9 @@ func (ingest *Ingestion) Ledger(
 	txs int,
 	ops int,
 ) {
+	channel := ingest.builders[LedgersTableName].Subscribe()
+	ingest.waitAndPublish(channel, strconv.FormatInt(id, 10))
+
 	ingest.builders[LedgersTableName].Values(
 		CurrentVersion,
 		id,
@@ -201,8 +205,6 @@ func (ingest *Ingestion) Ledger(
 		header.Data.LedgerVersion,
 		header.DataXDR(),
 	)
-	// Notify about update in ledger
-	sse.Publish(strconv.FormatInt(id, 10))
 }
 
 // Operation ingests the provided operation data into a new row in the
@@ -230,10 +232,28 @@ func (ingest *Ingestion) Operation(
 // `history_operation_participants` table.
 func (ingest *Ingestion) OperationParticipants(op int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
+		channel := ingest.builders[OperationParticipantsTableName].Subscribe()
+		ingest.waitAndPublish(channel, aid.Address())
 		ingest.builders[OperationParticipantsTableName].Values(op, Address(aid.Address()))
-		// Notify about update in participants
-		sse.Publish(aid.Address())
 	}
+}
+
+func (ingest *Ingestion) waitAndPublish(channel chan interface{}, topic string) {
+	go func() {
+		log.Debugf("waiting for topic %s", topic)
+		for {
+			select {
+			case <-channel:
+				log.Debugf("publish on topic %s", topic)
+				sse.Publish(topic)
+				return
+			case <-time.After(5 * time.Second):
+				log.Errorf("Failed to get publish approval on topic %s, releasing channel", topic)
+				sse.Publish(topic)
+				return
+			}
+		}
+	}()
 }
 
 // Rollback aborts this ingestions transaction
@@ -322,6 +342,9 @@ func (ingest *Ingestion) Transaction(
 	// Enquote empty signatures
 	signatures := tx.Base64Signatures()
 
+	channel := ingest.builders[TransactionsTableName].Subscribe()
+	ingest.waitAndPublish(channel, tx.TransactionHash)
+
 	ingest.builders[TransactionsTableName].Values(
 		id,
 		tx.TransactionHash,
@@ -342,8 +365,7 @@ func (ingest *Ingestion) Transaction(
 		time.Now().UTC(),
 		time.Now().UTC(),
 	)
-	// Notify about update in transaction
-	sse.Publish(tx.TransactionHash)
+
 }
 
 // TransactionParticipants ingests the provided account ids as participants of
@@ -351,9 +373,9 @@ func (ingest *Ingestion) Transaction(
 // `history_transaction_participants` table.
 func (ingest *Ingestion) TransactionParticipants(tx int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
+		channel := ingest.builders[TransactionParticipantsTableName].Subscribe()
+		ingest.waitAndPublish(channel, aid.Address())
 		ingest.builders[TransactionParticipantsTableName].Values(tx, Address(aid.Address()))
-		// Notify about update in transaction participants
-		sse.Publish(aid.Address())
 	}
 }
 
