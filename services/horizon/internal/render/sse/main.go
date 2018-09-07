@@ -116,7 +116,7 @@ var goodbyeEvent = Event{
 var helloEvent = Event{
 	Data:  "hello",
 	Event: "open",
-	Retry: 5000,
+	Retry: 60000,
 }
 
 var lock sync.Mutex
