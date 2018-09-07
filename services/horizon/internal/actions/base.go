@@ -94,6 +94,23 @@ func (base *Base) Execute(action interface{}) {
 				return
 			}
 
+			// Reply preamble message that states delay timer.
+			//
+			// NOTE This only happens only healthy HTTP 2xx responses.
+			//
+			// This is a hacky solution that tries to solve the case where clients have an unwanted behavior:
+			// They already have an account open and just want to poll their account balance but retry too quickly,
+			// according to default retry value (a few seconds usually). This causes them to spam the server right
+			// after disconnecting the SSE stream.
+			//
+			// This change will cause them to receive the preamble over and over again on every SSE tick,
+			// practically turning it into a keepalive message. This would lower the reconnection amount
+			// and in turn (most importantly) the amount of queries sent to the Horizon database.
+			//
+			// This has a cost though - it keeps SSE connections alive and also causes "junk" keep alive traffic
+			// to be sent over and over again.
+			sse.WritePreamble(base.Ctx, base.W)
+
 			select {
 			case <-base.Ctx.Done():
 				return
