@@ -133,21 +133,20 @@ func getJSON(val interface{}) string {
 	return string(js)
 }
 
-// TODO: make pubsub channels number configurable
-var sse_pubsub = pubsub.New(100000)
+// Pubsub for sse requests, so they will run sse.action only upon relevant data changes.
+var ssePubsub = pubsub.New(0)
 
-// SSE connection can subscribe to a topic which is ususllay an id (account, ledger, tx)
+// Subscribe to topic by SSE connection ususllay with an id (account, ledger, tx)
 // Once a change in database happens, Publish is used by ingestor so channel is notified.
 func Subscribe(topic string) chan interface{} {
 	log.WithField("topic", topic).Info("Subscribed to topic")
-	return sse_pubsub.Sub(topic)
+	return ssePubsub.Sub(topic)
 }
 
-// Unsubscribe to a topic, fir example when SSE connectio is closed. Reference counting is used in
-// order to decide if channel should stay alive or closed.
+// Unsubscribe to a topic, for example when SSE connection is closed.
 func Unsubscribe(channel chan interface{}, topic string) {
 	log.WithField("topic", topic).Info("Unsubscribed from topic")
-	sse_pubsub.Unsub(channel, topic)
+	ssePubsub.Unsub(channel, topic)
 }
 
 // Publish to channel, can be used by ingestor mostly to notify on DB changes. Delay in channel
@@ -155,7 +154,7 @@ func Unsubscribe(channel chan interface{}, topic string) {
 // in DB update (long queue in connection pool, netwok delays etc.)
 func Publish(topic string) {
 	log.WithField("topic", topic).Info("Publish on topic")
-	sse_pubsub.Pub(0, topic)
+	ssePubsub.Pub(0, topic)
 }
 
 func init() {

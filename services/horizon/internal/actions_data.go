@@ -56,6 +56,11 @@ func (action *DataShowAction) SSE(stream sse.Stream) {
 	)
 }
 
+// GetTopic is a method for actions.SSE
+func (action *DataShowAction) GetTopic() string {
+	return action.GetString("account_id")
+}
+
 func (action *DataShowAction) loadParams() {
 	action.Address = action.GetString("account_id")
 	action.Key = action.GetString("key")

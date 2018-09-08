@@ -77,6 +77,18 @@ func (action *PaymentsIndexAction) SSE(stream sse.Stream) {
 		})
 }
 
+// GetTopic is a method for actions.SSE
+func (action *PaymentsIndexAction) GetTopic() string {
+	if action.GetString("account_id") != "" {
+		return action.GetString("account_id")
+	} else if action.GetString("ledger_id") != "" {
+		return action.GetString("ledger_id")
+	} else if action.GetString("tx_id") != "" {
+		return action.GetString("tx_id")
+	}
+	return ""
+}
+
 func (action *PaymentsIndexAction) loadParams() {
 	action.ValidateCursorAsDefault()
 	action.AccountFilter = action.GetString("account_id")

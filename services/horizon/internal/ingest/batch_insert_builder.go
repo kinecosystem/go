@@ -4,19 +4,12 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
-	pubsub "github.com/cskr/pubsub"
 	"github.com/kinecosystem/go/support/db"
 	"github.com/kinecosystem/go/support/errors"
 )
 
-var builder_pubsub = pubsub.New(1000)
-
 func (b *BatchInsertBuilder) init() {
 	b.rows = make([][]interface{}, 0)
-}
-
-func (b *BatchInsertBuilder) Subscribe() chan interface{} {
-	return builder_pubsub.SubOnce("BatchInsertBuilder")
 }
 
 func (b *BatchInsertBuilder) createInsertBuilder() {
@@ -76,7 +69,6 @@ func (b *BatchInsertBuilder) Exec(DB *db.Session) error {
 		}
 	}
 
-	builder_pubsub.Pub(0, "BatchInsertBuilder")
 	// Empty rows slice
 	b.rows = make([][]interface{}, 0)
 	return nil

@@ -82,3 +82,8 @@ func (action *OrderBookShowAction) SSE(stream sse.Stream) {
 	})
 
 }
+
+// GetTopic is a method for actions.SSE
+func (action *OrderBookShowAction) GetTopic() string {
+	return "order_book"
+}

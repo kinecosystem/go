@@ -59,6 +59,11 @@ func (action *LedgerIndexAction) SSE(stream sse.Stream) {
 	)
 }
 
+// GetTopic is a method for actions.SSE
+func (action *LedgerIndexAction) GetTopic() string {
+	return "ledger"
+}
+
 func (action *LedgerIndexAction) loadParams() {
 	action.ValidateCursorAsDefault()
 	action.PagingParams = action.GetPageQuery()

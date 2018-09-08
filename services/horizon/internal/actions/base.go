@@ -2,10 +2,8 @@ package actions
 
 import (
 	"net/http"
-	"strconv"
 
 	gctx "github.com/goji/context"
-
 	"github.com/kinecosystem/go/services/horizon/internal/render"
 	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
@@ -59,24 +57,21 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
-		var channel chan interface{}
-
-		// If SSE request is related to a specific topic (tx_id, account_id etc.), subscribe this
-		// handler to that topic so request will only be triggered by this topic. Unsubscribed when
-		// done.
-		if topic := base.getTopic(); topic != "" {
-			channel = sse.Subscribe(topic)
-			defer sse.Unsubscribe(channel, topic)
-		}
+		var pumped chan interface{}
 
 		action, ok := action.(SSE)
-
+		// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
+		// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
+		topic := action.GetTopic()
+		if topic != "" {
+			pumped = sse.Subscribe(topic)
+			defer sse.Unsubscribe(pumped, topic)
+		}
 		if !ok {
 			goto NotAcceptable
 		}
 
 		stream := sse.NewStream(base.Ctx, base.W, base.R)
-
 		for {
 			action.SSE(stream)
 
@@ -114,7 +109,7 @@ func (base *Base) Execute(action interface{}) {
 			select {
 			case <-base.Ctx.Done():
 				return
-			case <-channel:
+			case <-pumped:
 				//no-op, continue onto the next iteration
 			}
 		}
@@ -139,23 +134,6 @@ func (base *Base) Execute(action interface{}) {
 NotAcceptable:
 	problem.Render(base.Ctx, base.W, hProblem.NotAcceptable)
 	return
-}
-
-// Get sse request topic to be used as pubsub topic.
-func (base *Base) getTopic() string {
-	var topic string = ""
-	switch {
-	case base.GetString("account_id") != "":
-		topic = base.GetString("account_id")
-	case base.GetString("id") != "":
-		topic = base.GetString("id")
-	case base.GetInt32("ledger_id") != 0:
-		topic = strconv.Itoa(int(base.GetInt32("ledger_id")))
-	case base.GetString("tx_id") != "":
-		topic = base.GetString("tx_id")
-	}
-
-	return topic
 }
 
 // Do executes the provided func iff there is no current error for the action.
