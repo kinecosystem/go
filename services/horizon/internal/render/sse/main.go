@@ -11,6 +11,8 @@ import (
 	"golang.org/x/net/context"
 )
 
+const pubsubCapacity = 0
+
 // Event is the packet of data that gets sent over the wire to a connected
 // client.
 type Event struct {
@@ -133,8 +135,8 @@ func getJSON(val interface{}) string {
 	return string(js)
 }
 
-// Pubsub for sse requests, so they will run sse.action only upon relevant data changes.
-var ssePubsub = pubsub.New(0)
+// Pubsub for SSE requests, so they will run SSE.action only upon relevant data changes.
+var ssePubsub = pubsub.New(pubsubCapacity)
 
 // Subscribe to topic by SSE connection usually with an id (account, ledger, tx)
 // Once a change in database happens, Publish is used by ingestor so channel is notified.

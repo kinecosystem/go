@@ -19,9 +19,15 @@ import (
 	"github.com/kinecosystem/go/xdr"
 )
 
-// Provide subscription to ingestions when are finally in the History DB.
-// This is required for invoking sse clients to get updates on changes in the DB.
-var commitPubsub = pubsub.New(0)
+const (
+	pubsubCommitTopic    = "commit"
+	pubsubCommitCapacity = 0
+	pubsubStubValue      = 0
+)
+
+// Pubsub functionaly for history database ingestion.
+// This is required for invoking SSE clients to get updates on database changes.
+var commitPubsub = pubsub.New(pubsubCommitCapacity)
 
 // ClearAll clears the entire history database
 func (ingest *Ingestion) ClearAll() error {
@@ -182,7 +188,7 @@ func (ingest *Ingestion) UpdateAccountIDs(tables []TableName) error {
 
 // Return a channel which emits a message when ingections were commited to the database
 func (ingest *Ingestion) getCommitChannel() chan interface{} {
-	return commitPubsub.SubOnce("commit")
+	return commitPubsub.SubOnce(pubsubCommitTopic)
 }
 
 // Listen until the insert action commited to the DB and then publish to sse subscriptors and
@@ -513,7 +519,7 @@ func (ingest *Ingestion) commit() error {
 		return err
 	}
 	// Update subscribers that commit is done to the DB.
-	commitPubsub.Pub(0, "commit")
+	commitPubsub.Pub(pubsubStubValue, pubsubCommitTopic)
 	return nil
 }
 
