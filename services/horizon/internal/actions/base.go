@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	gctx "github.com/goji/context"
+
 	"github.com/kinecosystem/go/services/horizon/internal/render"
 	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
@@ -60,6 +61,9 @@ func (base *Base) Execute(action interface{}) {
 		var pumped chan interface{}
 
 		action, ok := action.(SSE)
+		if !ok {
+			goto NotAcceptable
+		}
 		// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
 		// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
 		topic := action.GetTopic()
@@ -67,11 +71,8 @@ func (base *Base) Execute(action interface{}) {
 			pumped = sse.Subscribe(topic)
 			defer sse.Unsubscribe(pumped, topic)
 		}
-		if !ok {
-			goto NotAcceptable
-		}
-
 		stream := sse.NewStream(base.Ctx, base.W, base.R)
+
 		for {
 			action.SSE(stream)
 

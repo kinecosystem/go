@@ -68,10 +68,11 @@ func (action *TransactionIndexAction) SSE(stream sse.Stream) {
 
 // GetTopic is a method for actions.SSE
 func (action *TransactionIndexAction) GetTopic() string {
-	if action.GetString("account_id") != "" {
-		return action.GetString("account_id")
-	} else if action.GetString("ledger_id") != "" {
-		return action.GetString("ledger_id")
+	if res := action.GetString("account_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("ledger_id"); res != "" {
+		return res
 	}
 	return ""
 }
