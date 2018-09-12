@@ -1,5 +1,5 @@
-hash: 7eac67607acc35ee775cfd4301d326fa205f7d0e95836f36dd934c5ccd9fc171
-updated: 2017-12-22T11:51:26.139292-09:00
+hash: 1aa5a23fa67be77384d9fb20d2cf55d99f44e1a2d7146d758f33977f4560c12a
+updated: 2018-09-12T18:24:25.64194396+03:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -43,6 +43,8 @@ imports:
   - private/waiter
   - service/s3
   - service/sts
+- name: github.com/bartekn/go-bip39
+  version: a05967ea095d81c8fe4833776774cfaff8e5036c
 - name: github.com/btcsuite/btcd
   version: 4803a8291c92a1d2d41041b942a9a9e37deab065
   subpackages:
@@ -72,6 +74,8 @@ imports:
 - name: github.com/codegangsta/negroni
   version: c7477ad8e330bef55bf1ebe300cf8aa67c492d1b
   repo: https://github.com/codegangsta/negroni
+- name: github.com/cskr/pubsub
+  version: a1dc30a0b38055a251f1f04ceb4cc1c7207b0540
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   repo: https://github.com/davecgh/go-spew
@@ -231,7 +235,7 @@ imports:
   subpackages:
   - xdr3
 - name: github.com/onsi/ginkgo
-  version: 6c46eb8334b30dc55b42f1a1c725d5ce97375390
+  version: 9008c7b79f9636c46a0a945141020124702f0ecf
   subpackages:
   - config
   - extensions/table
@@ -252,7 +256,7 @@ imports:
   - reporters/stenographer/support/go-isatty
   - types
 - name: github.com/onsi/gomega
-  version: d35dcfdbfd01eaabf8da0b6b36f111ff953b68cb
+  version: 6e33911c8481405188b3791f916ac125a6a404b4
   subpackages:
   - format
   - internal/assertion
@@ -349,8 +353,6 @@ imports:
   - suite
 - name: github.com/tyler-smith/go-bip32
   version: 2c9cfd17756470a0b7c3e4b7954bae7d11035504
-- name: github.com/bartekn/go-bip39
-  version: a05967ea095d81c8fe4833776774cfaff8e5036c
 - name: github.com/tylerb/graceful
   version: 7116c7a8115899e80197cd9e0b97998c0f97ed8e
   repo: https://github.com/tylerb/graceful
@@ -373,7 +375,7 @@ imports:
   version: f06f290571ce81ab347174c6f7ad2e1865af41a7
   repo: https://github.com/xeipuuv/gojsonschema
 - name: github.com/y0ssar1an/q
-  version: 392ac3089fcf8c70ebbe85f4c29778b7ebe27a9f
+  version: 4b5d05b1e093249d7f51e3a72677a7003a534b40
 - name: github.com/yalp/jsonpath
   version: 31a79c7593bb93eb10b163650d4a3e6ca190e4dc
   repo: https://github.com/yalp/jsonpath
@@ -427,8 +429,7 @@ imports:
   subpackages:
   - unix
 - name: gopkg.in/fatih/set.v0
-  version: 2c768e3c5489976167bfc42b5c7c92ca783f4389
-  repo: https://github.com/fatih/set
+  version: 27c40922c40b43fe04554d8223a402af3ea333f3
 - name: gopkg.in/gavv/httpexpect.v1
   version: 40724cf1e4a08b670b14a02deff693a91f3aa9a0
   repo: https://gopkg.in/gavv/httpexpect.v1
