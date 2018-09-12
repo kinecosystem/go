@@ -84,6 +84,9 @@ func (action *OrderBookShowAction) SSE(stream sse.Stream) {
 }
 
 // GetTopic is a method for actions.SSE
+//
+// There is no value in this action for specific order, so registration topic is a general
+// change in the ledger.
 func (action *OrderBookShowAction) GetTopic() string {
 	return "order_book"
 }

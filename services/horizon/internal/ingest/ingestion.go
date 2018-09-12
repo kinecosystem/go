@@ -192,7 +192,7 @@ func (ingest *Ingestion) waitAndPublish(commited chan interface{}, topic string)
 	l.Info("Waiting for topic")
 	select {
 	case <-commited:
-		l.Info("Publish on topic")
+		l.Info("Publishing to topic")
 		sse.Publish(topic)
 	case <-time.After(10 * time.Second):
 		l.Errorf("Failed to get publish approval, releasing channel")
@@ -208,7 +208,7 @@ func (ingest *Ingestion) Ledger(
 	ops int,
 ) {
 
-	// Notify subscribers about changes after data is written on the DB
+	// Wait for data to be committed to database, then notify subscribes.
 	go ingest.waitAndPublish(ingest.getCommitChannel(), "ledger")
 	go ingest.waitAndPublish(ingest.getCommitChannel(), strconv.FormatInt(id, 10))
 
@@ -258,7 +258,9 @@ func (ingest *Ingestion) Operation(
 // `history_operation_participants` table.
 func (ingest *Ingestion) OperationParticipants(op int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
+		// Wait for data to be committed to database, then notify subscribes.
 		go ingest.waitAndPublish(ingest.getCommitChannel(), aid.Address())
+
 		ingest.builders[OperationParticipantsTableName].Values(op, Address(aid.Address()))
 	}
 }
@@ -289,6 +291,7 @@ func (ingest *Ingestion) Trade(
 	trade xdr.ClaimOfferAtom,
 	ledgerClosedAt int64,
 ) error {
+	// Wait for data to be committed to database, then notify subscribes.
 	go ingest.waitAndPublish(ingest.getCommitChannel(), "order_book")
 
 	q := history.Q{Session: ingest.DB}
@@ -350,6 +353,7 @@ func (ingest *Ingestion) Transaction(
 	// Enquote empty signatures
 	signatures := tx.Base64Signatures()
 
+	// Wait for data to be committed to database, then notify subscribes.
 	go ingest.waitAndPublish(ingest.getCommitChannel(), tx.TransactionHash)
 
 	ingest.builders[TransactionsTableName].Values(
@@ -379,6 +383,7 @@ func (ingest *Ingestion) Transaction(
 // `history_transaction_participants` table.
 func (ingest *Ingestion) TransactionParticipants(tx int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
+		// Wait for data to be committed to database, then notify subscribes.
 		go ingest.waitAndPublish(ingest.getCommitChannel(), aid.Address())
 		ingest.builders[TransactionParticipantsTableName].Values(tx, Address(aid.Address()))
 	}

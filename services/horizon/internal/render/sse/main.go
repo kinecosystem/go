@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sync"
 
-	pubsub "github.com/cskr/pubsub"
+	"github.com/cskr/pubsub"
 	"github.com/kinecosystem/go/support/log"
 	"golang.org/x/net/context"
 )
@@ -136,7 +136,7 @@ func getJSON(val interface{}) string {
 // Pubsub for sse requests, so they will run sse.action only upon relevant data changes.
 var ssePubsub = pubsub.New(0)
 
-// Subscribe to topic by SSE connection ususllay with an id (account, ledger, tx)
+// Subscribe to topic by SSE connection usually with an id (account, ledger, tx)
 // Once a change in database happens, Publish is used by ingestor so channel is notified.
 func Subscribe(topic string) chan interface{} {
 	log.WithField("topic", topic).Info("Subscribed to topic")

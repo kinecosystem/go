@@ -13,7 +13,7 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 )
 
-// Check subscription gets updates, and sse.Tick() doesnt trigger channel.
+// Test subscription gets updates, and sse.Tick() doesnt trigger channel.
 func TestSSEPubsub(t *testing.T) {
 	ht := StartHTTPTest(t, "base")
 	defer ht.Finish()
@@ -26,25 +26,21 @@ func TestSSEPubsub(t *testing.T) {
 	sse.Publish("a")
 
 	select {
-	case <-subscription:
-		// no-op.  Success!
+	case <-subscription: // no-op. Success!
 	case <-time.After(2 * time.Second):
-		t.Error("channel did not trigger")
-		t.FailNow()
+		t.Fatal("subscription did not trigger")
 	}
 
 	sse.Tick()
 	select {
 	case <-subscription:
-		t.Error("channel shouldn't trigger after tick")
-		t.FailNow()
-	case <-time.After(2 * time.Second):
-		// no-op. Success!
+		t.Fatal("subscription shouldn't trigger after tick")
+	case <-time.After(2 * time.Second): // no-op. Success!
 	}
 
 }
 
-// Check 2 subscriptions to different topics. Make sure that one topic doesnt
+// Test 2 subscriptions to different topics. Make sure that one topic doesnt
 // raise both channels.
 func TestSSEPubsubMultipleChannels(t *testing.T) {
 	ht := StartHTTPTest(t, "base")
@@ -52,42 +48,39 @@ func TestSSEPubsubMultipleChannels(t *testing.T) {
 
 	ht.App.ticks.Stop()
 
-	channelA := sse.Subscribe("a")
-	channelB := sse.Subscribe("b")
-	defer sse.Unsubscribe(channelA, "a")
-	defer sse.Unsubscribe(channelB, "b")
+	subA := sse.Subscribe("a")
+	subB := sse.Subscribe("b")
+	defer sse.Unsubscribe(subA, "a")
+	defer sse.Unsubscribe(subB, "b")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go func(channelA chan interface{}, channelB chan interface{}, wg *sync.WaitGroup) {
+	go func(subA chan interface{}, subB chan interface{}, wg *sync.WaitGroup) {
 		defer wg.Done()
+
 		select {
-		case <-channelA:
-			select {
-			case <-channelA:
-				t.Error("channelA shouldnt trigger")
-				t.FailNow()
-			case <-channelB:
-				t.Error("channelB shouldnt trigger")
-				t.FailNow()
-			case <-time.After(2 * time.Second):
-				// no-op. Success!
-			}
-		case <-channelB:
-			t.Error("channelB shouldnt trigger")
-			t.FailNow()
+		case <-subA: // no-op. Success!
+		case <-subB:
+			t.Fatal("subscription B shouldn't trigger")
 		case <-time.After(2 * time.Second):
-			t.Error("channelA did not trigger")
-			t.FailNow()
+			t.Fatal("subscription A did not trigger")
 		}
-	}(channelA, channelB, &wg)
+
+		select {
+		case <-subA:
+			t.Fatal("subscription A shouldn't trigger")
+		case <-subB:
+			t.Fatal("subscription B shouldn't trigger")
+		case <-time.After(2 * time.Second): // no-op. Success!
+		}
+	}(subA, subB, &wg)
 
 	sse.Publish("a")
 	wg.Wait()
 }
 
-// Check multiple number of topics handled
-func TestSSEPubsubManyChannels(t *testing.T) {
+// Test multiple number of topics handled
+func TestSSEPubsubManyTopics(t *testing.T) {
 	ht := StartHTTPTest(t, "base")
 	defer ht.Finish()
 
@@ -96,30 +89,31 @@ func TestSSEPubsubManyChannels(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(100)
 	subscriptions := make([]chan interface{}, 100)
+
 	for i := 0; i < 100; i++ {
 		subscriptions[i] = sse.Subscribe(strconv.Itoa(i))
 		defer sse.Unsubscribe(subscriptions[i], strconv.Itoa(i))
+
 		go func(subscription chan interface{}, wg *sync.WaitGroup) {
 			defer wg.Done()
 			select {
 			case <-subscription:
 				return
 			case <-time.After(2 * time.Second):
-				t.Error("Subscription did not trigger within 2 seconds")
-				t.FailNow()
+				t.Fatal("Subscription did not trigger within 2 seconds")
 			}
 		}(subscriptions[i], &wg)
 	}
 
-	for j := 0; j < 100; j++ {
+	for i := 0; i < 100; i++ {
 		sse.Publish(strconv.Itoa(j))
 	}
 
 	wg.Wait()
 }
 
-// Check multiple subscriptions to the same topic.
-func TestSSEPubsubManyListeners(t *testing.T) {
+// Test multiple subscriptions to the same topic.
+func TestSSEPubsubManySubscribers(t *testing.T) {
 	ht := StartHTTPTest(t, "base")
 	defer ht.Finish()
 
@@ -128,18 +122,17 @@ func TestSSEPubsubManyListeners(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(100)
 	subscriptions := make([]chan interface{}, 100)
-	//var subscriptions [100]chan interface{}
 	for i := 0; i < 100; i++ {
 		subscriptions[i] = sse.Subscribe("a")
 		defer sse.Unsubscribe(subscriptions[i], "a")
+
 		go func(subscription chan interface{}, wg *sync.WaitGroup) {
 			defer wg.Done()
 			select {
 			case <-subscription:
 				return
 			case <-time.After(2 * time.Second):
-				t.Error("Subscription did not trigger within 2 seconds")
-				t.FailNow()
+				t.Fatal("Subscription did not trigger within 2 seconds")
 			}
 		}(subscriptions[i], &wg)
 	}
@@ -149,12 +142,17 @@ func TestSSEPubsubManyListeners(t *testing.T) {
 	wg.Wait()
 }
 
-// Check sse subscription get message when ingest to Horizon happens.
+// Test SSE subscription get message when ingest to Horizon happens.
 func TestSSEPubsubTransactions(t *testing.T) {
-	tt := test.Start(t).ScenarioWithoutHorizon("kahuna")
+	SCENARIO_NAME = "kahuna"
+	TX_HASH := "GA46VRKBCLI2X6DXLX7AIEVRFLH3UA7XBE3NGNP6O74HQ5LXHMGTV2JB"
+
+	tt := test.Start(t).ScenarioWithoutHorizon(SCENARIO_NAME)
 	defer tt.Finish()
-	subscription := sse.Subscribe("GA46VRKBCLI2X6DXLX7AIEVRFLH3UA7XBE3NGNP6O74HQ5LXHMGTV2JB")
-	defer sse.Unsubscribe(subscription, "GA46VRKBCLI2X6DXLX7AIEVRFLH3UA7XBE3NGNP6O74HQ5LXHMGTV2JB")
+
+	subscription := sse.Subscribe(TX_HASH)
+	defer sse.Unsubscribe(subscription, TX_HASH)
+
 	var wg sync.WaitGroup
 	wg.Add(10)
 
@@ -164,17 +162,18 @@ func TestSSEPubsubTransactions(t *testing.T) {
 			case <-subscription:
 				wg.Done()
 			case <-time.After(10 * time.Second):
-				t.Error("Subscription did not trigger within 10 seconds")
-				t.FailNow()
+				t.Fatal("subscription did not trigger within fast enough")
 			}
 		}
 	}(subscription, &wg)
+
 	ingestHorizon(tt)
 
 	wg.Wait()
 }
 
-// helpers from ingest/main_test.go
+// Helpers from ingest/main_test.go
+
 func ingestHorizon(tt *test.T) *ingest.Session {
 	sys := sys(tt)
 	s := ingest.NewSession(sys)

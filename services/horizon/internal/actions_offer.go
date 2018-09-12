@@ -51,6 +51,9 @@ func (action *OffersByAccountAction) SSE(stream sse.Stream) {
 }
 
 // GetTopic is a method for actions.SSE
+//
+// There is no value in this action for specific account_id, so registration topic is a general
+// change in the ledger.
 func (action *OffersByAccountAction) GetTopic() string {
 	return action.GetString("account_id")
 }
