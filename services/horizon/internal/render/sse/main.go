@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/cskr/pubsub"
-	"github.com/kinecosystem/go/support/log"
+	"github.com/kinecosystem/go/services/horizon/internal/log"
 	"golang.org/x/net/context"
 )
 
