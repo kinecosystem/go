@@ -40,11 +40,4 @@ type Config struct {
 	// SkipCursorUpdate causes the ingestor to skip reporting the "last imported
 	// ledger" state to stellar-core.
 	SkipCursorUpdate bool
-
-	// Database connection pool configuration
-	HorizonDBMaxOpenConnections int
-	HorizonDBMaxIdleConnections int
-
-	CoreDBMaxOpenConnections int
-	CoreDBMaxIdleConnections int
 }
