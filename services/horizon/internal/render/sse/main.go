@@ -156,7 +156,9 @@ func Unsubscribe(channel chan interface{}, topic string) {
 // in DB update (long queue in connection pool, netwok delays etc.)
 func Publish(topic string) {
 	log.WithField("topic", topic).Info("Publish on topic")
-	ssePubsub.Pub(0, topic)
+	// using non-blocking channel message in case channel queue is full. This can happen if multiple
+	// messages reveived on short interval and sse.Execute loop is not waiting to channel.
+	ssePubsub.TryPub(0, topic)
 }
 
 func init() {
