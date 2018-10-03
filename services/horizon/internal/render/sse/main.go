@@ -155,7 +155,7 @@ func Unsubscribe(channel chan interface{}, topic string) {
 // submission is required in order to avoid edge cases when DB is not modified yet because of delays
 // in DB update (long queue in connection pool, netwok delays etc.)
 func Publish(topic string) {
-	log.WithField("topic", topic).Info("Publish on topic")
+	log.WithField("topic", topic).Info("Publish to topic")
 
 	// Use non-blocking channel message in case channel queue is full, and don't publish to topic if it is.
 	// This can happen if multiple messages need to be published on short interval when  sse.Execute() loop
