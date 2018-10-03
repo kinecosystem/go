@@ -197,8 +197,7 @@ func (ingest *Ingestion) waitAndPublish(committed chan interface{}, topic string
 	l := log.WithFields(log.F{"topic": topic, "channel": committed})
 	l.Info("Waiting for topic")
 	select {
-	case <-commited:
-		l.Info("Publishing to topic")
+	case <-committed:
 		sse.Publish(topic)
 	case <-time.After(10 * time.Second):
 		l.Errorf("Failed to get publish approval, releasing channel")
