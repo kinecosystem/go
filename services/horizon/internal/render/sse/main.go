@@ -156,8 +156,13 @@ func Unsubscribe(channel chan interface{}, topic string) {
 // in DB update (long queue in connection pool, netwok delays etc.)
 func Publish(topic string) {
 	log.WithField("topic", topic).Info("Publish on topic")
-	// using non-blocking channel message in case channel queue is full. This can happen if multiple
-	// messages reveived on short interval and sse.Execute loop is not waiting to channel.
+
+	// Use non-blocking channel message in case channel queue is full, and don't publish to topic if it is.
+	// This can happen if multiple messages need to be published on short interval when  sse.Execute() loop
+	// is still busy on acting on the previous action, and haven't fetched the next message yet.
+	//
+	// It is OK to not publish a second message to the topic since the one already in the queue will
+	// trigger the action in the next sse.Execute() iteration.
 	ssePubsub.TryPub(0, topic)
 }
 
