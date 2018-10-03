@@ -141,8 +141,9 @@ var ssePubsub = pubsub.New(pubsubCapacity)
 // Subscribe to topic by SSE connection usually with an id (account, ledger, tx)
 // Once a change in database happens, Publish is used by ingestor so channel is notified.
 func Subscribe(topic string) chan interface{} {
-	log.WithField("topic", topic).Info("Subscribed to topic")
-	return ssePubsub.Sub(topic)
+	topicChan := ssePubsub.Sub(topic)
+	log.WithFields(log.F{"topic": topic, "channel": topicChan}).Info("Subscribed to topic")
+	return topicChan
 }
 
 // Unsubscribe to a topic, for example when SSE connection is closed.
