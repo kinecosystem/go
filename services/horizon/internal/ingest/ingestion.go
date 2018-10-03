@@ -186,12 +186,12 @@ func (ingest *Ingestion) UpdateAccountIDs(tables []TableName) error {
 	return nil
 }
 
-// Return a channel which emits a message when ingections were commited to the database
+// Return a channel which emits a message when ingections were committed to the database
 func (ingest *Ingestion) getCommitChannel() chan interface{} {
 	return commitPubsub.SubOnce(pubsubCommitTopic)
 }
 
-// Listen until the insert action commited to the DB and then publish to sse subscriptors and
+// Listen until the insert action committed to the DB and then publish to sse subscriptors and
 // then publish the topic that was ingested.
 func (ingest *Ingestion) waitAndPublish(commited chan interface{}, topic string) {
 	l := log.WithField("topic", topic)
