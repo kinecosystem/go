@@ -64,6 +64,7 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 		stream := sse.NewStream(base.Ctx, base.W, base.R)
+		sse.WritePreamble(base.Ctx, base.W)
 
 		for {
 			action.SSE(stream)
@@ -83,21 +84,6 @@ func (base *Base) Execute(action interface{}) {
 			if stream.IsDone() {
 				return
 			}
-
-			// Reply preamble message that states delay timer, only when there is no error.
-			//
-			// This is a hacky solution that tries to solve two cases:
-			//
-			// 1. Clients await their account creation (who receive HTTP 404 because their account doesn't exist yet)
-			// will not receive the preamble, thus will retry with their default value defined on
-			// the client side, but should be quick enough (sane value should be a few seconds).
-			//
-			// 2. Clients who currently have an unwanted behavior:
-			// They already have an account open and just wanted to poll their account balance and retry too quickly,
-			// according to above default retry value. This causes them to spam the server every second.
-			// This change will cause them to receive the preamble with a longer configured
-			// delay - which should lower the throughput the server and its database are receiving.
-			sse.WritePreamble(base.Ctx, base.W)
 
 			select {
 			case <-base.Ctx.Done():
