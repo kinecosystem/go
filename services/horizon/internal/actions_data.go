@@ -2,8 +2,8 @@ package horizon
 
 import (
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
-	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
+	"github.com/kinecosystem/go/support/render/hal"
 )
 
 // DataShowAction renders a account summary found by its address.
@@ -54,6 +54,14 @@ func (action *DataShowAction) SSE(stream sse.Stream) {
 			stream.Send(sse.Event{Data: action.Data.Value})
 		},
 	)
+}
+
+// GetTopic is a method for actions.SSE
+//
+// There is no value in this action for specific account_id, so registration topic is a general
+// change in the ledger.
+func (action *DataShowAction) GetTopic() string {
+	return action.GetString("account_id")
 }
 
 func (action *DataShowAction) loadParams() {

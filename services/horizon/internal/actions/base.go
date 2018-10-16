@@ -58,9 +58,19 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
+		var pumped chan interface{}
+
 		action, ok := action.(SSE)
 		if !ok {
 			goto NotAcceptable
+		}
+
+		// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
+		// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
+		topic := action.GetTopic()
+		if topic != "" {
+			pumped = sse.Subscribe(topic)
+			defer sse.Unsubscribe(pumped, topic)
 		}
 
 		stream := sse.NewStream(base.Ctx, base.W, base.R)
@@ -87,7 +97,7 @@ func (base *Base) Execute(action interface{}) {
 			select {
 			case <-base.Ctx.Done():
 				return
-			case <-sse.Pumped():
+			case <-pumped:
 				//no-op, continue onto the next iteration
 			}
 		}

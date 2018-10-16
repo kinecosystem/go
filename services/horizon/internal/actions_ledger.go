@@ -59,6 +59,14 @@ func (action *LedgerIndexAction) SSE(stream sse.Stream) {
 	)
 }
 
+// GetTopic is a method for actions.SSE
+//
+// There is no value in this action for specific ledger_id, so registration topic is a general
+// change in the ledger.
+func (action *LedgerIndexAction) GetTopic() string {
+	return "ledger"
+}
+
 func (action *LedgerIndexAction) loadParams() {
 	action.ValidateCursorAsDefault()
 	action.PagingParams = action.GetPageQuery()

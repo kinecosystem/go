@@ -6,9 +6,12 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/kinecosystem/go/support/log"
+	"github.com/cskr/pubsub"
+	"github.com/kinecosystem/go/services/horizon/internal/log"
 	"golang.org/x/net/context"
 )
+
+const pubsubCapacity = 0
 
 // Event is the packet of data that gets sent over the wire to a connected
 // client.
@@ -34,7 +37,7 @@ type Eventable interface {
 
 // Pumped returns a channel that will be closed the next time the input pump
 // sends.  It can be used similar to `ctx.Done()`, like so:  `<-sse.Pumped()`
-func Pumped() <-chan struct{} {
+func Pumped() <-chan interface{} {
 	return nextTick
 }
 
@@ -43,7 +46,7 @@ func Pumped() <-chan struct{} {
 func Tick() {
 	lock.Lock()
 	prev := nextTick
-	nextTick = make(chan struct{})
+	nextTick = make(chan interface{})
 	lock.Unlock()
 	close(prev)
 }
@@ -120,7 +123,7 @@ var helloEvent = Event{
 }
 
 var lock sync.Mutex
-var nextTick chan struct{}
+var nextTick chan interface{}
 
 func getJSON(val interface{}) string {
 	js, err := json.Marshal(val)
@@ -132,8 +135,40 @@ func getJSON(val interface{}) string {
 	return string(js)
 }
 
+// Pubsub for SSE requests, so they will run SSE.action only upon relevant data changes.
+var ssePubsub = pubsub.New(pubsubCapacity)
+
+// Subscribe to topic by SSE connection usually with an id (account, ledger, tx)
+// Once a change in database happens, Publish is used by ingestor so channel is notified.
+func Subscribe(topic string) chan interface{} {
+	topicChan := ssePubsub.Sub(topic)
+	log.WithFields(log.F{"topic": topic, "channel": topicChan}).Info("Subscribed to topic")
+	return topicChan
+}
+
+// Unsubscribe to a topic, for example when SSE connection is closed.
+func Unsubscribe(channel chan interface{}, topic string) {
+	log.WithField("topic", topic).Info("Unsubscribed from topic")
+	ssePubsub.Unsub(channel, topic)
+}
+
+// Publish to channel, can be used by ingestor mostly to notify on DB changes. Delay in channel
+// submission is required in order to avoid edge cases when DB is not modified yet because of delays
+// in DB update (long queue in connection pool, netwok delays etc.)
+func Publish(topic string) {
+	log.WithField("topic", topic).Info("Publishing to topic")
+
+	// Use non-blocking channel message in case channel queue is full, and don't publish to topic if it is.
+	// This can happen if multiple messages need to be published on short interval when  sse.Execute() loop
+	// is still busy on acting on the previous action, and haven't fetched the next message yet.
+	//
+	// It is OK to not publish a second message to the topic since the one already in the queue will
+	// trigger the action in the next sse.Execute() iteration.
+	ssePubsub.TryPub(0, topic)
+}
+
 func init() {
 	lock.Lock()
-	nextTick = make(chan struct{})
+	nextTick = make(chan interface{})
 	lock.Unlock()
 }
