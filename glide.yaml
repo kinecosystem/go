@@ -297,3 +297,5 @@ import:
 - package: github.com/btcsuite/websocket
 - package: github.com/bartekn/go-bip39
   version: a05967ea095d81c8fe4833776774cfaff8e5036c
+- package: github.com/cskr/pubsub
+  version: ^1.0.1
