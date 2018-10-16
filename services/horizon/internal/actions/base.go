@@ -64,7 +64,6 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 		stream := sse.NewStream(base.Ctx, base.W, base.R)
-		sse.WritePreamble(base.Ctx, base.W)
 
 		for {
 			action.SSE(stream)
