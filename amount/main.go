@@ -17,10 +17,10 @@ import (
 	"github.com/kinecosystem/go/xdr"
 )
 
-// One is the value of one whole unit of currency. Stellar uses 7 fixed digits
-// for fractional values, thus One is 10 million (10^7).
+// One is the value of one whole unit of currency. Kin uses 4 fixed digits
+// for fractional values, thus One is 10 thousand (10^4).
 const (
-	One = 10000000
+	One = 10000
 )
 
 var (
