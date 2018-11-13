@@ -106,7 +106,7 @@ func TestSSEPubsubManyTopics(t *testing.T) {
 	}
 
 	for i := 0; i < 100; i++ {
-		sse.Publish(strconv.Itoa(j))
+		sse.Publish(strconv.Itoa(i))
 	}
 
 	wg.Wait()
@@ -144,7 +144,7 @@ func TestSSEPubsubManySubscribers(t *testing.T) {
 
 // Test SSE subscription get message when ingest to Horizon happens.
 func TestSSEPubsubTransactions(t *testing.T) {
-	SCENARIO_NAME = "kahuna"
+	SCENARIO_NAME := "kahuna"
 	TX_HASH := "GA46VRKBCLI2X6DXLX7AIEVRFLH3UA7XBE3NGNP6O74HQ5LXHMGTV2JB"
 
 	tt := test.Start(t).ScenarioWithoutHorizon(SCENARIO_NAME)
