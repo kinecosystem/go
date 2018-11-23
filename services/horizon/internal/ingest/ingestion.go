@@ -518,7 +518,7 @@ func (ingest *Ingestion) commit() error {
 		return err
 	}
 	// Update subscribers that commit is done to the DB.
-	commitPubsub.Pub(pubsubStubValue, pubsubCommitTopic)
+	commitPubsub.TryPub(pubsubStubValue, pubsubCommitTopic)
 	return nil
 }
 
