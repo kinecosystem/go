@@ -13,7 +13,7 @@ func TestFriendbot_makeTx(t *testing.T) {
 	fb := &Bot{
 		Secret:          "SAQWC7EPIYF3XGILYVJM4LVAVSLZKT27CTEI3AFBHU2VRCMQ3P3INPG5",
 		Network:         "Test SDF Network ; September 2015",
-		StartingBalance: "100.00",
+		StartingBalance: "10000",
 		sequence:        2,
 	}
 

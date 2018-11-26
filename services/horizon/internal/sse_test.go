@@ -23,13 +23,20 @@ func TestSSEPubsub(t *testing.T) {
 	subscription := sse.Subscribe("a")
 	defer sse.Unsubscribe(subscription, "a")
 
-	sse.Publish("a")
 
-	select {
-	case <-subscription: // no-op. Success!
-	case <-time.After(2 * time.Second):
-		t.Fatal("subscription did not trigger")
-	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func(subscription chan interface{}, wg *sync.WaitGroup) {
+			defer wg.Done()
+			select {
+			case <-subscription:
+				return
+			case <-time.After(2 * time.Second):
+				t.Fatal("subscription did not trigger")
+			}
+	}(subscription, &wg)
+	sse.Publish("a")
+	wg.Wait()
 
 	sse.Tick()
 	select {
@@ -74,7 +81,7 @@ func TestSSEPubsubMultipleChannels(t *testing.T) {
 		case <-time.After(2 * time.Second): // no-op. Success!
 		}
 	}(subA, subB, &wg)
-
+	time.Sleep(10 * time.Millisecond)
 	sse.Publish("a")
 	wg.Wait()
 }
@@ -136,6 +143,7 @@ func TestSSEPubsubManySubscribers(t *testing.T) {
 			}
 		}(subscriptions[i], &wg)
 	}
+	time.Sleep(10 * time.Millisecond)
 
 	sse.Publish("a")
 

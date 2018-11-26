@@ -1,9 +1,9 @@
 package build
 
 import (
+	"github.com/kinecosystem/go/xdr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/kinecosystem/go/xdr"
 )
 
 var _ = Describe("CreateAccountBuilder Mutators", func() {
@@ -66,7 +66,7 @@ var _ = Describe("CreateAccountBuilder Mutators", func() {
 	Describe("NativeAmount", func() {
 		BeforeEach(func() { mut = NativeAmount{"101"} })
 		It("sets the starting balance properly", func() {
-			Expect(subject.CA.StartingBalance).To(Equal(xdr.Int64(1010000000)))
+			Expect(subject.CA.StartingBalance).To(Equal(xdr.Int64(10100000)))
 		})
 		It("succeeds", func() {
 			Expect(subject.Err).NotTo(HaveOccurred())

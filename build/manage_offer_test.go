@@ -33,7 +33,7 @@ var _ = Describe("ManageOffer", func() {
 				It("sets values properly", func() {
 					builder := CreateOffer(rate, "20")
 
-					Expect(builder.MO.Amount).To(Equal(xdr.Int64(200000000)))
+					Expect(builder.MO.Amount).To(Equal(xdr.Int64(2000000)))
 
 					Expect(builder.MO.Selling.Type).To(Equal(xdr.AssetTypeAssetTypeCreditAlphanum4))
 					Expect(builder.MO.Selling.AlphaNum4.AssetCode).To(Equal([4]byte{'E', 'U', 'R', 0}))
@@ -59,7 +59,7 @@ var _ = Describe("ManageOffer", func() {
 				It("sets values properly", func() {
 					builder := UpdateOffer(rate, "100", 5)
 
-					Expect(builder.MO.Amount).To(Equal(xdr.Int64(1000000000)))
+					Expect(builder.MO.Amount).To(Equal(xdr.Int64(10000000)))
 
 					Expect(builder.MO.Selling.Type).To(Equal(xdr.AssetTypeAssetTypeCreditAlphanum4))
 					Expect(builder.MO.Selling.AlphaNum4.AssetCode).To(Equal([4]byte{'E', 'U', 'R', 0}))
@@ -150,7 +150,7 @@ var _ = Describe("ManageOffer", func() {
 				It("sets values properly", func() {
 					builder := CreatePassiveOffer(rate, "20")
 
-					Expect(builder.PO.Amount).To(Equal(xdr.Int64(200000000)))
+					Expect(builder.PO.Amount).To(Equal(xdr.Int64(2000000)))
 
 					Expect(builder.PO.Selling.Type).To(Equal(xdr.AssetTypeAssetTypeCreditAlphanum4))
 					Expect(builder.PO.Selling.AlphaNum4.AssetCode).To(Equal([4]byte{'E', 'U', 'R', 0}))
