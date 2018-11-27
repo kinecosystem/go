@@ -217,6 +217,10 @@ func (ingest *Ingestion) Ledger(
 	go ingest.waitAndPublish(ingest.getCommitChannel(), "ledger")
 	go ingest.waitAndPublish(ingest.getCommitChannel(), strconv.FormatInt(id, 10))
 
+	if txs > 0 {
+		go ingest.waitAndPublish(ingest.getCommitChannel(), "transactions")
+	}
+
 	ingest.builders[LedgersTableName].Values(
 		CurrentVersion,
 		id,

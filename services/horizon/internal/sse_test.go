@@ -173,6 +173,35 @@ func TestSSEPubsubTransactions(t *testing.T) {
 	wg.Wait()
 }
 
+// Test SSE subscription get message when ingest to Horizon happens.
+func TestSSEPubsubTransactionsImplicit(t *testing.T) {
+	SCENARIO_NAME := "kahuna"
+
+	tt := test.Start(t).ScenarioWithoutHorizon(SCENARIO_NAME)
+	defer tt.Finish()
+
+	subscription := sse.Subscribe("transactions")
+	defer sse.Unsubscribe(subscription, "transactions")
+
+	var wg sync.WaitGroup
+	wg.Add(54)
+
+	go func(subscription chan interface{}, wg *sync.WaitGroup) {
+		for i := 0; i < 54; i++ {
+			select {
+			case <-subscription:
+				wg.Done()
+			case <-time.After(10 * time.Second):
+				t.Fatal("subscription did not trigger within fast enough")
+			}
+		}
+	}(subscription, &wg)
+
+	ingestHorizon(tt)
+
+	wg.Wait()
+}
+
 // Helpers from ingest/main_test.go
 
 func ingestHorizon(tt *test.T) *ingest.Session {
