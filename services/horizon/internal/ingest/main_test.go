@@ -60,5 +60,6 @@ func sys(tt *test.T) *System {
 		"",
 		tt.CoreSession(),
 		tt.HorizonSession(),
+		"HORIZON",
 	)
 }

@@ -59,6 +59,8 @@ type Cursor struct {
 
 	// Err is the error that caused this iteration to fail, if any.
 	Err error
+	// Name is unique identifier tracking of latest ingest on stellar-core
+	Name string
 
 	lg   int32
 	tx   int
@@ -103,6 +105,10 @@ type System struct {
 	// StellarCoreURL is the http endpoint of the stellar-core that data is being
 	// ingested from.
 	StellarCoreURL string
+
+	// CursorName is the identifier of this horizon instance for tracking cursor data
+	// in stellar-core
+	CursorName string
 
 	// SkipCursorUpdate causes the ingestor to skip
 	// reporting the "last imported ledger" cursor to
@@ -185,12 +191,13 @@ type Session struct {
 
 // New initializes the ingester, causing it to begin polling the stellar-core
 // database for now ledgers and ingesting data into the horizon database.
-func New(network string, coreURL string, core, horizon *db.Session) *System {
+func New(network string, coreURL string, core, horizon *db.Session, cursorName string) *System {
 	i := &System{
 		Network:        network,
 		StellarCoreURL: coreURL,
 		HorizonDB:      horizon,
 		CoreDB:         core,
+		CursorName:     cursorName,
 	}
 
 	i.Metrics.ClearLedgerTimer = metrics.NewTimer()
@@ -205,6 +212,7 @@ func NewCursor(first, last int32, i *System) *Cursor {
 		FirstLedger:    first,
 		LastLedger:     last,
 		CoreDB:         i.CoreDB,
+		Name:           i.CursorName,
 		Metrics:        &i.Metrics,
 		AssetsModified: AssetsModified(make(map[string]xdr.Asset)),
 	}

@@ -51,7 +51,7 @@ func TestValidation(t *testing.T) {
 	tt := test.Start(t).Scenario("kahuna")
 	defer tt.Finish()
 
-	sys := New(network.TestNetworkPassphrase, "", tt.CoreSession(), tt.HorizonSession())
+	sys := New(network.TestNetworkPassphrase, "", tt.CoreSession(), tt.HorizonSession(), "HORIZON")
 
 	// intact chain
 	for i := int32(2); i <= 57; i++ {

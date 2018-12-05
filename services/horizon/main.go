@@ -29,6 +29,7 @@ func init() {
 	viper.SetDefault("horizon-db-max-idle-connections", 4)
 	viper.SetDefault("core-db-max-open-connections", 12)
 	viper.SetDefault("core-db-max-idle-connections", 4)
+	viper.SetDefault("cursor-name", "HORIZON")
 
 	viper.BindEnv("port", "PORT")
 	viper.BindEnv("db-url", "DATABASE_URL")
@@ -45,6 +46,7 @@ func init() {
 	viper.BindEnv("tls-cert", "TLS_CERT")
 	viper.BindEnv("tls-key", "TLS_KEY")
 	viper.BindEnv("ingest", "INGEST")
+	viper.BindEnv("cursor-name", "CURSOR_NAME")
 	viper.BindEnv("network-passphrase", "NETWORK_PASSPHRASE")
 	viper.BindEnv("history-retention-count", "HISTORY_RETENTION_COUNT")
 	viper.BindEnv("history-stale-threshold", "HISTORY_STALE_THRESHOLD")
@@ -149,6 +151,12 @@ func init() {
 	)
 
 	rootCmd.PersistentFlags().String(
+		"cursor-name",
+		"",
+		"Override the cursor name used in stellar-core",
+	)
+
+	rootCmd.PersistentFlags().String(
 		"network-passphrase",
 		"",
 		"Override the network passphrase",
@@ -227,6 +235,7 @@ func initConfig() {
 		TLSCert:                     cert,
 		TLSKey:                      key,
 		Ingest:                      viper.GetBool("ingest"),
+		CursorName:                  viper.GetString("cursor-name"),
 		HistoryRetentionCount:       uint(viper.GetInt("history-retention-count")),
 		StaleThreshold:              uint(viper.GetInt("history-stale-threshold")),
 		SkipCursorUpdate:            viper.GetBool("skip-cursor-update"),

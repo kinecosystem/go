@@ -219,5 +219,6 @@ func sys(tt *test.T) *ingest.System {
 		"",
 		tt.CoreSession(),
 		tt.HorizonSession(),
+		"HORIZON",
 	)
 }

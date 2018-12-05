@@ -26,6 +26,9 @@ type Config struct {
 	// Ingest is a boolean that indicates whether or not this horizon instance
 	// should run the data ingestion subsystem.
 	Ingest bool
+	// CursorName indentifying horizon cursor, so multiple horizons will be able
+	// to communicate with a single core without collisions in cursor info
+	CursorName string
 	// HistoryRetentionCount represents the minimum number of ledgers worth of
 	// history data to retain in the horizon database. For the purposes of
 	// determining a "retention duration", each ledger roughly corresponds to 10
