@@ -20,6 +20,7 @@ func initIngester(app *App) {
 		app.config.StellarCoreURL,
 		app.CoreSession(nil),
 		app.HorizonSession(nil),
+		app.config.CursorName,
 	)
 
 	app.ingester.SkipCursorUpdate = app.config.SkipCursorUpdate

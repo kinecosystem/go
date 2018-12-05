@@ -228,7 +228,7 @@ func ingestSystem() *ingest.System {
 		log.Fatal("network-passphrase is blank: reingestion requires manually setting passphrase")
 	}
 
-	i := ingest.New(passphrase, config.StellarCoreURL, cdb, hdb)
+	i := ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, config.CursorName)
 	return i
 }
 

@@ -786,7 +786,7 @@ func (is *Session) reportCursorState() error {
 
 	core := &stellarcore.Client{URL: is.StellarCoreURL}
 
-	err := core.SetCursor(context.Background(), "HORIZON", is.Cursor.LastLedger)
+	err := core.SetCursor(context.Background(), is.Cursor.Name, is.Cursor.LastLedger)
 
 	if err != nil {
 		return errors.Wrap(err, "SetCursor failed")
