@@ -43,7 +43,12 @@ func (handler *FriendbotHandler) doHandle(r *http.Request) (*horizon.Transaction
 		return nil, problem.MakeInvalidFieldProblem("addr", err)
 	}
 
-	return handler.loadResult(address)
+	amount, err := handler.loadAmount(r)
+	if err != nil {
+		amount = handler.Friendbot.StartingBalance
+	}
+
+	return handler.loadResult(address, amount)
 }
 
 func (handler *FriendbotHandler) checkEnabled() error {
@@ -70,8 +75,18 @@ func (handler *FriendbotHandler) loadAddress(r *http.Request) (string, error) {
 	return unescaped, err
 }
 
-func (handler *FriendbotHandler) loadResult(address string) (*horizon.TransactionSuccess, error) {
-	result, err := handler.Friendbot.Pay(address)
+func (handler *FriendbotHandler) loadAmount(r *http.Request) (string, error) {
+	amount := r.Form.Get("amount")
+	unescaped, err := url.QueryUnescape(amount)
+	if err != nil {
+		return unescaped, err
+	}
+
+	return unescaped, err
+}
+
+func (handler *FriendbotHandler) loadResult(address string, amount string) (*horizon.TransactionSuccess, error) {
+	result, err := handler.Friendbot.Pay(address, amount)
 	switch e := err.(type) {
 	case horizon.Error:
 		return result, e.Problem.ToProblem()

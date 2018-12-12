@@ -25,9 +25,9 @@ type Bot struct {
 }
 
 // Pay funds the account at `destAddress`
-func (bot *Bot) Pay(destAddress string) (*horizon.TransactionSuccess, error) {
+func (bot *Bot) Pay(destAddress string, amount string) (*horizon.TransactionSuccess, error) {
 	channel := make(chan interface{})
-	shouldReadChannel, result, err := bot.lockedPay(channel, destAddress)
+	shouldReadChannel, result, err := bot.lockedPay(channel, destAddress, amount)
 	if !shouldReadChannel {
 		return result, err
 	}
@@ -43,7 +43,7 @@ func (bot *Bot) Pay(destAddress string) (*horizon.TransactionSuccess, error) {
 	}
 }
 
-func (bot *Bot) lockedPay(channel chan interface{}, destAddress string) (bool, *horizon.TransactionSuccess, error) {
+func (bot *Bot) lockedPay(channel chan interface{}, destAddress string, amount string) (bool, *horizon.TransactionSuccess, error) {
 	bot.lock.Lock()
 	defer bot.lock.Unlock()
 
@@ -52,7 +52,7 @@ func (bot *Bot) lockedPay(channel chan interface{}, destAddress string) (bool, *
 		return false, nil, err
 	}
 
-	signed, err := bot.makeTx(destAddress)
+	signed, err := bot.makeTx(destAddress, amount)
 	if err != nil {
 		return false, nil, err
 	}
@@ -92,14 +92,14 @@ func (bot *Bot) checkSequenceRefresh() error {
 	return bot.refreshSequence()
 }
 
-func (bot *Bot) makeTx(destAddress string) (string, error) {
+func (bot *Bot) makeTx(destAddress string, amount string) (string, error) {
 	txn, err := b.Transaction(
 		b.SourceAccount{AddressOrSeed: bot.Secret},
 		b.Sequence{Sequence: bot.sequence + 1},
 		b.Network{Passphrase: bot.Network},
 		b.CreateAccount(
 			b.Destination{AddressOrSeed: destAddress},
-			b.NativeAmount{Amount: bot.StartingBalance},
+			b.NativeAmount{Amount: amount},
 		),
 	)
 
