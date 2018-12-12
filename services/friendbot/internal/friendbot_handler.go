@@ -8,6 +8,8 @@ import (
 	"github.com/kinecosystem/go/strkey"
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
+
+	"strconv"
 )
 
 // FriendbotHandler causes an account at `Address` to be created.
@@ -46,6 +48,13 @@ func (handler *FriendbotHandler) doHandle(r *http.Request) (*horizon.Transaction
 	amount, err := handler.loadAmount(r)
 	if err != nil {
 		amount = handler.Friendbot.StartingBalance
+	} else {
+		s, err := strconv.ParseFloat(handler.Friendbot.StartingBalance, 64)
+		a, err := strconv.ParseFloat(amount, 64)
+
+		if err != nil || a > s {
+			amount = handler.Friendbot.StartingBalance
+		}
 	}
 
 	return handler.loadResult(address, amount)
