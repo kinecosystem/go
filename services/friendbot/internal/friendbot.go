@@ -25,9 +25,11 @@ type Bot struct {
 }
 
 // Pay funds the account at `destAddress`
-func (bot *Bot) Pay(destAddress string, amount string) (*horizon.TransactionSuccess, error) {
+// `amount` is the amount to fund, capped at `Bot.StartingBalance`
+// Setting `isFundRequest` to true will issue a `Payment` instead of `CreateAccount`
+func (bot *Bot) Pay(destAddress string, amount string, isFundRequest bool) (*horizon.TransactionSuccess, error) {
 	channel := make(chan interface{})
-	shouldReadChannel, result, err := bot.lockedPay(channel, destAddress, amount)
+	shouldReadChannel, result, err := bot.lockedPay(channel, destAddress, amount, isFundRequest)
 	if !shouldReadChannel {
 		return result, err
 	}
@@ -43,7 +45,7 @@ func (bot *Bot) Pay(destAddress string, amount string) (*horizon.TransactionSucc
 	}
 }
 
-func (bot *Bot) lockedPay(channel chan interface{}, destAddress string, amount string) (bool, *horizon.TransactionSuccess, error) {
+func (bot *Bot) lockedPay(channel chan interface{}, destAddress string, amount string, isFundRequest bool) (bool, *horizon.TransactionSuccess, error) {
 	bot.lock.Lock()
 	defer bot.lock.Unlock()
 
@@ -52,7 +54,7 @@ func (bot *Bot) lockedPay(channel chan interface{}, destAddress string, amount s
 		return false, nil, err
 	}
 
-	signed, err := bot.makeTx(destAddress, amount)
+	signed, err := bot.makeTx(destAddress, amount, isFundRequest)
 	if err != nil {
 		return false, nil, err
 	}
@@ -92,16 +94,24 @@ func (bot *Bot) checkSequenceRefresh() error {
 	return bot.refreshSequence()
 }
 
-func (bot *Bot) makeTx(destAddress string, amount string) (string, error) {
-	txn, err := b.Transaction(
+func (bot *Bot) makeTx(destAddress string, amount string, isFundRequest bool) (string, error) {
+	ops := []b.TransactionMutator{
 		b.SourceAccount{AddressOrSeed: bot.Secret},
 		b.Sequence{Sequence: bot.sequence + 1},
 		b.Network{Passphrase: bot.Network},
-		b.CreateAccount(
+	}
+
+	if isFundRequest {
+		ops = append(ops, b.Payment(
 			b.Destination{AddressOrSeed: destAddress},
-			b.NativeAmount{Amount: amount},
-		),
-	)
+			b.NativeAmount{Amount: amount}))
+	} else {
+		ops = append(ops, b.CreateAccount(
+			b.Destination{AddressOrSeed: destAddress},
+			b.NativeAmount{Amount: amount}))
+	}
+
+	txn, err := b.Transaction(ops...)
 
 	if err != nil {
 		return "", errors.Wrap(err, "Error building a transaction")

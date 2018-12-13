@@ -17,7 +17,7 @@ func TestFriendbot_makeTx(t *testing.T) {
 		sequence:        2,
 	}
 
-	txn, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance)
+	txn, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -32,13 +32,13 @@ func TestFriendbot_makeTx(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
-		_, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance)
+		_, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
 		// don't assert on the txn value here because the ordering is not guaranteed between these 2 goroutines
 		assert.NoError(t, err)
 		wg.Done()
 	}()
 	go func() {
-		_, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance)
+		_, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
 		assert.NoError(t, err)
 		wg.Done()
 	}()
