@@ -8,6 +8,8 @@ import (
 	"github.com/kinecosystem/go/strkey"
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
+
+	"strconv"
 )
 
 // FriendbotHandler causes an account at `Address` to be created.
@@ -43,7 +45,19 @@ func (handler *FriendbotHandler) doHandle(r *http.Request) (*horizon.Transaction
 		return nil, problem.MakeInvalidFieldProblem("addr", err)
 	}
 
-	return handler.loadResult(address)
+	amount, err := handler.loadAmount(r)
+	if err != nil {
+		amount = handler.Friendbot.StartingBalance
+	} else {
+		s, err := strconv.ParseFloat(handler.Friendbot.StartingBalance, 64)
+		a, err := strconv.ParseFloat(amount, 64)
+
+		if err != nil || a > s {
+			amount = handler.Friendbot.StartingBalance
+		}
+	}
+
+	return handler.loadResult(address, amount)
 }
 
 func (handler *FriendbotHandler) checkEnabled() error {
@@ -70,8 +84,18 @@ func (handler *FriendbotHandler) loadAddress(r *http.Request) (string, error) {
 	return unescaped, err
 }
 
-func (handler *FriendbotHandler) loadResult(address string) (*horizon.TransactionSuccess, error) {
-	result, err := handler.Friendbot.Pay(address)
+func (handler *FriendbotHandler) loadAmount(r *http.Request) (string, error) {
+	amount := r.Form.Get("amount")
+	unescaped, err := url.QueryUnescape(amount)
+	if err != nil {
+		return unescaped, err
+	}
+
+	return unescaped, err
+}
+
+func (handler *FriendbotHandler) loadResult(address string, amount string) (*horizon.TransactionSuccess, error) {
+	result, err := handler.Friendbot.Pay(address, amount)
 	switch e := err.(type) {
 	case horizon.Error:
 		return result, e.Problem.ToProblem()
