@@ -195,7 +195,7 @@ func (ingest *Ingestion) getCommitChannel() chan interface{} {
 // then publish the topic that was ingested.
 func (ingest *Ingestion) waitAndPublish(committed chan interface{}, topic string) {
 	l := log.WithFields(log.F{"topic": topic, "channel": committed})
-	l.Info("Waiting for topic")
+	l.Debug("Waiting for topic")
 	select {
 	case <-committed:
 		sse.Publish(topic)
