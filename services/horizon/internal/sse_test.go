@@ -173,7 +173,7 @@ func TestSSEPubsubTransactions(t *testing.T) {
 	wg.Wait()
 }
 
-// Test SSE subscription get message when ingest to Horizon happens.
+// Test SSE subscription for transactions gets message when ingest to Horizon happens.
 func TestSSEPubsubTransactionsImplicit(t *testing.T) {
 	SCENARIO_NAME := "kahuna"
 
@@ -192,7 +192,7 @@ func TestSSEPubsubTransactionsImplicit(t *testing.T) {
 			case <-subscription:
 				wg.Done()
 			case <-time.After(10 * time.Second):
-				t.Fatal("subscription did not trigger within fast enough")
+				t.Fatal("subscription did not trigger fast enough")
 			}
 		}
 	}(subscription, &wg)
