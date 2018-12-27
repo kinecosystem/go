@@ -22,8 +22,8 @@ func TestFriendbot_makeTx(t *testing.T) {
 		return
 	}
 	expectedTxn := "AAAAAPuYf7x7KGvFX9fjCR9WIaoTX3yHJYwX6ZSx6w76HPjEAAAAZAAAAAAAAAADAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA" +
-		"0ob63nrm9S1s7+lvdyfgUTpejMQOhgMlxcvOvzUFhhQAAAAAAJiWgAAAAAAAAAAB+hz4xAAAAEAxJX1arTWrUylEZNhvMezff4pLc5CcgIfQcF" +
-		"//EXoudKwXSgQGFNivsgVRKL7djlsUkr1m8nMIgZ7lqibe46EB"
+		"0ob63nrm9S1s7+lvdyfgUTpejMQOhgMlxcvOvzUFhhQAAAAAO5rKAAAAAAAAAAAB+hz4xAAAAECzNV2yXevMYKzm7OhXX2gYwmLZ5V37yeRHUX" +
+		"3Vhb6eT8wkUtpj2vJsUwzLWjdKMyGonFCPkaG4twRFUVqBRLEH"
 	assert.Equal(t, expectedTxn, txn)
 
 	// ensure we're race free. NOTE:  presently, gb can't
