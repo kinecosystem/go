@@ -117,7 +117,7 @@ var _ = Describe("ChangeTrustBuilder Mutators", func() {
 			})
 
 			It("sets limit value properly", func() {
-				Expect(subject.CT.Limit).To(Equal(xdr.Int64(200000000)))
+				Expect(subject.CT.Limit).To(Equal(xdr.Int64(2000000)))
 			})
 		})
 

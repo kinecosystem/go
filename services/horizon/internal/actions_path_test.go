@@ -30,7 +30,7 @@ func TestPathActions_Index(t *testing.T) {
 	)
 	q.Add("destination_asset_type", "credit_alphanum4")
 	q.Add("destination_asset_code", "EUR")
-	q.Add("destination_amount", "10")
+	q.Add("destination_amount", "1000")
 
 	w = ht.Get("/paths?" + q.Encode())
 	ht.Assert.Equal(200, w.Code)

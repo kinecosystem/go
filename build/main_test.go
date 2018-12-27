@@ -25,7 +25,7 @@ func ExampleTransactionBuilder() {
 		TestNetwork,
 		Payment(
 			Destination{"GAWSI2JO2CF36Z43UGMUJCDQ2IMR5B3P5TMS7XM7NUTU3JHG3YJUDQXA"},
-			NativeAmount{"50"},
+			NativeAmount{"5000"},
 		),
 	)
 
@@ -62,7 +62,7 @@ func ExampleCreateAccount() {
 		TestNetwork,
 		CreateAccount(
 			Destination{"GAWSI2JO2CF36Z43UGMUJCDQ2IMR5B3P5TMS7XM7NUTU3JHG3YJUDQXA"},
-			NativeAmount{"50"},
+			NativeAmount{"5000"},
 		),
 	)
 
@@ -98,7 +98,7 @@ func ExamplePayment() {
 		TestNetwork,
 		Payment(
 			Destination{"GAWSI2JO2CF36Z43UGMUJCDQ2IMR5B3P5TMS7XM7NUTU3JHG3YJUDQXA"},
-			NativeAmount{"50"},
+			NativeAmount{"5000"},
 		),
 	)
 
@@ -134,8 +134,8 @@ func ExamplePathPayment() {
 		TestNetwork,
 		Payment(
 			Destination{"GBDT3K42LOPSHNAEHEJ6AVPADIJ4MAR64QEKKW2LQPBSKLYD22KUEH4P"},
-			CreditAmount{"USD", "GAWSI2JO2CF36Z43UGMUJCDQ2IMR5B3P5TMS7XM7NUTU3JHG3YJUDQXA", "50"},
-			PayWith(CreditAsset("EUR", "GCPZJ3MJQ3GUGJSBL6R3MLYZS6FKVHG67BPAINMXL3NWNXR5S6XG657P"), "100").
+			CreditAmount{"USD", "GAWSI2JO2CF36Z43UGMUJCDQ2IMR5B3P5TMS7XM7NUTU3JHG3YJUDQXA", "5000"},
+			PayWith(CreditAsset("EUR", "GCPZJ3MJQ3GUGJSBL6R3MLYZS6FKVHG67BPAINMXL3NWNXR5S6XG657P"), "10000").
 				Through(Asset{Native: true}).
 				Through(CreditAsset("BTC", "GAHJZHVKFLATAATJH46C7OK2ZOVRD47GZBGQ7P6OCVF6RJDCEG5JMQBQ")),
 		),
@@ -259,7 +259,7 @@ func ExampleChangeTrust() {
 		SourceAccount{seed},
 		Sequence{1},
 		TestNetwork,
-		Trust("USD", "GAWSI2JO2CF36Z43UGMUJCDQ2IMR5B3P5TMS7XM7NUTU3JHG3YJUDQXA", Limit("100.25")),
+		Trust("USD", "GAWSI2JO2CF36Z43UGMUJCDQ2IMR5B3P5TMS7XM7NUTU3JHG3YJUDQXA", Limit("10025")),
 	)
 
 	if err != nil {
@@ -369,8 +369,8 @@ func ExampleManageOffer() {
 		SourceAccount{seed},
 		Sequence{1},
 		TestNetwork,
-		CreateOffer(rate, "20"),
-		UpdateOffer(rate, "40", OfferID(2)),
+		CreateOffer(rate, "2000"),
+		UpdateOffer(rate, "4000", OfferID(2)),
 		DeleteOffer(rate, OfferID(1)),
 	)
 
@@ -410,7 +410,7 @@ func ExampleCreatePassiveOffer() {
 		SourceAccount{seed},
 		Sequence{1},
 		TestNetwork,
-		CreatePassiveOffer(rate, "20"),
+		CreatePassiveOffer(rate, "2000"),
 	)
 
 	if err != nil {
