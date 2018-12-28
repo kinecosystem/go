@@ -19,7 +19,7 @@ install:
 script:
 - glide install
 - mkdir /home/travis/gopath/src/github.com/kinecosystem
-- git clone https://github.com/kinecosystem/go.git /home/travis/gopath/src/github.com/kinecosystem
+- git clone https://github.com/kinecosystem/go.git /home/travis/gopath/src/github.com/kinecosystem/go
 - ./support/scripts/run_tests
 
 before_deploy:
