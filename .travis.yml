@@ -18,6 +18,7 @@ install:
 - cp linux-amd64/glide $GOPATH/bin
 script:
 - glide install
+- ls -la /home/travis/gopath/src && ls -la /home/travis/gopath/src/github.com
 - ./support/scripts/run_tests
 
 before_deploy:
