@@ -11,7 +11,7 @@ go:
 - '1.8'
 - '1.9'
 - tip
-go_import_path: github.com/stellar/go
+go_import_path: github.com/kinecosystem/go
 install:
 - wget https://github.com/Masterminds/glide/releases/download/v0.12.3/glide-v0.12.3-linux-amd64.tar.gz
 - tar -xzvf glide-v0.12.3-linux-amd64.tar.gz
@@ -20,7 +20,6 @@ script:
 - glide install
 - mkdir /home/travis/gopath/src/github.com/kinecosystem
 - git clone https://github.com/kinecosystem/go.git /home/travis/gopath/src/github.com/kinecosystem/go
-- sed -i -e 's/'"stellar"'/'"kinecosystem"'/g' /home/travis/gopath/src/github.com/kinecosystem/go/hash/main_test.go
 - ./support/scripts/run_tests
 
 before_deploy:
