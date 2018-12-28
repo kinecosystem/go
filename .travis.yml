@@ -18,8 +18,8 @@ install:
 - cp linux-amd64/glide $GOPATH/bin
 script:
 - glide install
-- mkdir /home/travis/gopath/src/github.com/kinecosystem
-- git clone https://github.com/kinecosystem/go.git /home/travis/gopath/src/github.com/kinecosystem/go
+- mv /home/travis/gopath/src/github.com/stellar /home/travis/gopath/src/github.com/kinecosystem
+#- git clone https://github.com/kinecosystem/go.git /home/travis/gopath/src/github.com/kinecosystem/go
 - ./support/scripts/run_tests
 
 before_deploy:
