@@ -19,7 +19,7 @@ install:
 script:
 - glide install
 - ./support/scripts/run_tests
-- bash <curl -s https://codecov.io/bash) 4f651f20-82e1-4021-ac89-1cac21b92b0d
+- bash <curl -s https://codecov.io/bash) -t 4f651f20-82e1-4021-ac89-1cac21b92b0d
 
 before_deploy:
 - go run ./support/scripts/build_release_artifacts/main.go
