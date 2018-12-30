@@ -21,7 +21,7 @@ install:
 script:
 - glide install
 - ./support/scripts/run_tests
-- bash <curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.io/bash)
 
 before_deploy:
 - go run ./support/scripts/build_release_artifacts/main.go
