@@ -11,6 +11,8 @@ go:
 - '1.8'
 #- '1.9'
 #- tip
+env:
+- CODECOV_TOKEN="4f651f20-82e1-4021-ac89-1cac21b92b0d"
 go_import_path: github.com/kinecosystem/go
 install:
 - wget https://github.com/Masterminds/glide/releases/download/v0.12.3/glide-v0.12.3-linux-amd64.tar.gz
@@ -19,7 +21,7 @@ install:
 script:
 - glide install
 - ./support/scripts/run_tests
-- bash <curl -s https://codecov.io/bash) -t 4f651f20-82e1-4021-ac89-1cac21b92b0d
+- bash <curl -s https://codecov.io/bash)
 
 before_deploy:
 - go run ./support/scripts/build_release_artifacts/main.go
