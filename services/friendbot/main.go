@@ -82,6 +82,9 @@ func initRouter(fb *internal.Bot) *chi.Mux {
 	handler := &internal.FriendbotHandler{Friendbot: fb}
 	routerConfig.Route(http.MethodGet, "/", http.HandlerFunc(handler.Handle))
 	routerConfig.Route(http.MethodPost, "/", http.HandlerFunc(handler.Handle))
+	// fund handler
+	routerConfig.Route(http.MethodGet, "/fund", http.HandlerFunc(handler.Handle))
+	routerConfig.Route(http.MethodPost, "/fund", http.HandlerFunc(handler.Handle))
 	// not found handler
 	routerConfig.NotFound(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		problem.Render(r.Context(), w, problem.NotFound)

@@ -57,7 +57,9 @@ func (handler *FriendbotHandler) doHandle(r *http.Request) (*horizon.Transaction
 		}
 	}
 
-	return handler.loadResult(address, amount)
+	isFundRequest := r.URL.Path == "/fund"
+
+	return handler.loadResult(address, amount, isFundRequest)
 }
 
 func (handler *FriendbotHandler) checkEnabled() error {
@@ -94,8 +96,8 @@ func (handler *FriendbotHandler) loadAmount(r *http.Request) (string, error) {
 	return unescaped, err
 }
 
-func (handler *FriendbotHandler) loadResult(address string, amount string) (*horizon.TransactionSuccess, error) {
-	result, err := handler.Friendbot.Pay(address, amount)
+func (handler *FriendbotHandler) loadResult(address string, amount string, isFundRequest bool) (*horizon.TransactionSuccess, error) {
+	result, err := handler.Friendbot.Pay(address, amount, isFundRequest)
 	switch e := err.(type) {
 	case horizon.Error:
 		return result, e.Problem.ToProblem()
