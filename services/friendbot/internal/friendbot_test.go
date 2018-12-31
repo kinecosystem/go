@@ -26,6 +26,15 @@ func TestFriendbot_makeTx(t *testing.T) {
 		"3Vhb6eT8wkUtpj2vJsUwzLWjdKMyGonFCPkaG4twRFUVqBRLEH"
 	assert.Equal(t, expectedTxn, txn)
 
+	txn, err = fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, true)
+	if !assert.NoError(t, err) {
+		return
+	}
+	expectedTxn = "AAAAAPuYf7x7KGvFX9fjCR9WIaoTX3yHJYwX6ZSx6w76HPjEAAAAZAAAAAAAAAAEAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAA0o" +
+		"b63nrm9S1s7+lvdyfgUTpejMQOhgMlxcvOvzUFhhQAAAAAAAAAAACYloAAAAAAAAAAAfoc+MQAAABAXBGPGGlfO0Gb+D2uGsKp7uU7tBTnHAHcz" +
+		"ocI58+XsRQMZFqPx3uuX1M8t2rvDdun97wXmXrHm+JEqdgwBMtrCQ=="
+	assert.Equal(t, expectedTxn, txn)
+
 	// ensure we're race free. NOTE:  presently, gb can't
 	// run with -race on... we'll confirm this works when
 	// horizon is in the monorepo
