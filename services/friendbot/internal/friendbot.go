@@ -24,9 +24,10 @@ type Bot struct {
 	lock                 sync.Mutex
 }
 
-// Pay funds the account at `destAddress`
-// `amount` is the amount to fund, capped at `Bot.StartingBalance`
-// Setting `isFundRequest` to true will issue a `Payment` instead of `CreateAccount`
+// Pay funds to account.
+//
+// amount is the amount to fund, capped at Bot.StartingBalance.
+// Setting isFundRequest to true will submit a transaction with a Payment instead of CreateAccount operation.
 func (bot *Bot) Pay(destAddress string, amount string, isFundRequest bool) (*horizon.TransactionSuccess, error) {
 	channel := make(chan interface{})
 	shouldReadChannel, result, err := bot.lockedPay(channel, destAddress, amount, isFundRequest)
