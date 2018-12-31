@@ -152,17 +152,28 @@ func Unsubscribe(channel chan interface{}, topic string) {
 	ssePubsub.Unsub(channel, topic)
 }
 
-// Publish publishes to channel in a non-blocking manner.
-func Publish(topic string) {
+// Publish publishes to channel.
+//
+// NOTE there is good reason to usually publish in a non-blocking manner i.e. skipping publishing
+// and dropping sending the notification to the channel. The reason is in case channel queue is full,
+// and there's already a notification waiting to be consumed by a subscription.
+//
+// This can happen if multiple messages need to be published on short interval when sse.Execute() loop
+// is still busy on acting on the previous action, and haven't fetched the next message yet.
+//
+// It is OK to not publish a second message to the topic since the one already in the queue will
+// trigger the action in the next sse.Execute() iteration.
+//
+// Only reason to publish a notification in a blocking manner would be to write consistent unit
+// tests where a subscription can wait for notification to be published in separate goroutine.
+func Publish(topic string, blocking bool) {
 	log.WithField("topic", topic).Debug("Publishing to topic")
 
-	// Use non-blocking channel message in case channel queue is full, and don't publish to topic if it is.
-	// This can happen if multiple messages need to be published on short interval when  sse.Execute() loop
-	// is still busy on acting on the previous action, and haven't fetched the next message yet.
-	//
-	// It is OK to not publish a second message to the topic since the one already in the queue will
-	// trigger the action in the next sse.Execute() iteration.
-	ssePubsub.TryPub(0, topic)
+	if blocking {
+		ssePubsub.Pub(0, topic)
+	} else {
+		ssePubsub.TryPub(0, topic)
+	}
 }
 
 func init() {

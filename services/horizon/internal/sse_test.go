@@ -23,7 +23,6 @@ func TestSSEPubsub(t *testing.T) {
 	subscription := sse.Subscribe("a")
 	defer sse.Unsubscribe(subscription, "a")
 
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func(subscription chan interface{}, wg *sync.WaitGroup) {
@@ -35,7 +34,7 @@ func TestSSEPubsub(t *testing.T) {
 			t.Fatal("subscription did not trigger")
 		}
 	}(subscription, &wg)
-	sse.Publish("a")
+	sse.Publish("a", true)
 	wg.Wait()
 
 	sse.Tick()
@@ -81,8 +80,7 @@ func TestSSEPubsubMultipleChannels(t *testing.T) {
 		case <-time.After(2 * time.Second): // no-op. Success!
 		}
 	}(subA, subB, &wg)
-	time.Sleep(10 * time.Millisecond)
-	sse.Publish("a")
+	sse.Publish("a", true)
 	wg.Wait()
 }
 
@@ -106,14 +104,14 @@ func TestSSEPubsubManyTopics(t *testing.T) {
 			select {
 			case <-subscription:
 				return
-			case <-time.After(2 * time.Second):
+			case <-time.After(10 * time.Second):
 				t.Fatal("Subscription did not trigger within 2 seconds")
 			}
 		}(subscriptions[i], &wg)
 	}
 
 	for i := 0; i < 100; i++ {
-		sse.Publish(strconv.Itoa(i))
+		sse.Publish(strconv.Itoa(i), true)
 	}
 
 	wg.Wait()
@@ -138,14 +136,12 @@ func TestSSEPubsubManySubscribers(t *testing.T) {
 			select {
 			case <-subscription:
 				return
-			case <-time.After(2 * time.Second):
+			case <-time.After(10 * time.Second):
 				t.Fatal("Subscription did not trigger within 2 seconds")
 			}
 		}(subscriptions[i], &wg)
 	}
-	time.Sleep(10 * time.Millisecond)
-
-	sse.Publish("a")
+	sse.Publish("a", true)
 
 	wg.Wait()
 }
@@ -162,19 +158,16 @@ func TestSSEPubsubTransactions(t *testing.T) {
 	defer sse.Unsubscribe(subscription, TX_HASH)
 
 	var wg sync.WaitGroup
-	wg.Add(10)
+	wg.Add(1)
 
 	go func(subscription chan interface{}, wg *sync.WaitGroup) {
-		for i := 0; i < 10; i++ {
-			select {
-			case <-subscription:
-				wg.Done()
-			case <-time.After(10 * time.Second):
-				t.Fatal("subscription did not trigger within fast enough")
-			}
+		select {
+		case <-subscription:
+			wg.Done()
+		case <-time.After(10 * time.Second):
+			t.Fatal("subscription did not trigger within fast enough")
 		}
 	}(subscription, &wg)
-
 	ingestHorizon(tt)
 
 	wg.Wait()

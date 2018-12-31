@@ -198,10 +198,10 @@ func (ingest *Ingestion) waitAndPublish(committed chan interface{}, topic string
 	l.Debug("Waiting for topic")
 	select {
 	case <-committed:
-		sse.Publish(topic)
+		sse.Publish(topic, false)
 	case <-time.After(10 * time.Second):
 		l.Errorf("Failed to get publish approval, releasing channel")
-		sse.Publish(topic)
+		sse.Publish(topic, false)
 	}
 }
 
