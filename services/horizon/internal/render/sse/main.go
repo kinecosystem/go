@@ -152,9 +152,7 @@ func Unsubscribe(channel chan interface{}, topic string) {
 	ssePubsub.Unsub(channel, topic)
 }
 
-// Publish to channel, can be used by ingestor mostly to notify on DB changes. Delay in channel
-// submission is required in order to avoid edge cases when DB is not modified yet because of delays
-// in DB update (long queue in connection pool, netwok delays etc.)
+// Publish publishes to channel in a non-blocking manner.
 func Publish(topic string) {
 	log.WithField("topic", topic).Debug("Publishing to topic")
 
