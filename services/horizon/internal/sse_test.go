@@ -27,13 +27,13 @@ func TestSSEPubsub(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func(subscription chan interface{}, wg *sync.WaitGroup) {
-			defer wg.Done()
-			select {
-			case <-subscription:
-				return
-			case <-time.After(2 * time.Second):
-				t.Fatal("subscription did not trigger")
-			}
+		defer wg.Done()
+		select {
+		case <-subscription:
+			return
+		case <-time.After(2 * time.Second):
+			t.Fatal("subscription did not trigger")
+		}
 	}(subscription, &wg)
 	sse.Publish("a")
 	wg.Wait()
