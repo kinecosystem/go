@@ -198,10 +198,10 @@ func (ingest *Ingestion) waitAndPublish(committed chan interface{}, topic string
 	l.Debug("Waiting for topic")
 	select {
 	case <-committed:
-		sse.Publish(topic)
+		sse.Publish(topic, false)
 	case <-time.After(10 * time.Second):
 		l.Errorf("Failed to get publish approval, releasing channel")
-		sse.Publish(topic)
+		sse.Publish(topic, false)
 	}
 }
 
@@ -216,6 +216,10 @@ func (ingest *Ingestion) Ledger(
 	// Wait for data to be committed to database, then notify subscribes.
 	go ingest.waitAndPublish(ingest.getCommitChannel(), "ledger")
 	go ingest.waitAndPublish(ingest.getCommitChannel(), strconv.FormatInt(id, 10))
+
+	if txs > 0 {
+		go ingest.waitAndPublish(ingest.getCommitChannel(), "transactions")
+	}
 
 	ingest.builders[LedgersTableName].Values(
 		CurrentVersion,

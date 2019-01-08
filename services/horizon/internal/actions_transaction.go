@@ -74,7 +74,7 @@ func (action *TransactionIndexAction) GetTopic() string {
 	if res := action.GetString("ledger_id"); res != "" {
 		return res
 	}
-	return ""
+	return "transactions"
 }
 
 func (action *TransactionIndexAction) loadParams() {
