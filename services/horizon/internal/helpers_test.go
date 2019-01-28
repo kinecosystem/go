@@ -7,15 +7,9 @@ import (
 	"log"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/PuerkitoBio/throttled"
-	hlog "github.com/kinecosystem/go/services/horizon/internal/log"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/services/horizon/internal/test"
 	supportLog "github.com/stellar/go/support/log"
 	"github.com/throttled/throttled"
->>>>>>> horizon-v0.15.3
 )
 
 func NewTestApp() *App {

@@ -12,20 +12,11 @@ import (
 	"github.com/rcrowley/go-metrics"
 	"github.com/rs/cors"
 	"github.com/sebest/xff"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2"
-	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
-	"github.com/kinecosystem/go/services/horizon/internal/txsub/sequence"
-	"github.com/kinecosystem/go/support/render/problem"
-	"github.com/zenazn/goji/web"
-	"github.com/zenazn/goji/web/middleware"
-=======
 	"github.com/stellar/go/services/horizon/internal/db2"
 	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
 	"github.com/stellar/go/services/horizon/internal/txsub/sequence"
 	"github.com/stellar/go/support/render/problem"
 	"github.com/throttled/throttled"
->>>>>>> horizon-v0.15.3
 )
 
 // Web contains the http server related fields for horizon: the router,

@@ -2,11 +2,7 @@ package test
 
 import (
 	"github.com/sirupsen/logrus"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/log"
-=======
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 )
 
 var testLogger *log.Entry

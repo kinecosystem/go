@@ -6,14 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-<<<<<<< HEAD
-	"github.com/go-errors/errors"
-	"github.com/kinecosystem/go/support/log"
-	"golang.org/x/net/context"
-=======
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 )
 
 // P is a struct that represents an error response to be rendered to a connected

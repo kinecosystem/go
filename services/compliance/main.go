@@ -12,15 +12,6 @@ import (
 	"github.com/facebookgo/inject"
 	"github.com/goji/httpauth"
 	"github.com/spf13/cobra"
-<<<<<<< HEAD
-	complianceHandler "github.com/kinecosystem/go/handlers/compliance"
-	complianceProtocol "github.com/kinecosystem/go/protocols/compliance"
-	"github.com/kinecosystem/go/support/app"
-	"github.com/kinecosystem/go/support/config"
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/support/http"
-	"github.com/kinecosystem/go/support/log"
-=======
 	"github.com/stellar/go/clients/federation"
 	"github.com/stellar/go/clients/stellartoml"
 	"github.com/stellar/go/services/compliance/internal/config"
@@ -31,7 +22,6 @@ import (
 	"github.com/stellar/go/support/db/schema"
 	"github.com/stellar/go/support/errors"
 	supportHttp "github.com/stellar/go/support/http"
->>>>>>> horizon-v0.15.3
 )
 
 var app *App

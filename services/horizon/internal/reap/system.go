@@ -3,17 +3,10 @@ package reap
 import (
 	"time"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/errors"
-	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	"github.com/kinecosystem/go/services/horizon/internal/log"
-	"github.com/kinecosystem/go/services/horizon/internal/toid"
-=======
 	"github.com/stellar/go/services/horizon/internal/errors"
 	"github.com/stellar/go/services/horizon/internal/ledger"
 	"github.com/stellar/go/services/horizon/internal/toid"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 )
 
 // DeleteUnretainedHistory removes all data associated with unretained ledgers.

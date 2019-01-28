@@ -3,16 +3,10 @@ package ingest
 import (
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/network"
-	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/network"
 	"github.com/stellar/go/services/horizon/internal/db2/core"
 	"github.com/stellar/go/services/horizon/internal/ledger"
 	"github.com/stellar/go/services/horizon/internal/test"
->>>>>>> horizon-v0.15.3
 )
 
 func TestIngest_Kahuna1(t *testing.T) {

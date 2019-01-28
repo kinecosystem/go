@@ -4,13 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/services/horizon/internal/test"
 	"github.com/stellar/go/protocols/horizon"
->>>>>>> horizon-v0.15.3
 )
 
 func TestRootAction(t *testing.T) {

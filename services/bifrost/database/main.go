@@ -3,8 +3,8 @@ package database
 import (
 	"time"
 
-	"github.com/kinecosystem/go/support/db"
-	"github.com/kinecosystem/go/support/errors"
+	"github.com/stellar/go/support/db"
+	"github.com/stellar/go/support/errors"
 )
 
 type Chain string

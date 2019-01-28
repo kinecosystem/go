@@ -1,17 +1,11 @@
 package resourceadapter
 
 import (
-<<<<<<< HEAD:services/horizon/internal/resource/order_book_summary.go
-	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
-	"github.com/kinecosystem/go/xdr"
-	"golang.org/x/net/context"
-=======
 	"context"
 
 	"github.com/stellar/go/services/horizon/internal/db2/core"
 	"github.com/stellar/go/xdr"
 	. "github.com/stellar/go/protocols/horizon"
->>>>>>> horizon-v0.15.3:services/horizon/internal/resourceadapter/order_book_summary.go
 )
 
 func PopulateOrderBookSummary(

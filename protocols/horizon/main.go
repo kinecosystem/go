@@ -5,17 +5,6 @@ package horizon
 import (
 	"time"
 
-<<<<<<< HEAD:services/horizon/internal/resource/main.go
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
-	"github.com/kinecosystem/go/services/horizon/internal/resource/base"
-	"github.com/kinecosystem/go/services/horizon/internal/resource/effects"
-	"github.com/kinecosystem/go/services/horizon/internal/resource/operations"
-	"github.com/kinecosystem/go/strkey"
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/xdr"
-	"golang.org/x/net/context"
-=======
 	"encoding/base64"
 	"encoding/json"
 
@@ -24,7 +13,6 @@ import (
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/support/render/hal"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3:protocols/horizon/main.go
 )
 
 // KeyTypeNames maps from strkey version bytes into json string values to use in

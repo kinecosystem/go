@@ -4,13 +4,8 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/resource/operations"
-=======
 	"github.com/stellar/go/services/horizon/internal/db2/history"
 	"github.com/stellar/go/protocols/horizon/operations"
->>>>>>> horizon-v0.15.3
 )
 
 func TestPaymentActions(t *testing.T) {

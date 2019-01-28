@@ -4,12 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-<<<<<<< HEAD
-	"github.com/manucorporat/sse"
-	"github.com/kinecosystem/go/support/errors"
-=======
 	"github.com/stellar/go/support/errors"
->>>>>>> horizon-v0.15.3
 )
 
 func decodeResponse(resp *http.Response, object interface{}) (err error) {

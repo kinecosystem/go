@@ -17,12 +17,7 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/support/errors"
-	"golang.org/x/net/context"
-=======
 	"github.com/stellar/go/support/errors"
->>>>>>> horizon-v0.15.3
 
 	// Enable mysql
 	_ "github.com/go-sql-driver/mysql"

@@ -5,16 +5,9 @@ import (
 	"errors"
 	"sync"
 
-<<<<<<< HEAD
-	. "github.com/kinecosystem/go/build"
-	"github.com/kinecosystem/go/keypair"
-	"github.com/kinecosystem/go/services/horizon/internal/txsub"
-	"golang.org/x/net/context"
-=======
 	. "github.com/stellar/go/build"
 	"github.com/stellar/go/keypair"
 	"github.com/stellar/go/services/horizon/internal/txsub"
->>>>>>> horizon-v0.15.3
 )
 
 // Bot represents the friendbot subsystem.

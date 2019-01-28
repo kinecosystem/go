@@ -5,16 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-<<<<<<< HEAD
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/kinecosystem/go/services/horizon/internal/context/requestid"
-	"github.com/kinecosystem/go/support/render/problem"
-	"golang.org/x/net/context"
-=======
 	"github.com/stellar/go/support/context/requestid"
 	"github.com/stellar/go/support/render/problem"
 	"github.com/stretchr/testify/assert"
->>>>>>> horizon-v0.15.3
 )
 
 var ctx = context.Background()

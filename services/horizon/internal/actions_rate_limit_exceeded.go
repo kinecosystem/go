@@ -3,15 +3,8 @@ package horizon
 import (
 	"net/http"
 
-<<<<<<< HEAD
-	"github.com/zenazn/goji/web"
-
-	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
-	"github.com/kinecosystem/go/support/render/problem"
-=======
 	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
 	"github.com/stellar/go/support/render/problem"
->>>>>>> horizon-v0.15.3
 )
 
 // RateLimitExceededAction renders a 429 response

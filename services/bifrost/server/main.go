@@ -4,14 +4,14 @@ import (
 	"math/big"
 	"net/http"
 
-	"github.com/kinecosystem/go/services/bifrost/bitcoin"
-	"github.com/kinecosystem/go/services/bifrost/config"
-	"github.com/kinecosystem/go/services/bifrost/database"
-	"github.com/kinecosystem/go/services/bifrost/ethereum"
-	"github.com/kinecosystem/go/services/bifrost/queue"
-	"github.com/kinecosystem/go/services/bifrost/sse"
-	"github.com/kinecosystem/go/services/bifrost/stellar"
-	"github.com/kinecosystem/go/support/log"
+	"github.com/stellar/go/services/bifrost/bitcoin"
+	"github.com/stellar/go/services/bifrost/config"
+	"github.com/stellar/go/services/bifrost/database"
+	"github.com/stellar/go/services/bifrost/ethereum"
+	"github.com/stellar/go/services/bifrost/queue"
+	"github.com/stellar/go/services/bifrost/sse"
+	"github.com/stellar/go/services/bifrost/stellar"
+	"github.com/stellar/go/support/log"
 )
 
 // ProtocolVersion is the version of the protocol that Bifrost server and

@@ -12,15 +12,9 @@ import (
 	"net/url"
 	"sync"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/build"
-	"github.com/kinecosystem/go/support/errors"
-	"golang.org/x/net/context"
-=======
 	"github.com/stellar/go/build"
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3
 )
 
 // DefaultTestNetClient is a default client to connect to test network

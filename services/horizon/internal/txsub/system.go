@@ -7,13 +7,8 @@ import (
 	"time"
 
 	"github.com/rcrowley/go-metrics"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/log"
-	"github.com/kinecosystem/go/services/horizon/internal/txsub/sequence"
-=======
 	"github.com/stellar/go/services/horizon/internal/txsub/sequence"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 )
 
 // System represents a completely configured transaction submission system.

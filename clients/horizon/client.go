@@ -12,15 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/xdr"
-	"golang.org/x/net/context"
-=======
 	"github.com/manucorporat/sse"
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3
 )
 
 // HomeDomainForAccount returns the home domain for the provided strkey-encoded

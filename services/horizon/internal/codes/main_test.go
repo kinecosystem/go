@@ -3,13 +3,8 @@ package codes
 import (
 	"testing"
 
-<<<<<<< HEAD
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/kinecosystem/go/xdr"
-=======
 	"github.com/stellar/go/xdr"
 	"github.com/stretchr/testify/assert"
->>>>>>> horizon-v0.15.3
 )
 
 func TestString(t *testing.T) {

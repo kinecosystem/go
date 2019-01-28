@@ -3,13 +3,9 @@ package horizon
 import (
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/services/horizon/internal/db2/history"
 	"github.com/stellar/go/services/horizon/internal/test"
 	"github.com/stellar/go/protocols/horizon/effects"
->>>>>>> horizon-v0.15.3
 )
 
 func TestEffectActions_Index(t *testing.T) {

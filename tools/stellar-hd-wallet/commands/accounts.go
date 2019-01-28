@@ -7,16 +7,10 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/exp/crypto/derivation"
-	"github.com/kinecosystem/go/keypair"
-	"github.com/kinecosystem/go/support/errors"
-=======
 	"github.com/stellar/go/exp/crypto/derivation"
 	"github.com/stellar/go/keypair"
 	"github.com/stellar/go/support/errors"
 	"github.com/tyler-smith/go-bip39"
->>>>>>> horizon-v0.15.3
 )
 
 var wordsRegexp = regexp.MustCompile(`^[a-z]+$`)

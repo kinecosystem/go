@@ -6,21 +6,12 @@ import (
 	"os"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/PuerkitoBio/throttled"
-	"github.com/kinecosystem/go/services/horizon/internal"
-	hlog "github.com/kinecosystem/go/services/horizon/internal/log"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-=======
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stellar/go/services/horizon/internal"
 	"github.com/stellar/go/support/log"
 	"github.com/throttled/throttled"
->>>>>>> horizon-v0.15.3
 )
 
 var app *horizon.App
@@ -66,15 +57,12 @@ func init() {
 	viper.BindEnv("history-retention-count", "HISTORY_RETENTION_COUNT")
 	viper.BindEnv("history-stale-threshold", "HISTORY_STALE_THRESHOLD")
 	viper.BindEnv("skip-cursor-update", "SKIP_CURSOR_UPDATE")
-<<<<<<< HEAD
 	viper.BindEnv("horizon-db-max-open-connections", "HORIZON_DB_MAX_OPEN_CONNECTIONS")
 	viper.BindEnv("horizon-db-max-idle-connections", "HORIZON_DB_MAX_IDLE_CONNECTIONS")
 	viper.BindEnv("core-db-max-open-connections", "CORE_DB_MAX_OPEN_CONNECTIONS")
 	viper.BindEnv("core-db-max-idle-connections", "CORE_DB_MAX_IDLE_CONNECTIONS")
-=======
 	viper.BindEnv("enable-asset-stats", "ENABLE_ASSET_STATS")
 	viper.BindEnv("max-path-length", "MAX_PATH_LENGTH")
->>>>>>> horizon-v0.15.3
 
 	rootCmd = &cobra.Command{
 		Use:   "horizon",
@@ -313,54 +301,33 @@ func initConfig() {
 	}
 
 	config = horizon.Config{
-<<<<<<< HEAD
 		DatabaseURL:                 viper.GetString("db-url"),
 		StellarCoreDatabaseURL:      viper.GetString("stellar-core-db-url"),
 		StellarCoreURL:              viper.GetString("stellar-core-url"),
 		Port:                        viper.GetInt("port"),
-		RateLimit:                   throttled.PerHour(viper.GetInt("per-hour-rate-limit")),
-		RedisURL:                    viper.GetString("redis-url"),
-		FriendbotURL:                viper.GetString("friendbot-url"),
-		LogLevel:                    ll,
-		SentryDSN:                   viper.GetString("sentry-dsn"),
-		LogglyToken:                 viper.GetString("loggly-token"),
-		LogglyHost:                  viper.GetString("loggly-host"),
-		TLSCert:                     cert,
-		TLSKey:                      key,
-		Ingest:                      viper.GetBool("ingest"),
-		CursorName:                  viper.GetString("cursor-name"),
-		HistoryRetentionCount:       uint(viper.GetInt("history-retention-count")),
-		StaleThreshold:              uint(viper.GetInt("history-stale-threshold")),
-		SkipCursorUpdate:            viper.GetBool("skip-cursor-update"),
+		MaxDBConnections:            viper.GetInt("max-db-connections"),
 		HorizonDBMaxOpenConnections: viper.GetInt("horizon-db-max-open-connections"),
 		HorizonDBMaxIdleConnections: viper.GetInt("horizon-db-max-idle-connections"),
 		CoreDBMaxOpenConnections:    viper.GetInt("core-db-max-open-connections"),
 		CoreDBMaxIdleConnections:    viper.GetInt("core-db-max-idle-connections"),
-=======
-		DatabaseURL:            viper.GetString("db-url"),
-		StellarCoreDatabaseURL: viper.GetString("stellar-core-db-url"),
-		StellarCoreURL:         viper.GetString("stellar-core-url"),
-		Port:                   viper.GetInt("port"),
-		MaxDBConnections:       viper.GetInt("max-db-connections"),
-		SSEUpdateFrequency:     time.Duration(viper.GetInt("sse-update-frequency")) * time.Second,
-		ConnectionTimeout:      time.Duration(viper.GetInt("connection-timeout")) * time.Second,
-		RateLimit:              rateLimit,
-		RateLimitRedisKey:      viper.GetString("rate-limit-redis-key"),
-		RedisURL:               viper.GetString("redis-url"),
-		FriendbotURL:           friendbotURL,
-		LogLevel:               ll,
-		LogFile:                lf,
-		MaxPathLength:          uint(viper.GetInt("max-path-length")),
-		SentryDSN:              viper.GetString("sentry-dsn"),
-		LogglyToken:            viper.GetString("loggly-token"),
-		LogglyTag:              viper.GetString("loggly-tag"),
-		TLSCert:                cert,
-		TLSKey:                 key,
-		Ingest:                 viper.GetBool("ingest"),
-		HistoryRetentionCount:  uint(viper.GetInt("history-retention-count")),
-		StaleThreshold:         uint(viper.GetInt("history-stale-threshold")),
-		SkipCursorUpdate:       viper.GetBool("skip-cursor-update"),
-		EnableAssetStats:       viper.GetBool("enable-asset-stats"),
->>>>>>> horizon-v0.15.3
+		SSEUpdateFrequency:          time.Duration(viper.GetInt("sse-update-frequency")) * time.Second,
+		ConnectionTimeout:           time.Duration(viper.GetInt("connection-timeout")) * time.Second,
+		Ingest:                      viper.GetBool("ingest"),
+		LogFile:                     lf,
+		LogLevel:                    ll,
+		LogglyTag:                   viper.GetString("loggly-tag"),
+		LogglyToken:                 viper.GetString("loggly-token"),
+		MaxPathLength:               uint(viper.GetInt("max-path-length")),
+		RateLimit:                   rateLimit,
+		RateLimitRedisKey:           viper.GetString("rate-limit-redis-key"),
+		RedisURL:                    viper.GetString("redis-url"),
+		FriendbotURL:                friendbotURL,
+		SentryDSN:                   viper.GetString("sentry-dsn"),
+		TLSCert:                     cert,
+		TLSKey:                      key,
+		HistoryRetentionCount:       uint(viper.GetInt("history-retention-count")),
+		StaleThreshold:              uint(viper.GetInt("history-stale-threshold")),
+		SkipCursorUpdate:            viper.GetBool("skip-cursor-update"),
+		EnableAssetStats:            viper.GetBool("enable-asset-stats"),
 	}
 }

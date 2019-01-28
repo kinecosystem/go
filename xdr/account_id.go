@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kinecosystem/go/strkey"
+	"github.com/stellar/go/strkey"
 )
 
 // Address returns the strkey encoded form of this AccountId.  This method will

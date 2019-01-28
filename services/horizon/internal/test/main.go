@@ -12,14 +12,9 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
-<<<<<<< HEAD
-	hlog "github.com/kinecosystem/go/services/horizon/internal/log"
-	tdb "github.com/kinecosystem/go/services/horizon/internal/test/db"
-=======
 	"github.com/stellar/go/services/horizon/internal/logmetrics"
 	tdb "github.com/stellar/go/services/horizon/internal/test/db"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

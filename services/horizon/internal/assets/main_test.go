@@ -4,13 +4,8 @@ import (
 	"testing"
 
 	"github.com/go-errors/errors"
-<<<<<<< HEAD
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/kinecosystem/go/xdr"
-=======
 	"github.com/stellar/go/xdr"
 	"github.com/stretchr/testify/assert"
->>>>>>> horizon-v0.15.3
 )
 
 // Tests for Parse

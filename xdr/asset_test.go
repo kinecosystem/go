@@ -1,11 +1,7 @@
 package xdr_test
 
 import (
-<<<<<<< HEAD
-	. "github.com/kinecosystem/go/xdr"
-=======
 	"testing"
->>>>>>> horizon-v0.15.3
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -4,11 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
-=======
 	"github.com/stellar/go/protocols/horizon"
->>>>>>> horizon-v0.15.3
 )
 
 func TestAccountActions_Show(t *testing.T) {

@@ -6,11 +6,6 @@ import (
 
 	"github.com/segmentio/go-loggly"
 	"github.com/sirupsen/logrus"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/support/http/mutil"
-	"golang.org/x/net/context"
-=======
->>>>>>> horizon-v0.15.3
 )
 
 // DefaultLogger represents the default logger that is not bound to any specific

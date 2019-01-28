@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/jarcoal/httpmock"
-	"github.com/kinecosystem/go/support/errors"
+	"github.com/stellar/go/support/errors"
 )
 
 // Return specifies the response for a ClientExpectation, which is then

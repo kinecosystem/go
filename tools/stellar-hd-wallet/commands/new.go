@@ -4,12 +4,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/support/errors"
-=======
 	"github.com/stellar/go/support/errors"
 	"github.com/tyler-smith/go-bip39"
->>>>>>> horizon-v0.15.3
 )
 
 const DefaultEntropySize = 256

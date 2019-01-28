@@ -4,16 +4,10 @@ import (
 	"strconv"
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/PuerkitoBio/throttled"
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/services/horizon/internal/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/throttled/throttled"
->>>>>>> horizon-v0.15.3
 )
 
 type RateLimitMiddlewareTestSuite struct {

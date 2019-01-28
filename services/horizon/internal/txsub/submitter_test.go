@@ -5,12 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-<<<<<<< HEAD
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/services/horizon/internal/test"
->>>>>>> horizon-v0.15.3
 )
 
 func TestDefaultSubmitter(t *testing.T) {

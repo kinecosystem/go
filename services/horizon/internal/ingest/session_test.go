@@ -3,15 +3,10 @@ package ingest
 import (
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/services/horizon/internal/db2"
 	"github.com/stellar/go/services/horizon/internal/db2/history"
 	"github.com/stellar/go/services/horizon/internal/test"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3
 )
 
 func Test_ingestSignerEffects(t *testing.T) {

@@ -3,8 +3,8 @@ package stellar
 import (
 	"sync"
 
-	"github.com/kinecosystem/go/clients/horizon"
-	"github.com/kinecosystem/go/support/log"
+	"github.com/stellar/go/clients/horizon"
+	"github.com/stellar/go/support/log"
 )
 
 // Status describes status of account processing

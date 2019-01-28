@@ -6,22 +6,11 @@ import (
 	"strings"
 	"time"
 
-<<<<<<< HEAD
-	"golang.org/x/net/context"
-
-	gctx "github.com/goji/context"
-	"github.com/kinecosystem/go/services/horizon/internal/log"
-	"github.com/kinecosystem/go/services/horizon/internal/render"
-	"github.com/zenazn/goji/web"
-	"github.com/zenazn/goji/web/middleware"
-	"github.com/zenazn/goji/web/mutil"
-=======
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/stellar/go/services/horizon/internal/render"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 )
 
 // LoggerMiddleware is the middleware that logs http requests and resposnes

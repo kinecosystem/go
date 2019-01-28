@@ -8,17 +8,9 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/support/http/httptest"
-	"golang.org/x/net/context"
-=======
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/support/http/httptest"
 	"github.com/stretchr/testify/assert"
->>>>>>> horizon-v0.15.3
 )
 
 func ExampleClient_StreamLedgers() {

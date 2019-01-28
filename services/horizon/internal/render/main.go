@@ -4,12 +4,7 @@ import (
 	"net/http"
 
 	"bitbucket.org/ww/goautoneg"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/support/log"
-	"golang.org/x/net/context"
-=======
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 )
 
 // Negotiate inspects the Accept header of the provided request and determines

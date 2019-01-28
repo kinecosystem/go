@@ -11,12 +11,8 @@ import (
 	"strings"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/support/errors"
-=======
 	proto "github.com/stellar/go/protocols/stellarcore"
 	"github.com/stellar/go/support/errors"
->>>>>>> horizon-v0.15.3
 )
 
 // Client represents a client that is capable of communicating with a

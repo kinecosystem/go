@@ -1,17 +1,10 @@
 package horizon
 
 import (
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/log"
-	"github.com/kinecosystem/go/support/db"
-=======
 	"github.com/stellar/go/services/horizon/internal/db2/core"
 	"github.com/stellar/go/services/horizon/internal/db2/history"
 	"github.com/stellar/go/support/db"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 )
 
 func initHorizonDb(app *App) {

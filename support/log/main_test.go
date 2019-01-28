@@ -7,12 +7,7 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-<<<<<<< HEAD
-	serr "github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/support/http/httptest"
-=======
 	serr "github.com/stellar/go/support/errors"
->>>>>>> horizon-v0.15.3
 	"github.com/stretchr/testify/assert"
 )
 

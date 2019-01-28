@@ -4,17 +4,11 @@ import (
 	"math"
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-	"github.com/kinecosystem/go/xdr"
-=======
 	"github.com/stretchr/testify/assert"
 
 	"github.com/stellar/go/services/horizon/internal/db2/core"
 	"github.com/stellar/go/services/horizon/internal/test"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3
 )
 
 func TestOrderBook(t *testing.T) {

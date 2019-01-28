@@ -11,14 +11,9 @@ import (
 	"os"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/support/log"
-=======
 	"github.com/stellar/go/support/config"
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.3
 	"golang.org/x/net/http2"
 	"gopkg.in/tylerb/graceful.v1"
 )

@@ -1,18 +1,11 @@
 package horizon
 
 import (
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/paths"
-	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
-	halRender "github.com/kinecosystem/go/support/render/hal"
-=======
 	"github.com/stellar/go/protocols/horizon"
 	"github.com/stellar/go/services/horizon/internal/actions"
 	"github.com/stellar/go/services/horizon/internal/paths"
 	"github.com/stellar/go/services/horizon/internal/resourceadapter"
 	"github.com/stellar/go/support/render/hal"
->>>>>>> horizon-v0.15.3
 )
 
 // PathIndexAction provides path finding

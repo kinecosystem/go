@@ -3,17 +3,9 @@ package operations
 import (
 	"time"
 
-<<<<<<< HEAD:services/horizon/internal/resource/operations/main.go
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/resource/base"
-	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
-	"github.com/kinecosystem/go/xdr"
-	"golang.org/x/net/context"
-=======
 	"github.com/stellar/go/protocols/horizon/base"
 	"github.com/stellar/go/support/render/hal"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3:protocols/horizon/operations/main.go
 )
 
 // OperationTypeNames maps from operation type to the string used to represent that type

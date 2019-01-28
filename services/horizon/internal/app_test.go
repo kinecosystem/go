@@ -4,12 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
-=======
 	"github.com/stellar/go/services/horizon/internal/test"
->>>>>>> horizon-v0.15.3
 )
 
 func TestNewApp(t *testing.T) {

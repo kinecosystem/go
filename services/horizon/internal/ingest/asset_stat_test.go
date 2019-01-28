@@ -5,18 +5,10 @@ import (
 	"sort"
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/keypair"
-	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-	"github.com/kinecosystem/go/support/db"
-	"github.com/kinecosystem/go/xdr"
-=======
 	"github.com/stellar/go/keypair"
 	"github.com/stellar/go/services/horizon/internal/test"
 	"github.com/stellar/go/support/db"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3
 	"github.com/stretchr/testify/assert"
 )
 

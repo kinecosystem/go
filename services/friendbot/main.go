@@ -8,13 +8,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/spf13/cobra"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/friendbot/internal"
-	"github.com/kinecosystem/go/support/config"
-	"github.com/kinecosystem/go/support/http/server"
-	"github.com/kinecosystem/go/support/log"
-	"github.com/kinecosystem/go/support/render/problem"
-=======
 	"github.com/stellar/go/services/friendbot/internal"
 	"github.com/stellar/go/support/app"
 	"github.com/stellar/go/support/config"
@@ -22,7 +15,6 @@ import (
 	"github.com/stellar/go/support/http"
 	"github.com/stellar/go/support/log"
 	"github.com/stellar/go/support/render/problem"
->>>>>>> horizon-v0.15.3
 )
 
 // Config represents the configuration of a friendbot server

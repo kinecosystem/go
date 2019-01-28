@@ -7,19 +7,6 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/amount"
-	"github.com/kinecosystem/go/services/horizon/internal/assets"
-	"github.com/kinecosystem/go/services/horizon/internal/db2"
-	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
-	"github.com/kinecosystem/go/services/horizon/internal/toid"
-	"github.com/kinecosystem/go/strkey"
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/support/render/problem"
-	"github.com/kinecosystem/go/support/time"
-	"github.com/kinecosystem/go/xdr"
-=======
 	"github.com/go-chi/chi"
 	"github.com/stellar/go/amount"
 	"github.com/stellar/go/services/horizon/internal/assets"
@@ -32,7 +19,6 @@ import (
 	"github.com/stellar/go/support/render/problem"
 	"github.com/stellar/go/support/time"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3
 )
 
 const (

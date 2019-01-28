@@ -4,14 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
-	"github.com/kinecosystem/go/services/horizon/internal/paths"
-	"github.com/kinecosystem/go/xdr"
-=======
 	"github.com/stellar/go/services/horizon/internal/db2/core"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3
 )
 
 // pathNode represents a path as a linked list pointing from source to destination

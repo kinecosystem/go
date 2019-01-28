@@ -1,13 +1,6 @@
 package resourceadapter
 
 import (
-<<<<<<< HEAD:services/horizon/internal/resource/asset_stat.go
-	"github.com/kinecosystem/go/amount"
-	"github.com/kinecosystem/go/services/horizon/internal/db2/assets"
-	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
-	"github.com/kinecosystem/go/xdr"
-	"golang.org/x/net/context"
-=======
 	"context"
 
 	"github.com/stellar/go/amount"
@@ -16,7 +9,6 @@ import (
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/support/render/hal"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3:services/horizon/internal/resourceadapter/asset_stat.go
 )
 
 // PopulateAssetStat fills out the details

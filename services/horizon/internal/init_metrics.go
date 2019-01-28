@@ -4,11 +4,7 @@ import (
 	"fmt"
 
 	"github.com/rcrowley/go-metrics"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/log"
-=======
 	"github.com/stellar/go/services/horizon/internal/logmetrics"
->>>>>>> horizon-v0.15.3
 )
 
 func initMetrics(app *App) {

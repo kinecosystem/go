@@ -12,20 +12,11 @@ import (
 	"strconv"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/build"
-	"github.com/kinecosystem/go/clients/horizon"
-	"github.com/kinecosystem/go/keypair"
-	"github.com/kinecosystem/go/services/bifrost/common"
-	"github.com/kinecosystem/go/services/bifrost/server"
-	"golang.org/x/net/context"
-=======
 	"github.com/stellar/go/build"
 	"github.com/stellar/go/clients/horizon"
 	"github.com/stellar/go/keypair"
 	"github.com/stellar/go/services/bifrost/common"
 	"github.com/stellar/go/services/bifrost/server"
->>>>>>> horizon-v0.15.3
 )
 
 func (u *Users) Start(accounts chan<- server.GenerateAddressResponse) {

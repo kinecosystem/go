@@ -13,18 +13,6 @@ import (
 	"os/signal"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/go-chi/chi/middleware"
-	"github.com/kinecosystem/go/keypair"
-	"github.com/kinecosystem/go/services/bifrost/bitcoin"
-	"github.com/kinecosystem/go/services/bifrost/common"
-	"github.com/kinecosystem/go/services/bifrost/database"
-	"github.com/kinecosystem/go/services/bifrost/ethereum"
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/support/http/server"
-	"github.com/kinecosystem/go/support/log"
-	"github.com/kinecosystem/go/xdr"
-=======
 	"github.com/stellar/go/keypair"
 	"github.com/stellar/go/services/bifrost/bitcoin"
 	"github.com/stellar/go/services/bifrost/common"
@@ -35,7 +23,6 @@ import (
 	"github.com/stellar/go/support/http"
 	"github.com/stellar/go/support/log"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.3
 )
 
 func (s *Server) Start() error {

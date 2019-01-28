@@ -5,14 +5,9 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/services/horizon/internal/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
->>>>>>> horizon-v0.15.3
 )
 
 type QueueTestSuite struct {

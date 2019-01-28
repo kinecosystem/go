@@ -6,13 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-<<<<<<< HEAD
-
-	"github.com/cskr/pubsub"
-	"github.com/kinecosystem/go/support/log"
-	"golang.org/x/net/context"
-=======
->>>>>>> horizon-v0.15.3
 )
 
 const pubsubCapacity = 0

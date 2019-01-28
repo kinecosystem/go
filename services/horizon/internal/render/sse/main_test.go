@@ -6,13 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-<<<<<<< HEAD
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/kinecosystem/go/support/test"
-=======
 	"github.com/stellar/go/support/test"
 	"github.com/stretchr/testify/assert"
->>>>>>> horizon-v0.15.3
 )
 
 func TestWriteEventOutput(t *testing.T) {

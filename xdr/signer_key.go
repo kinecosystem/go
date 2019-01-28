@@ -3,8 +3,8 @@ package xdr
 import (
 	"fmt"
 
-	"github.com/kinecosystem/go/strkey"
-	"github.com/kinecosystem/go/support/errors"
+	"github.com/stellar/go/strkey"
+	"github.com/stellar/go/support/errors"
 )
 
 // Address returns the strkey encoded form of this signer key.  This method will

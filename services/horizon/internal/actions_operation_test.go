@@ -5,15 +5,9 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/resource/operations"
-	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
 	"github.com/stellar/go/protocols/horizon/operations"
 	"github.com/stellar/go/services/horizon/internal/db2/history"
 	"github.com/stellar/go/services/horizon/internal/test"
->>>>>>> horizon-v0.15.3
 )
 
 func TestOperationActions_Index(t *testing.T) {

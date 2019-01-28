@@ -3,15 +3,8 @@ package horizon
 import (
 	"net/http"
 
-<<<<<<< HEAD
-	gctx "github.com/goji/context"
-	"github.com/kinecosystem/go/services/horizon/internal/errors"
-	"github.com/kinecosystem/go/support/render/problem"
-	"github.com/zenazn/goji/web"
-=======
 	"github.com/stellar/go/services/horizon/internal/errors"
 	"github.com/stellar/go/support/render/problem"
->>>>>>> horizon-v0.15.3
 )
 
 // RecoverMiddleware helps the server recover from panics.  It ensures that
