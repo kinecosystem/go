@@ -1,14 +1,18 @@
 package sse
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
+<<<<<<< HEAD
 
 	"github.com/cskr/pubsub"
 	"github.com/kinecosystem/go/support/log"
 	"golang.org/x/net/context"
+=======
+>>>>>>> horizon-v0.15.3
 )
 
 const pubsubCapacity = 0
@@ -35,6 +39,7 @@ type Eventable interface {
 	SseEvent() Event
 }
 
+<<<<<<< HEAD
 // Pumped returns a channel that will be closed the next time the input pump
 // sends.  It can be used similar to `ctx.Done()`, like so:  `<-sse.Pumped()`
 func Pumped() <-chan interface{} {
@@ -51,6 +56,8 @@ func Tick() {
 	close(prev)
 }
 
+=======
+>>>>>>> horizon-v0.15.3
 // WritePreamble prepares this http connection for streaming using Server Sent
 // Events.  It sends the initial http response with the appropriate headers to
 // do so.
@@ -82,7 +89,6 @@ func WriteEvent(ctx context.Context, w http.ResponseWriter, e Event) {
 		fmt.Fprint(w, "event: err\n")
 		fmt.Fprintf(w, "data: %s\n\n", e.Error.Error())
 		w.(http.Flusher).Flush()
-		log.Ctx(ctx).Error(e.Error)
 		return
 	}
 
@@ -122,8 +128,15 @@ var helloEvent = Event{
 	Retry: 1000,
 }
 
+<<<<<<< HEAD
 var lock sync.Mutex
 var nextTick chan interface{}
+=======
+var (
+	lock     sync.Mutex
+	nextTick = make(chan struct{})
+)
+>>>>>>> horizon-v0.15.3
 
 func getJSON(val interface{}) string {
 	js, err := json.Marshal(val)
@@ -134,6 +147,7 @@ func getJSON(val interface{}) string {
 
 	return string(js)
 }
+<<<<<<< HEAD
 
 // Pubsub for SSE requests, so they will run SSE.action only upon relevant data changes.
 var ssePubsub = pubsub.New(pubsubCapacity)
@@ -181,3 +195,5 @@ func init() {
 	nextTick = make(chan interface{})
 	lock.Unlock()
 }
+=======
+>>>>>>> horizon-v0.15.3

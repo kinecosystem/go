@@ -55,7 +55,7 @@ func TestAssetIngest(t *testing.T) {
 
 	tt := test.Start(t).ScenarioWithoutHorizon("kahuna")
 	defer tt.Finish()
-	s := ingest(tt)
+	s := ingest(tt, true)
 	tt.Require.NoError(s.Err)
 	q := history.Q{Session: s.Ingestion.DB}
 
@@ -75,7 +75,7 @@ func TestAssetIngest(t *testing.T) {
 func TestAssetStatsIngest(t *testing.T) {
 	tt := test.Start(t).ScenarioWithoutHorizon("ingest_asset_stats")
 	defer tt.Finish()
-	s := ingest(tt)
+	s := ingest(tt, true)
 	tt.Require.NoError(s.Err)
 	q := history.Q{Session: s.Ingestion.DB}
 
@@ -139,12 +139,49 @@ func TestAssetStatsIngest(t *testing.T) {
 	}, assetStats[2])
 }
 
+func TestAssetStatsDisabledIngest(t *testing.T) {
+	tt := test.Start(t).ScenarioWithoutHorizon("ingest_asset_stats")
+	defer tt.Finish()
+	s := ingest(tt, false)
+	tt.Require.NoError(s.Err)
+	q := history.Q{Session: s.Ingestion.DB}
+
+	type AssetStatResult struct {
+		Type        string `db:"asset_type"`
+		Code        string `db:"asset_code"`
+		Issuer      string `db:"asset_issuer"`
+		Amount      int64  `db:"amount"`
+		NumAccounts int32  `db:"num_accounts"`
+		Flags       int8   `db:"flags"`
+		Toml        string `db:"toml"`
+	}
+	assetStats := []AssetStatResult{}
+	err := q.Select(
+		&assetStats,
+		sq.
+			Select(
+				"hist.asset_type",
+				"hist.asset_code",
+				"hist.asset_issuer",
+				"stats.amount",
+				"stats.num_accounts",
+				"stats.flags",
+				"stats.toml",
+			).
+			From("history_assets hist").
+			Join("asset_stats stats ON hist.id = stats.id").
+			OrderBy("hist.asset_code ASC", "hist.asset_issuer ASC"),
+	)
+	tt.Require.NoError(err)
+	tt.Assert.Equal(0, len(assetStats))
+}
+
 func TestTradeIngestTimestamp(t *testing.T) {
 	//ingest trade scenario and verify that the trade timestamp
 	//matches the appropriate ledger's timestamp
 	tt := test.Start(t).ScenarioWithoutHorizon("trades")
 	defer tt.Finish()
-	s := ingest(tt)
+	s := ingest(tt, false)
 	q := history.Q{Session: s.Ingestion.DB}
 
 	var ledgers []history.Ledger

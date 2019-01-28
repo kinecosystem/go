@@ -1,3 +1,4 @@
+dist: xenial
 language: go
 services:
 - mysql
@@ -5,18 +6,18 @@ services:
 - redis-server
 addons:
   postgresql: '9.4'
+  ssh_known_hosts:
+  - bitbucket.org
 go:
-- '1.7'
-- '1.8'
 - '1.9'
+- '1.10'
+- '1.11'
 - tip
 go_import_path: github.com/stellar/go
 install:
-- wget https://github.com/Masterminds/glide/releases/download/v0.12.3/glide-v0.12.3-linux-amd64.tar.gz
-- tar -xzvf glide-v0.12.3-linux-amd64.tar.gz
-- cp linux-amd64/glide $GOPATH/bin
+- curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 script:
-- glide install
+- dep ensure -v
 - ./support/scripts/run_tests
 
 before_deploy:
@@ -45,7 +46,7 @@ deploy:
     name: Snapshots $(date --utc +'%F-%T')
     on:
       branch: master
-      go: '1.9'
+      go: '1.11'
   #tagged releases
   - provider: releases
     skip_cleanup: true
@@ -57,4 +58,5 @@ deploy:
     on:
       repo: stellar/go
       tags: true
-      go: '1.9'
+      condition: $TRAVIS_TAG != snapshots
+      go: '1.11'

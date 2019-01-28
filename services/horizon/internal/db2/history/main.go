@@ -101,6 +101,9 @@ const (
 	// EffectDataUpdated occurs when an account changes a data field's value
 	EffectDataUpdated EffectType = 42 // from manage_data
 
+	// EffectSequenceBumped occurs when an account bumps their sequence number
+	EffectSequenceBumped EffectType = 43 // from bump_sequence
+
 )
 
 // Account is a row of data from the `history_accounts` table
@@ -128,7 +131,7 @@ type Asset struct {
 // AssetStat is a row in the asset_stats table representing the stats per Asset
 type AssetStat struct {
 	ID          int64  `db:"id"`
-	Amount      int64  `db:"amount"`
+	Amount      string `db:"amount"`
 	NumAccounts int32  `db:"num_accounts"`
 	Flags       int8   `db:"flags"`
 	Toml        string `db:"toml"`
@@ -155,6 +158,20 @@ type EffectsQ struct {
 // EffectType is the numeric type for an effect, used as the `type` field in the
 // `history_effects` table.
 type EffectType int
+
+// FeeStats is a row of data from the min, mode aggregate functions over the
+// `history_ledgers` table.
+type FeeStats struct {
+	Min  null.Int `db:"min"`
+	Mode null.Int `db:"mode"`
+}
+
+// LatestLedger represents a response from the raw LatestLedgerBaseFeeAndSequence
+// query.
+type LatestLedger struct {
+	BaseFee  int32 `db:"base_fee"`
+	Sequence int32 `db:"sequence"`
+}
 
 // Ledger is a row of data from the `history_ledgers` table
 type Ledger struct {
@@ -232,11 +249,13 @@ type Trade struct {
 	Order              int32     `db:"order"`
 	LedgerCloseTime    time.Time `db:"ledger_closed_at"`
 	OfferID            int64     `db:"offer_id"`
+	BaseOfferID        *int64    `db:"base_offer_id"`
 	BaseAccount        string    `db:"base_account"`
 	BaseAssetType      string    `db:"base_asset_type"`
 	BaseAssetCode      string    `db:"base_asset_code"`
 	BaseAssetIssuer    string    `db:"base_asset_issuer"`
 	BaseAmount         xdr.Int64 `db:"base_amount"`
+	CounterOfferID     *int64    `db:"counter_offer_id"`
 	CounterAccount     string    `db:"counter_account"`
 	CounterAssetType   string    `db:"counter_asset_type"`
 	CounterAssetCode   string    `db:"counter_asset_code"`
@@ -295,6 +314,16 @@ func (q *Q) ElderLedger(dest interface{}) error {
 // LatestLedger loads the latest known ledger
 func (q *Q) LatestLedger(dest interface{}) error {
 	return q.GetRaw(dest, `SELECT COALESCE(MAX(sequence), 0) FROM history_ledgers`)
+}
+
+// LatestLedgerBaseFeeAndSequence loads the latest known ledger's base fee and
+// sequence number.
+func (q *Q) LatestLedgerBaseFeeAndSequence(dest interface{}) error {
+	return q.GetRaw(dest, `
+		SELECT base_fee, sequence
+		FROM history_ledgers
+		WHERE sequence = (SELECT COALESCE(MAX(sequence), 0) FROM history_ledgers)
+	`)
 }
 
 // OldestOutdatedLedgers populates a slice of ints with the first million

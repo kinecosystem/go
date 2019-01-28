@@ -1,11 +1,21 @@
 package horizon
 
 import (
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/resource"
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
+=======
+	"github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/services/horizon/internal/actions"
+	"github.com/stellar/go/services/horizon/internal/db2/core"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> horizon-v0.15.3
 )
 
 // This file contains the actions:
@@ -21,7 +31,7 @@ type AccountShowAction struct {
 	CoreRecord     core.Account
 	CoreSigners    []core.Signer
 	CoreTrustlines []core.Trustline
-	Resource       resource.Account
+	Resource       horizon.Account
 }
 
 // JSON is a method for actions.JSON
@@ -38,6 +48,7 @@ func (action *AccountShowAction) JSON() {
 
 // SSE is a method for actions.SSE
 func (action *AccountShowAction) SSE(stream sse.Stream) {
+
 	action.Do(
 		action.loadParams,
 		action.loadRecord,
@@ -55,12 +66,15 @@ func (action *AccountShowAction) GetTopic() string {
 }
 
 func (action *AccountShowAction) loadParams() {
-	action.Address = action.GetString("id")
+	action.Address = action.GetAddress("account_id", actions.RequiredParam)
 }
 
 func (action *AccountShowAction) loadRecord() {
+	app := AppFromContext(action.R.Context())
+	protocolVersion := app.protocolVersion
+
 	action.Err = action.CoreQ().
-		AccountByAddress(&action.CoreRecord, action.Address)
+		AccountByAddress(&action.CoreRecord, action.Address, protocolVersion)
 	if action.Err != nil {
 		return
 	}
@@ -78,7 +92,7 @@ func (action *AccountShowAction) loadRecord() {
 	}
 
 	action.Err = action.CoreQ().
-		TrustlinesByAddress(&action.CoreTrustlines, action.Address)
+		TrustlinesByAddress(&action.CoreTrustlines, action.Address, protocolVersion)
 	if action.Err != nil {
 		return
 	}
@@ -98,8 +112,9 @@ func (action *AccountShowAction) loadRecord() {
 }
 
 func (action *AccountShowAction) loadResource() {
-	action.Err = action.Resource.Populate(
-		action.Ctx,
+	action.Err = resourceadapter.PopulateAccount(
+		action.R.Context(),
+		&action.Resource,
 		action.CoreRecord,
 		action.CoreData,
 		action.CoreSigners,

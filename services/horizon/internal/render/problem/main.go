@@ -1,11 +1,17 @@
 package problem
 
 import (
+	"context"
 	"net/http"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/context/requestid"
 	"github.com/kinecosystem/go/support/render/problem"
 	"golang.org/x/net/context"
+=======
+	"github.com/stellar/go/support/context/requestid"
+	"github.com/stellar/go/support/render/problem"
+>>>>>>> horizon-v0.15.3
 )
 
 // Inflate expands a problem with contextal information, including setting basic info.
@@ -66,7 +72,8 @@ var (
 		Title:  "Timeout",
 		Status: http.StatusGatewayTimeout,
 		Detail: "Your request timed out before completing.  Please try your " +
-			"request again.",
+			"request again. If you are submitting a transaction make sure you are " +
+			"sending exactly the same transaction (with the same sequence number).",
 	}
 
 	// UnsupportedMediaType is a well-known problem type.  Use it as a shortcut

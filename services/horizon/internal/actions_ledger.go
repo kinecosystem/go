@@ -1,6 +1,7 @@
 package horizon
 
 import (
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
@@ -9,6 +10,16 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resource"
 	halRender "github.com/kinecosystem/go/support/render/hal"
+=======
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/ledger"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/support/render/hal"
+	"github.com/stellar/go/services/horizon/internal/render/problem"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+>>>>>>> horizon-v0.15.3
 )
 
 // This file contains the actions:
@@ -33,7 +44,7 @@ func (action *LedgerIndexAction) JSON() {
 		action.ValidateCursorWithinHistory,
 		action.loadRecords,
 		action.loadPage,
-		func() { halRender.Render(action.W, action.Page) },
+		func() { hal.Render(action.W, action.Page) },
 	)
 }
 
@@ -51,8 +62,8 @@ func (action *LedgerIndexAction) SSE(stream sse.Stream) {
 			records := action.Records[stream.SentCount():]
 
 			for _, record := range records {
-				var res resource.Ledger
-				res.Populate(action.Ctx, record)
+				var res horizon.Ledger
+				resourceadapter.PopulateLedger(action.R.Context(), &res, record)
 				stream.Send(sse.Event{ID: res.PagingToken(), Data: res})
 			}
 		},
@@ -80,8 +91,8 @@ func (action *LedgerIndexAction) loadRecords() {
 
 func (action *LedgerIndexAction) loadPage() {
 	for _, record := range action.Records {
-		var res resource.Ledger
-		res.Populate(action.Ctx, record)
+		var res horizon.Ledger
+		resourceadapter.PopulateLedger(action.R.Context(), &res, record)
 		action.Page.Add(res)
 	}
 
@@ -107,15 +118,15 @@ func (action *LedgerShowAction) JSON() {
 		action.verifyWithinHistory,
 		action.loadRecord,
 		func() {
-			var res resource.Ledger
-			res.Populate(action.Ctx, action.Record)
-			halRender.Render(action.W, res)
+			var res horizon.Ledger
+			resourceadapter.PopulateLedger(action.R.Context(), &res, action.Record)
+			hal.Render(action.W, res)
 		},
 	)
 }
 
 func (action *LedgerShowAction) loadParams() {
-	action.Sequence = action.GetInt32("id")
+	action.Sequence = action.GetInt32("ledger_id")
 }
 
 func (action *LedgerShowAction) loadRecord() {

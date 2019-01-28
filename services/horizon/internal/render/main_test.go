@@ -1,45 +1,39 @@
 package render
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
-	"golang.org/x/net/context"
-
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestRenderPackage(t *testing.T) {
+func TestNegotiate(t *testing.T) {
+	r, err := http.NewRequest("GET", "/ledgers", nil)
+	assert.Nil(t, err)
+	r.WithContext(context.Background())
 
-	Convey("render.Negotiate", t, func() {
-		ctx := context.Background()
-
-		r, err := http.NewRequest("GET", "/ledgers", nil)
-		So(err, ShouldBeNil)
-		r.Header.Add("Accept", "application/hal+json")
-		So(Negotiate(ctx, r), ShouldEqual, MimeHal)
-
-		Convey("Obeys the Accept header's prioritization", func() {
-
-			r.Header.Set("Accept", "text/event-stream,application/hal+json")
-			So(Negotiate(ctx, r), ShouldEqual, MimeEventStream)
-
-			r.Header.Set("Accept", "text/event-stream;q=0.5,application/hal+json")
-			So(Negotiate(ctx, r), ShouldEqual, MimeHal)
+	testCases := []struct {
+		Header               string
+		ExpectedResponseType string
+	}{
+		// Obeys the Accept header's prioritization
+		{"application/hal+json", MimeHal},
+		{"text/event-stream,application/hal+json", MimeEventStream},
+		// Defaults to HAL
+		{"text/event-stream;q=0.5,application/hal+json", MimeHal},
+		{"", MimeHal},
+		// Returns empty string for invalid type
+		{"text/plain", ""},
+	}
+	for _, tc := range testCases {
+		t.Run("", func(t *testing.T) {
+			r.Header.Set("Accept", tc.Header)
+			assert.Equal(t, tc.ExpectedResponseType, Negotiate(r))
 		})
+	}
 
-		Convey("Defaults to HAL", func() {
-			r.Header.Set("Accept", "")
-			So(Negotiate(ctx, r), ShouldEqual, MimeHal)
-
-			r.Header.Del("Accept")
-			So(Negotiate(ctx, r), ShouldEqual, MimeHal)
-		})
-
-		Convey("Returns empty string for invalid type", func() {
-			r.Header.Set("Accept", "text/plain")
-			So(Negotiate(ctx, r), ShouldEqual, "")
-		})
-
-	})
+	// Defaults to MimeHal even with no Accept key set
+	r.Header.Del("Accept")
+	assert.Equal(t, MimeHal, Negotiate(r))
 }

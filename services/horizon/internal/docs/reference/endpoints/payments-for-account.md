@@ -4,10 +4,16 @@ clientData:
   laboratoryUrl: https://www.stellar.org/laboratory/#explorer?resource=payments&endpoint=for_account
 ---
 
-This endpoint responds with a collection of [Payment operations](../resources/operation.md) where the given [account](../resources/account.md) was either the sender or receiver.
+This endpoint responds with a collection of payment-related operations where the given [account](../resources/account.md) was either the sender or receiver.
 
-This endpoint can also be used in [streaming](../responses.md#streaming) mode so it is possible to use it to listen for new payments to or from an account as they get made in the Stellar network.
+This endpoint can also be used in [streaming](../streaming.md) mode so it is possible to use it to listen for new payments to or from an account as they get made in the Stellar network.
 If called in streaming mode Horizon will start at the earliest known payment unless a `cursor` is set. In that case it will start from the `cursor`. You can also set `cursor` value to `now` to only stream payments created since your request time.
+
+The operations that can be returned in by this endpoint are:
+- `create_account`
+- `payment`
+- `path_payment`
+- `account_merge`
 
 ## Request
 
@@ -28,7 +34,7 @@ GET /accounts/{id}/payments{?cursor,limit,order}
 
 ```bash
 # Retrieve the 25 latest payments for a specific account.
-curl "https://horizon-testnet.stellar.org/account/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments?limit=25&order=desc"
+curl "https://horizon-testnet.stellar.org/accounts/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments?limit=25&order=desc"
 ```
 
 ### JavaScript Example Request
@@ -65,11 +71,11 @@ This endpoint responds with a [page](../resources/page.md) of [payment operation
           "href": "/transaction/6391dd190f15f7d1665ba53c63842e368f485651a53d8d852ed442a446d1c69a"
         },
         "precedes": {
-          "href": "/account/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments?cursor=12884905984&order=asc{?limit}",
+          "href": "/accounts/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments?cursor=12884905984&order=asc{?limit}",
           "templated": true
         },
         "succeeds": {
-          "href": "/account/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments?cursor=12884905984&order=desc{?limit}",
+          "href": "/accounts/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments?cursor=12884905984&order=desc{?limit}",
           "templated": true
         }
       },
@@ -89,11 +95,11 @@ This endpoint responds with a [page](../resources/page.md) of [payment operation
 },
 "_links": {
   "next": {
-    "href": "/account/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments?cursor=12884905984&order=asc{?limit}",
+    "href": "/accounts/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments?cursor=12884905984&order=asc{?limit}",
     "templated": true
   },
   "self": {
-    "href": "/account/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments"
+    "href": "/accounts/GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ/payments"
   }
 }
 }

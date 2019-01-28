@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"testing"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/resource"
+=======
+	"github.com/stellar/go/protocols/horizon"
+>>>>>>> horizon-v0.15.3
 )
 
 func TestLedgerActions_Index(t *testing.T) {
@@ -32,7 +36,7 @@ func TestLedgerActions_Show(t *testing.T) {
 	w := ht.Get("/ledgers/1")
 	ht.Assert.Equal(200, w.Code)
 
-	var result resource.Ledger
+	var result horizon.Ledger
 	err := json.Unmarshal(w.Body.Bytes(), &result)
 	if ht.Assert.NoError(err) {
 		ht.Assert.Equal(int32(1), result.Sequence)

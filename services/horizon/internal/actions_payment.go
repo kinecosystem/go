@@ -4,12 +4,20 @@ import (
 	"errors"
 	"fmt"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resource"
 	halRender "github.com/kinecosystem/go/support/render/hal"
+=======
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> horizon-v0.15.3
 )
 
 // PaymentsIndexAction returns a paged slice of payments based upon the provided
@@ -36,7 +44,7 @@ func (action *PaymentsIndexAction) JSON() {
 		action.loadPage,
 	)
 	action.Do(func() {
-		halRender.Render(action.W, action.Page)
+		hal.Render(action.W, action.Page)
 	})
 }
 
@@ -58,14 +66,14 @@ func (action *PaymentsIndexAction) SSE(stream sse.Stream) {
 				ledger, found := action.Ledgers.Records[record.LedgerSequence()]
 				if !found {
 					msg := fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence())
-					stream.Err(errors.New(msg))
+					action.Err = errors.New(msg)
 					return
 				}
 
-				res, err := resource.NewOperation(action.Ctx, record, ledger)
+				res, err := resourceadapter.NewOperation(action.R.Context(), record, ledger)
 
 				if err != nil {
-					stream.Err(err)
+					action.Err = err
 					return
 				}
 
@@ -93,7 +101,7 @@ func (action *PaymentsIndexAction) GetTopic() string {
 
 func (action *PaymentsIndexAction) loadParams() {
 	action.ValidateCursorAsDefault()
-	action.AccountFilter = action.GetString("account_id")
+	action.AccountFilter = action.GetAddress("account_id")
 	action.LedgerFilter = action.GetInt32("ledger_id")
 	action.TransactionFilter = action.GetString("tx_id")
 	action.PagingParams = action.GetPageQuery()
@@ -135,7 +143,7 @@ func (action *PaymentsIndexAction) loadPage() {
 			return
 		}
 
-		res, action.Err = resource.NewOperation(action.Ctx, record, ledger)
+		res, action.Err = resourceadapter.NewOperation(action.R.Context(), record, ledger)
 		if action.Err != nil {
 			return
 		}

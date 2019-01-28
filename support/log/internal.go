@@ -1,11 +1,16 @@
 package log
 
 import (
+	"context"
 	"net/http"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/support/http/mutil"
 	"golang.org/x/net/context"
+=======
+	"github.com/stellar/go/support/http/mutil"
+>>>>>>> horizon-v0.15.3
 )
 
 // logStartOfRequest emits the logline that reports that an http request is

@@ -20,7 +20,13 @@ func initIngester(app *App) {
 		app.config.StellarCoreURL,
 		app.CoreSession(nil),
 		app.HorizonSession(nil),
+<<<<<<< HEAD
 		app.config.CursorName,
+=======
+		ingest.Config{
+			EnableAssetStats: app.config.EnableAssetStats,
+		},
+>>>>>>> horizon-v0.15.3
 	)
 
 	app.ingester.SkipCursorUpdate = app.config.SkipCursorUpdate

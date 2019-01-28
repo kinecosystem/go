@@ -88,6 +88,42 @@ func ExampleCreateAccount() {
 	// Output: tx base64: AAAAADZY/nWY0gx6beMpf4S8Ur0qHsjA8fbFtBzBx1cbQzHwAAAAZAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAALSRpLtCLv2eboZlEiHDSGR6Hb+zZL92fbSdNpObeE0EAAAAAHc1lAAAAAAAAAAABG0Mx8AAAAEDiHQEurLITX87zmkEi8Rrcf5wGp1JrLnSDoTJiN+yNjJZVF3WcBJgoGyIJ3NJo+tNmTqALVrJziiiZGdoukxcN
 }
 
+// ExampleBumpSequence creates a transaction to bump sequence of a given account. It then
+// encodes the transaction into a base64 string capable of being submitted to stellar-core. It uses
+// the transaction builder system.
+func ExampleBumpSequence() {
+	seed := "SDOTALIMPAM2IV65IOZA7KZL7XWZI5BODFXTRVLIHLQZQCKK57PH5F3H"
+	tx, err := Transaction(
+		SourceAccount{seed},
+		Sequence{1},
+		TestNetwork,
+		BumpSequence(
+			BumpTo(5),
+		),
+	)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	txe, err := tx.Sign(seed)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	txeB64, err := txe.Base64()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Printf("tx base64: %s", txeB64)
+	// Output: tx base64: AAAAADZY/nWY0gx6beMpf4S8Ur0qHsjA8fbFtBzBx1cbQzHwAAAAZAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAsAAAAAAAAABQAAAAAAAAABG0Mx8AAAAEAZkMhF/4tin/eiAw+yj13iQ9xApg0wadSyIMdk2D73RvwvgxwqfAGF6qmL1d8qqrjClZ7Vi0MYBDPxOQchwMQA
+}
+
 // ExamplePayment creates and signs a native-asset Payment, encodes it into a base64 string capable of
 // being submitted to stellar-core. It uses the transaction builder system.
 func ExamplePayment() {

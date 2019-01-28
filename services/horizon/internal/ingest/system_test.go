@@ -10,7 +10,7 @@ import (
 func TestBackfill(t *testing.T) {
 	tt := test.Start(t).ScenarioWithoutHorizon("kahuna")
 	defer tt.Finish()
-	is := sys(tt)
+	is := sys(tt, false)
 
 	err := is.ReingestSingle(10)
 	tt.Require.NoError(err)
@@ -34,7 +34,7 @@ func TestBackfill(t *testing.T) {
 func TestClearAll(t *testing.T) {
 	tt := test.Start(t).Scenario("kahuna")
 	defer tt.Finish()
-	is := sys(tt)
+	is := sys(tt, false)
 
 	err := is.ClearAll()
 
@@ -51,7 +51,11 @@ func TestValidation(t *testing.T) {
 	tt := test.Start(t).Scenario("kahuna")
 	defer tt.Finish()
 
+<<<<<<< HEAD
 	sys := New(network.TestNetworkPassphrase, "", tt.CoreSession(), tt.HorizonSession(), "HORIZON")
+=======
+	sys := New(network.TestNetworkPassphrase, "", tt.CoreSession(), tt.HorizonSession(), Config{})
+>>>>>>> horizon-v0.15.3
 
 	// intact chain
 	for i := int32(2); i <= 57; i++ {

@@ -5,9 +5,17 @@ import (
 
 	"encoding/json"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
 	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
 	"github.com/kinecosystem/go/support/db"
+=======
+	"github.com/guregu/null"
+	"github.com/stellar/go/services/horizon/internal/ledger"
+	"github.com/stellar/go/services/horizon/internal/operationfeestats"
+	"github.com/stellar/go/support/db"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> horizon-v0.15.3
 )
 
 // CoreSession returns a db.Session instance pointing at the stellar core test database
@@ -24,6 +32,7 @@ func (t *T) Finish() {
 	RestoreLogger()
 	// Reset cached ledger state
 	ledger.SetState(ledger.State{})
+	operationfeestats.ResetState()
 
 	if t.LogBuffer.Len() > 0 {
 		t.T.Log("\n" + t.LogBuffer.String())
@@ -43,6 +52,7 @@ func (t *T) HorizonSession() *db.Session {
 func (t *T) Scenario(name string) *T {
 	LoadScenario(name)
 	t.UpdateLedgerState()
+	t.UpdateOperationFeeStatsState()
 	return t
 }
 
@@ -50,6 +60,7 @@ func (t *T) Scenario(name string) *T {
 func (t *T) ScenarioWithoutHorizon(name string) *T {
 	LoadScenarioWithoutHorizon(name)
 	t.UpdateLedgerState()
+	t.UpdateOperationFeeStatsState()
 	return t
 }
 
@@ -90,6 +101,18 @@ func (t *T) UnmarshalNext(r io.Reader) string {
 	return env.Links.Next.Href
 }
 
+// UnmarshalExtras extracts and returns extras content
+func (t *T) UnmarshalExtras(r io.Reader) map[string]string {
+	var resp struct {
+		Extras map[string]string `json:"extras"`
+	}
+
+	err := json.NewDecoder(r).Decode(&resp)
+	t.Require.NoError(err, "failed to decode page")
+
+	return resp.Extras
+}
+
 // UpdateLedgerState updates the cached ledger state (or panicing on failure).
 func (t *T) UpdateLedgerState() {
 	var next ledger.State
@@ -116,5 +139,62 @@ func (t *T) UpdateLedgerState() {
 	}
 
 	ledger.SetState(next)
+	return
+}
+
+// UpdateOperationFeeStatsState updates the cached operation fees state
+// or panics on failure.
+func (t *T) UpdateOperationFeeStatsState() {
+	var err error
+	var next operationfeestats.State
+
+	var latest struct {
+		BaseFee  int32 `db:"base_fee"`
+		Sequence int32 `db:"sequence"`
+	}
+	var feeStats struct {
+		Min  null.Int `db:"min"`
+		Mode null.Int `db:"mode"`
+	}
+
+	cur := operationfeestats.CurrentState()
+
+	err = t.HorizonSession().GetRaw(&latest, `
+		SELECT base_fee, sequence
+		FROM history_ledgers
+		WHERE sequence = (SELECT COALESCE(MAX(sequence), 0) FROM history_ledgers)
+	`)
+	if err != nil {
+		return
+	}
+
+	next.LastBaseFee = int64(latest.BaseFee)
+	next.LastLedger = int64(latest.Sequence)
+
+	// finish early if no new ledgers
+	if cur.LastLedger == int64(latest.Sequence) {
+		return
+	}
+
+	err = t.HorizonSession().GetRaw(&feeStats, `
+		SELECT min(fee_paid/operation_count),  mode() within group (order by fee_paid/operation_count)
+		FROM history_transactions
+		WHERE ledger_sequence > $1 AND ledger_sequence <= $2
+	`, latest.Sequence-5, latest.Sequence)
+	if err != nil {
+		return
+	}
+
+	// if no transactions in last X ledgers, return
+	// latest ledger's base fee for all
+	if !feeStats.Mode.Valid && !feeStats.Min.Valid {
+		next.Min = next.LastBaseFee
+		next.Mode = next.LastBaseFee
+	} else {
+		next.Min = feeStats.Min.Int64
+		next.Mode = feeStats.Mode.Int64
+	}
+
+	operationfeestats.SetState(next)
 	return
 }

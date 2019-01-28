@@ -3,9 +3,13 @@ package commands
 import (
 	"strings"
 
-	"github.com/bartekn/go-bip39"
 	"github.com/spf13/cobra"
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/support/errors"
+=======
+	"github.com/stellar/go/support/errors"
+	"github.com/tyler-smith/go-bip39"
+>>>>>>> horizon-v0.15.3
 )
 
 const DefaultEntropySize = 256

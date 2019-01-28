@@ -5,11 +5,18 @@ import (
 	"sort"
 	"testing"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/keypair"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 	"github.com/kinecosystem/go/support/db"
 	"github.com/kinecosystem/go/xdr"
+=======
+	"github.com/stellar/go/keypair"
+	"github.com/stellar/go/services/horizon/internal/test"
+	"github.com/stellar/go/support/db"
+	"github.com/stellar/go/xdr"
+>>>>>>> horizon-v0.15.3
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +26,7 @@ func TestStatTrustlinesInfo(t *testing.T) {
 		assetCode       string
 		assetIssuer     string
 		wantNumAccounts int32
-		wantAmount      int64
+		wantAmount      string
 	}
 
 	testCases := []struct {
@@ -33,7 +40,7 @@ func TestStatTrustlinesInfo(t *testing.T) {
 				"USD",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				1,
-				0,
+				"0",
 			}},
 		}, {
 			"asset_stat_trustlines_2",
@@ -42,7 +49,7 @@ func TestStatTrustlinesInfo(t *testing.T) {
 				"USD",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				1,
-				0,
+				"0",
 			}},
 		}, {
 			"asset_stat_trustlines_3",
@@ -51,13 +58,13 @@ func TestStatTrustlinesInfo(t *testing.T) {
 				"USD1",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				1,
-				0,
+				"0",
 			}, {
 				xdr.AssetTypeAssetTypeCreditAlphanum4,
 				"USD2",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				1,
-				0,
+				"0",
 			}},
 		}, {
 			"asset_stat_trustlines_4",
@@ -66,13 +73,13 @@ func TestStatTrustlinesInfo(t *testing.T) {
 				"USD",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				1,
-				0,
+				"0",
 			}, {
 				xdr.AssetTypeAssetTypeCreditAlphanum4,
 				"USD",
 				"GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU",
 				1,
-				0,
+				"0",
 			}},
 		}, {
 			"asset_stat_trustlines_5",
@@ -81,7 +88,7 @@ func TestStatTrustlinesInfo(t *testing.T) {
 				"USD",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				1,
-				0,
+				"0",
 			}},
 		}, {
 			"asset_stat_trustlines_6",
@@ -90,7 +97,7 @@ func TestStatTrustlinesInfo(t *testing.T) {
 				"USD",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				1,
-				1012345000,
+				"1012345000",
 			}},
 		}, {
 			"asset_stat_trustlines_7",
@@ -99,7 +106,7 @@ func TestStatTrustlinesInfo(t *testing.T) {
 				"USD",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				2,
-				1012345000,
+				"1012345000",
 			}},
 		}, {
 			"allow_trust",
@@ -108,7 +115,7 @@ func TestStatTrustlinesInfo(t *testing.T) {
 				"USD",
 				"GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 				1, // assets with the auth_required flag should only be counted for authorized accounts
-				0,
+				"0",
 			}},
 		},
 	}
@@ -119,10 +126,9 @@ func TestStatTrustlinesInfo(t *testing.T) {
 			defer tt.Finish()
 
 			session := &db.Session{DB: tt.CoreDB}
-			coreQ := &core.Q{Session: session}
 
 			for i, asset := range kase.assetState {
-				numAccounts, amount, err := statTrustlinesInfo(coreQ, asset.assetType, asset.assetCode, asset.assetIssuer)
+				numAccounts, amount, err := statTrustlinesInfo(session, asset.assetType, asset.assetCode, asset.assetIssuer)
 
 				tt.Require.NoError(err)
 				tt.Assert.Equal(asset.wantNumAccounts, numAccounts, fmt.Sprintf("asset index: %d", i))
@@ -163,9 +169,8 @@ func TestStatAccountInfo(t *testing.T) {
 			defer tt.Finish()
 
 			session := &db.Session{DB: tt.CoreDB}
-			coreQ := &core.Q{Session: session}
 
-			flags, toml, err := statAccountInfo(coreQ, kase.account)
+			flags, toml, err := statAccountInfo(session, kase.account)
 			tt.Require.NoError(err)
 			tt.Assert.Equal(kase.wantFlags, flags)
 			tt.Assert.Equal(kase.wantToml, toml)
@@ -349,24 +354,21 @@ func TestAssetModified(t *testing.T) {
 
 	for _, kase := range testCases {
 		t.Run(kase.opBody.Type.String(), func(t *testing.T) {
-			var coreQ *core.Q
+			var session *db.Session
 			if kase.needsCoreQ {
 				tt := test.Start(t).ScenarioWithoutHorizon("asset_stat_operations")
 				defer tt.Finish()
-				session := &db.Session{DB: tt.CoreDB}
-				coreQ = &core.Q{Session: session}
+				session = &db.Session{DB: tt.CoreDB}
 			}
 
-			assetsModified := AssetsModified(make(map[string]xdr.Asset))
-			assetsModified.IngestOperation(
-				nil,
+			assetsStats := AssetStats{CoreSession: session}
+			assetsStats.IngestOperation(
 				&xdr.Operation{
 					SourceAccount: &sourceAccount,
 					Body:          kase.opBody,
 				},
-				&sourceAccount,
-				coreQ)
-			assert.Equal(t, kase.wantAssets, extractKeys(assetsModified))
+				&sourceAccount)
+			assert.Equal(t, kase.wantAssets, extractKeys(assetsStats.toUpdate))
 		})
 	}
 }
@@ -387,17 +389,15 @@ func TestSourceAccountForAllowTrust(t *testing.T) {
 	})
 	wantAssets := []string{"credit_alphanum4/CAT/GCYLTPOU7IVYHHA3XKQF4YB4W4ZWHFERMOQ7K47IWANKNBFBNJJNEOG5"} // issued by anotherAccount
 
-	assetsModified := AssetsModified(make(map[string]xdr.Asset))
-	assetsModified.IngestOperation(
-		nil,
+	assetsStats := AssetStats{}
+	assetsStats.IngestOperation(
 		&xdr.Operation{
 			// this is the difference between this test and the table-driven case above
 			SourceAccount: nil,
 			Body:          opBody,
 		},
-		&sourceAccount,
-		nil)
-	assert.Equal(t, wantAssets, extractKeys(assetsModified))
+		&sourceAccount)
+	assert.Equal(t, wantAssets, extractKeys(assetsStats.toUpdate))
 }
 
 func makeAccount(secret string, code string) (xdr.AccountId, xdr.Asset) {

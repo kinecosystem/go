@@ -23,6 +23,7 @@ To learn more about the concept of operations in the Stellar network, take a loo
 | [ACCOUNT_MERGE](#account-merge)               | 8      | Deletes account and transfers remaining balance to destination account.
 | [INFLATION](#inflation)                       | 9      | Runs inflation.
 | [MANAGE_DATA](#manage-data)                   | 10     | Set, modify or delete a Data Entry (name/value pair) for an account.
+| [BUMP_SEQUENCE](#bump-sequence)               | 11     | Bumps forward the sequence number of an account.
 
 
 Every operation type shares a set of common attributes and links, some operations also contain
@@ -619,6 +620,47 @@ Set, modify or delete a Data Entry (name/value pair) for an account.
   "type_i": 10,
   "name": "lang",
   "value": "aW5kb25lc2lhbg=="
+}
+```
+
+<a id="bump-sequence"></a>
+### Bump Sequence
+
+Bumps forward the sequence number of the source account of the operation, allowing it to invalidate any transactions with a smaller sequence number.
+
+#### Attributes
+
+| Field      |  Type  | Description                                                      |
+| ---------- | ------ | ---------------------------------------------------------------- |
+| bumpTo     | number | Desired value for the operation’s source account sequence number.|
+
+#### Example
+```json
+{
+  "_links": {
+    "self": {
+      "href": "/operations/1743756726273"
+    },
+    "transaction": {
+      "href": "/transactions/328436a8dffaf6ca33c08a93279234c7d3eaf1c028804152614187dc76b7168d"
+    },
+    "effects": {
+      "href": "/operations/1743756726273/effects"
+    },
+    "succeeds": {
+      "href": "/effects?order=desc&cursor=1743756726273"
+    },
+    "precedes": {
+      "href": "/effects?order=asc&cursor=1743756726273"
+    }
+  },
+  "id": "1743756726273",
+  "paging_token": "1743756726273",
+  "source_account": "GBHPJ3VMVT3X7Y6HIIAPK7YPTZCF3CWO4557BKGX2GVO4O7EZHIBELLH",
+  "type": "bump_sequence",
+  "type_i": 11,
+  "transaction_hash": "328436a8dffaf6ca33c08a93279234c7d3eaf1c028804152614187dc76b7168d",
+  "bump_to": "1273737228"
 }
 ```
 

@@ -8,7 +8,13 @@ import (
 	"github.com/kinecosystem/go/strkey"
 )
 
-func initFriendbot(friendbotSecret string, networkPassphrase string, horizonURL string, startingBalance string) *internal.Bot {
+func initFriendbot(
+	friendbotSecret string,
+	networkPassphrase string,
+	horizonURL string,
+	startingBalance string,
+) *internal.Bot {
+
 	if friendbotSecret == "" || networkPassphrase == "" || horizonURL == "" || startingBalance == "" {
 		return nil
 	}
@@ -22,7 +28,8 @@ func initFriendbot(friendbotSecret string, networkPassphrase string, horizonURL 
 			URL:  horizonURL,
 			HTTP: http.DefaultClient,
 		},
-		Network:         networkPassphrase,
-		StartingBalance: startingBalance,
+		Network:           networkPassphrase,
+		StartingBalance:   startingBalance,
+		SubmitTransaction: internal.AsyncSubmitTransaction,
 	}
 }

@@ -7,13 +7,20 @@
 package horizon
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"sync"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/build"
 	"github.com/kinecosystem/go/support/errors"
 	"golang.org/x/net/context"
+=======
+	"github.com/stellar/go/build"
+	"github.com/stellar/go/support/errors"
+	"github.com/stellar/go/xdr"
+>>>>>>> horizon-v0.15.3
 )
 
 // DefaultTestNetClient is a default client to connect to test network
@@ -41,6 +48,12 @@ type Limit uint
 // Order represents `order` param in queries
 type Order string
 
+// StartTime is an integer values of timestamp
+type StartTime int64
+
+// EndTime is an integer values of timestamp
+type EndTime int64
+
 const (
 	OrderAsc  Order = "asc"
 	OrderDesc Order = "desc"
@@ -56,9 +69,16 @@ var (
 	// Envelope() against a `Problem` value that doesn't have the
 	// "envelope_xdr" extra field populated when it is expected to be.
 	ErrEnvelopeNotPopulated = errors.New("envelope_xdr not populated")
+
+	// ErrResultNotPopulated is the error returned from a call to
+	// Result() against a `Problem` value that doesn't have the
+	// "result_xdr" extra field populated when it is expected to be.
+	ErrResultNotPopulated = errors.New("result_xdr not populated")
 )
 
 // Client struct contains data required to connect to Horizon instance
+// It is okay to call methods on Client concurrently.
+// A Client must not be copied after first use.
 type Client struct {
 	// URL of Horizon server to connect
 	URL string
@@ -74,8 +94,25 @@ type ClientInterface interface {
 	HomeDomainForAccount(aid string) (string, error)
 	LoadAccount(accountID string) (Account, error)
 	LoadAccountOffers(accountID string, params ...interface{}) (offers OffersPage, err error)
+	LoadTradeAggregations(
+		baseAsset Asset,
+		counterAsset Asset,
+		resolution int64,
+		params ...interface{},
+	) (tradeAggrs TradeAggregationsPage, err error)
+	LoadTrades(
+		baseAsset Asset,
+		counterAsset Asset,
+		offerID int64,
+		resolution int64,
+		params ...interface{},
+	) (tradesPage TradesPage, err error)
+	LoadAccountMergeAmount(p *Payment) error
 	LoadMemo(p *Payment) error
+	LoadOperation(operationID string) (payment Payment, err error)
 	LoadOrderBook(selling Asset, buying Asset, params ...interface{}) (orderBook OrderBookSummary, err error)
+	LoadTransaction(transactionID string) (transaction Transaction, err error)
+	SequenceForAccount(accountID string) (xdr.SequenceNumber, error)
 	StreamLedgers(ctx context.Context, cursor *Cursor, handler LedgerHandler) error
 	StreamPayments(ctx context.Context, accountID string, cursor *Cursor, handler PaymentHandler) error
 	StreamTransactions(ctx context.Context, accountID string, cursor *Cursor, handler TransactionHandler) error

@@ -12,5 +12,5 @@ type NotImplementedAction struct {
 
 // JSON is a method for actions.JSON
 func (action *NotImplementedAction) JSON() {
-	problem.Render(action.Ctx, action.W, hProblem.NotImplemented)
+	problem.Render(action.R.Context(), action.W, hProblem.NotImplemented)
 }

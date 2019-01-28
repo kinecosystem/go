@@ -2,8 +2,12 @@ package horizon
 
 import (
 	"github.com/rcrowley/go-metrics"
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
 	halRender "github.com/kinecosystem/go/support/render/hal"
+=======
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> horizon-v0.15.3
 )
 
 // MetricsAction collects and renders a snapshot from the metrics system that
@@ -20,7 +24,7 @@ func (action *MetricsAction) JSON() {
 		"self": hal.NewLink("/metrics"),
 	}
 
-	halRender.Render(action.W, action.Snapshot)
+	hal.Render(action.W, action.Snapshot)
 }
 
 // LoadSnapshot populates action.Snapshot

@@ -74,7 +74,7 @@ func binNamesForDir(dir string) []string {
 
 	result := []string{}
 	for _, file := range files {
-		if file.IsDir() {
+		if file.IsDir() && file.Name() != "internal" {
 			result = append(result, filepath.Join(dir, file.Name()))
 		}
 	}

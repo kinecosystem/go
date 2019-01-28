@@ -5,7 +5,8 @@ clientData:
 ---
 
 People on the Stellar network can make [offers](../resources/offer.md) to buy or sell assets.  This endpoint represents all the offers a particular account makes.
-
+This endpoint can also be used in [streaming](../streaming.md) mode so it is possible to use it to listen as offers are processed in the Stellar network.
+If called in streaming mode Horizon will start at the earliest known offer unless a `cursor` is set. In that case it will start from the `cursor`. You can also set `cursor` value to `now` to only stream offers created since your request time.
 
 ## Request
 
@@ -47,6 +48,8 @@ server.offers('accounts', 'GCJ34JYMXNI7N55YREWAACMMZECOMTPIYDTFCQBWPUP7BLJQDDTVG
 ## Response
 
 The list of offers.
+
+**Note:** a response of 200 with an empty records array may either mean there are no offers for `account_id` or `account_id` does not exist.
 
 ### Example Response
 
@@ -92,7 +95,8 @@ The list of offers.
           "n": 387,
           "d": 50
         },
-        "price": "7.7400000"
+        "price": "7.7400000",
+        "last_modified": "1970-01-01T00:00:05Z"
       },
       {
         "_links": {
@@ -121,7 +125,8 @@ The list of offers.
           "n": 779,
           "d": 100
         },
-        "price": "7.7900000"
+        "price": "7.7900000",
+        "last_modified": "1970-01-01T00:00:06Z"
       }
     ]
   }

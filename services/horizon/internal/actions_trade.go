@@ -1,10 +1,10 @@
 package horizon
 
 import (
-	"errors"
-	"fmt"
 	"strconv"
+	gTime "time"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
@@ -12,6 +12,17 @@ import (
 	halRender "github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/time"
 	"github.com/kinecosystem/go/xdr"
+=======
+	"github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/support/errors"
+	"github.com/stellar/go/support/render/hal"
+	"github.com/stellar/go/support/time"
+	"github.com/stellar/go/xdr"
+>>>>>>> horizon-v0.15.3
 )
 
 type TradeIndexAction struct {
@@ -21,6 +32,7 @@ type TradeIndexAction struct {
 	CounterAssetFilter    xdr.Asset
 	HasCounterAssetFilter bool
 	OfferFilter           int64
+	AccountFilter         string
 	PagingParams          db2.PageQuery
 	Records               []history.Trade
 	Page                  hal.Page
@@ -34,7 +46,37 @@ func (action *TradeIndexAction) JSON() {
 		action.loadRecords,
 		action.loadPage,
 		func() {
-			halRender.Render(action.W, action.Page)
+			hal.Render(action.W, action.Page)
+		},
+	)
+}
+
+// SSE is a method for actions.SSE
+func (action *TradeIndexAction) SSE(stream sse.Stream) {
+	action.Setup(
+		action.EnsureHistoryFreshness,
+		action.loadParams,
+	)
+	action.Do(
+		action.loadRecords,
+		func() {
+			stream.SetLimit(int(action.PagingParams.Limit))
+			records := action.Records[stream.SentCount():]
+
+			for _, record := range records {
+				var res horizon.Trade
+				err := resourceadapter.PopulateTrade(action.R.Context(), &res, record)
+
+				if err != nil {
+					action.Err = err
+					return
+				}
+
+				stream.Send(sse.Event{
+					ID:   res.PagingToken(),
+					Data: res,
+				})
+			}
 		},
 	)
 }
@@ -45,11 +87,21 @@ func (action *TradeIndexAction) loadParams() {
 	action.BaseAssetFilter, action.HasBaseAssetFilter = action.MaybeGetAsset("base_")
 	action.CounterAssetFilter, action.HasCounterAssetFilter = action.MaybeGetAsset("counter_")
 	action.OfferFilter = action.GetInt64("offer_id")
+	action.AccountFilter = action.GetAddress("account_id")
+
+	if (!action.HasBaseAssetFilter && action.HasCounterAssetFilter) ||
+		(action.HasBaseAssetFilter && !action.HasCounterAssetFilter) {
+		action.SetInvalidField("base_asset_type,counter_asset_type", errors.New("this endpoint supports asset pairs but only one asset supplied"))
+	}
 }
 
 // loadRecords populates action.Records
 func (action *TradeIndexAction) loadRecords() {
 	trades := action.HistoryQ().Trades()
+
+	if action.AccountFilter != "" {
+		trades.ForAccount(action.AccountFilter)
+	}
 
 	if action.HasBaseAssetFilter {
 
@@ -73,7 +125,7 @@ func (action *TradeIndexAction) loadRecords() {
 		}
 	}
 
-	if action.OfferFilter > int64(0) {
+	if action.OfferFilter != 0 {
 		trades = trades.ForOffer(action.OfferFilter)
 	}
 
@@ -83,9 +135,10 @@ func (action *TradeIndexAction) loadRecords() {
 // loadPage populates action.Page
 func (action *TradeIndexAction) loadPage() {
 	for _, record := range action.Records {
-		var res resource.Trade
+		var res horizon.Trade
 
-		action.Err = res.Populate(action.Ctx, record)
+		action.Err = resourceadapter.PopulateTrade(action.R.Context(), &res, record)
+
 		if action.Err != nil {
 			return
 		}
@@ -106,6 +159,7 @@ type TradeAggregateIndexAction struct {
 	CounterAssetFilter xdr.Asset
 	StartTimeFilter    time.Millis
 	EndTimeFilter      time.Millis
+	OffsetFilter       int64
 	ResolutionFilter   int64
 	PagingParams       db2.PageQuery
 	Records            []history.TradeAggregation
@@ -120,7 +174,7 @@ func (action *TradeAggregateIndexAction) JSON() {
 		action.loadRecords,
 		action.loadPage,
 		func() {
-			halRender.Render(action.W, action.Page)
+			hal.Render(action.W, action.Page)
 		},
 	)
 }
@@ -129,9 +183,26 @@ func (action *TradeAggregateIndexAction) loadParams() {
 	action.PagingParams = action.GetPageQuery()
 	action.BaseAssetFilter = action.GetAsset("base_")
 	action.CounterAssetFilter = action.GetAsset("counter_")
+	action.OffsetFilter = action.GetInt64("offset")
 	action.StartTimeFilter = action.GetTimeMillis("start_time")
 	action.EndTimeFilter = action.GetTimeMillis("end_time")
 	action.ResolutionFilter = action.GetInt64("resolution")
+
+	//check if resolution is legal
+	resolutionDuration := gTime.Duration(action.ResolutionFilter) * gTime.Millisecond
+	if history.StrictResolutionFiltering {
+		if _, ok := history.AllowedResolutions[resolutionDuration]; !ok {
+			action.SetInvalidField("resolution", errors.New("illegal or missing resolution. "+
+				"allowed resolutions are: 1 minute (60000), 5 minutes (300000), 15 minutes (900000), 1 hour (3600000), "+
+				"1 day (86400000) and 1 week (604800000)"))
+		}
+	}
+	// check if offset is legal
+	offsetDuration := gTime.Duration(action.OffsetFilter) * gTime.Millisecond
+	if offsetDuration%gTime.Hour != 0 || offsetDuration >= gTime.Hour*24 || offsetDuration > resolutionDuration {
+		action.SetInvalidField("offset", errors.New("illegal or missing offset. offset must be a multiple of an"+
+			" hour, less than or equal to the resolution, and less than 24 hours"))
+	}
 }
 
 // loadRecords populates action.Records
@@ -152,7 +223,7 @@ func (action *TradeAggregateIndexAction) loadRecords() {
 
 	//initialize the query builder with required params
 	tradeAggregationsQ, err := historyQ.GetTradeAggregationsQ(
-		baseAssetId, counterAssetId, action.ResolutionFilter, action.PagingParams)
+		baseAssetId, counterAssetId, action.ResolutionFilter, action.OffsetFilter, action.PagingParams)
 
 	if err != nil {
 		action.Err = err
@@ -161,10 +232,20 @@ func (action *TradeAggregateIndexAction) loadRecords() {
 
 	//set time range if supplied
 	if !action.StartTimeFilter.IsNil() {
-		tradeAggregationsQ.WithStartTime(action.StartTimeFilter)
+		tradeAggregationsQ, err = tradeAggregationsQ.WithStartTime(action.StartTimeFilter)
+		if err != nil {
+			action.SetInvalidField("start_time", errors.New("illegal start time. adjusted start time must "+
+				"be less than the provided end time if the end time is greater than 0"))
+			return
+		}
 	}
 	if !action.EndTimeFilter.IsNil() {
-		tradeAggregationsQ.WithEndTime(action.EndTimeFilter)
+		tradeAggregationsQ, err = tradeAggregationsQ.WithEndTime(action.EndTimeFilter)
+		if err != nil {
+			action.SetInvalidField("end_time", errors.New("illegal end time. adjusted end time "+
+				"must be greater than the offset and greater than the provided start time"))
+			return
+		}
 	}
 
 	action.Err = historyQ.Select(&action.Records, tradeAggregationsQ.GetSql())
@@ -173,9 +254,10 @@ func (action *TradeAggregateIndexAction) loadRecords() {
 func (action *TradeAggregateIndexAction) loadPage() {
 	action.Page.Init()
 	for _, record := range action.Records {
-		var res resource.TradeAggregation
+		var res horizon.TradeAggregation
 
-		action.Err = res.Populate(action.Ctx, record)
+		action.Err = resourceadapter.PopulateTradeAggregation(action.R.Context(), &res, record)
+
 		if action.Err != nil {
 			return
 		}
@@ -213,79 +295,4 @@ func (action *TradeAggregateIndexAction) loadPage() {
 			action.Page.Links.Next = hal.NewLink(newUrl.String())
 		}
 	}
-}
-
-// TradeEffectIndexAction
-type TradeEffectIndexAction struct {
-	Action
-	AccountFilter string
-	PagingParams  db2.PageQuery
-	Records       []history.Effect
-	Ledgers       history.LedgerCache
-	Page          hal.Page
-}
-
-// JSON is a method for actions.JSON
-func (action *TradeEffectIndexAction) JSON() {
-	action.Do(
-		action.EnsureHistoryFreshness,
-		action.loadParams,
-		action.loadRecords,
-		action.loadLedgers,
-		action.loadPage,
-		func() {
-			halRender.Render(action.W, action.Page)
-		},
-	)
-}
-
-// loadLedgers populates the ledger cache for this action
-func (action *TradeEffectIndexAction) loadLedgers() {
-	if action.Err != nil {
-		return
-	}
-
-	for _, trade := range action.Records {
-		action.Ledgers.Queue(trade.LedgerSequence())
-	}
-
-	action.Err = action.Ledgers.Load(action.HistoryQ())
-}
-
-func (action *TradeEffectIndexAction) loadParams() {
-	action.AccountFilter = action.GetString("account_id")
-	action.PagingParams = action.GetPageQuery()
-}
-
-func (action *TradeEffectIndexAction) loadRecords() {
-	trades := action.HistoryQ().Effects().OfType(history.EffectTrade).ForAccount(action.AccountFilter)
-
-	action.Err = trades.Page(action.PagingParams).Select(&action.Records)
-}
-
-// loadPage populates action.Page
-func (action *TradeEffectIndexAction) loadPage() {
-	for _, record := range action.Records {
-		var res resource.TradeEffect
-
-		ledger, found := action.Ledgers.Records[record.LedgerSequence()]
-		if !found {
-			msg := fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence())
-			action.Err = errors.New(msg)
-			return
-		}
-
-		action.Err = res.PopulateFromEffect(action.Ctx, record, ledger)
-		if action.Err != nil {
-			return
-		}
-
-		action.Page.Add(res)
-	}
-
-	action.Page.FullURL = action.FullURL()
-	action.Page.Limit = action.PagingParams.Limit
-	action.Page.Cursor = action.PagingParams.Cursor
-	action.Page.Order = action.PagingParams.Order
-	action.Page.PopulateLinks()
 }

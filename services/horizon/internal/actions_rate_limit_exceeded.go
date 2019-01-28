@@ -3,10 +3,15 @@ package horizon
 import (
 	"net/http"
 
+<<<<<<< HEAD
 	"github.com/zenazn/goji/web"
 
 	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/support/render/problem"
+=======
+	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
+	"github.com/stellar/go/support/render/problem"
+>>>>>>> horizon-v0.15.3
 )
 
 // RateLimitExceededAction renders a 429 response
@@ -15,15 +20,9 @@ type RateLimitExceededAction struct {
 	App *App
 }
 
-// ServeHTTPC is a method for web.Handler
 func (action RateLimitExceededAction) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ap := &action.Action
-	c := web.C{
-		Env: map[interface{}]interface{}{
-			"app": action.App,
-		},
-	}
-	ap.Prepare(c, w, r)
+	ap.Prepare(w, r)
 	ap.App = action.App
-	problem.Render(action.Ctx, action.W, hProblem.RateLimitExceeded)
+	problem.Render(action.R.Context(), action.W, hProblem.RateLimitExceeded)
 }

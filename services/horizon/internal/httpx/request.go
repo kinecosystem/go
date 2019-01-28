@@ -1,15 +1,15 @@
 package httpx
 
 import (
+	"context"
 	"net/http"
 
-	"golang.org/x/net/context"
+	horizonContext "github.com/stellar/go/services/horizon/internal/context"
+	"github.com/stellar/go/support/log"
 )
 
-var requestContextKey = 0
-
 func RequestFromContext(ctx context.Context) *http.Request {
-	found := ctx.Value(&requestContextKey)
+	found := ctx.Value(&horizonContext.RequestContextKey)
 
 	if found == nil {
 		return nil
@@ -37,15 +37,16 @@ func RequestContext(parent context.Context, w http.ResponseWriter, r *http.Reque
 		closedByClient = make(chan bool)
 	}
 
-	// listen for the connection to close, trigger cancelation
+	// listen for the connection to close, trigger cancellation
 	go func() {
 		select {
 		case <-closedByClient:
+			log.Ctx(parent).Info("Request closed by client")
 			cancel()
 		case <-ctx.Done():
 			return
 		}
 	}()
 
-	return context.WithValue(ctx, &requestContextKey, r), cancel
+	return context.WithValue(ctx, &horizonContext.RequestContextKey, r), cancel
 }

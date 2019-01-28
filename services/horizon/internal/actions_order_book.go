@@ -3,12 +3,22 @@ package horizon
 import (
 	"net/http"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resource"
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
 	"github.com/kinecosystem/go/xdr"
+=======
+	"github.com/stellar/go/services/horizon/internal/db2/core"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/support/render/problem"
+	"github.com/stellar/go/xdr"
+	"github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> horizon-v0.15.3
 )
 
 // OrderBookShowAction renders a account summary found by its address.
@@ -17,7 +27,7 @@ type OrderBookShowAction struct {
 	Selling  xdr.Asset
 	Buying   xdr.Asset
 	Record   core.OrderBookSummary
-	Resource resource.OrderBookSummary
+	Resource horizon.OrderBookSummary
 	Limit    uint64
 }
 
@@ -53,8 +63,9 @@ func (action *OrderBookShowAction) LoadRecord() {
 
 // LoadResource populates action.Record
 func (action *OrderBookShowAction) LoadResource() {
-	action.Err = action.Resource.Populate(
-		action.Ctx,
+	action.Err = resourceadapter.PopulateOrderBookSummary(
+		action.R.Context(),
+		&action.Resource,
 		action.Selling,
 		action.Buying,
 		action.Record,

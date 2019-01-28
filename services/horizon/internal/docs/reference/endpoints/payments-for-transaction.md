@@ -4,7 +4,13 @@ clientData:
   laboratoryUrl: https://www.stellar.org/laboratory/#explorer?resource=payments&endpoint=for_transaction
 ---
 
-This endpoint represents all payment [operations](../resources/operation.md) that are part of a given [transaction](../resources/transaction.md).
+This endpoint represents all payment-related [operations](../resources/operation.md) that are part of a given [transaction](../resources/transaction.md).
+
+The operations that can be returned in by this endpoint are:
+- `create_account`
+- `payment`
+- `path_payment`
+- `account_merge`
 
 ## Request
 

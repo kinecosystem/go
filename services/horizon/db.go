@@ -10,10 +10,17 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2/schema"
 	"github.com/kinecosystem/go/services/horizon/internal/ingest"
 	hlog "github.com/kinecosystem/go/services/horizon/internal/log"
 	"github.com/kinecosystem/go/support/db"
+=======
+	"github.com/stellar/go/services/horizon/internal/db2/schema"
+	"github.com/stellar/go/services/horizon/internal/ingest"
+	"github.com/stellar/go/support/db"
+	hlog "github.com/stellar/go/support/log"
+>>>>>>> horizon-v0.15.3
 )
 
 var dbCmd = &cobra.Command{
@@ -25,10 +32,12 @@ var dbBackfillCmd = &cobra.Command{
 	Use:   "backfill [COUNT]",
 	Short: "backfills horizon history for COUNT ledgers",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		app := initApp(cmd, args)
+		app.UpdateLedgerState()
+
 		hlog.DefaultLogger.Logger.Level = config.LogLevel
 
-		i := ingestSystem()
+		i := ingestSystem(ingest.Config{})
 		i.SkipCursorUpdate = true
 		parsed, err := strconv.ParseUint(args[0], 10, 32)
 		if err != nil {
@@ -42,6 +51,48 @@ var dbBackfillCmd = &cobra.Command{
 	},
 }
 
+var dbInitAssetStatsCmd = &cobra.Command{
+	Use:   "init-asset-stats",
+	Short: "initializes values for assets stats",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Check config
+		initApp(cmd, args)
+
+		hlog.DefaultLogger.Logger.Level = config.LogLevel
+
+		hdb, err := db.Open("postgres", config.DatabaseURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		cdb, err := db.Open("postgres", config.StellarCoreDatabaseURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		assetStats := ingest.AssetStats{
+			CoreSession:    cdb,
+			HistorySession: hdb,
+		}
+
+		log.Println("Getting assets from core DB...")
+
+		count, err := assetStats.AddAllAssetsFromCore()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println(fmt.Sprintf("Updating %d assets...", count))
+
+		err = assetStats.UpdateAssetStats()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println(fmt.Sprintf("Added stats for %d assets...", count))
+	},
+}
+
 var dbClearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "clears all imported historical data",
@@ -49,7 +100,7 @@ var dbClearCmd = &cobra.Command{
 		initConfig()
 		hlog.DefaultLogger.Logger.Level = config.LogLevel
 
-		i := ingestSystem()
+		i := ingestSystem(ingest.Config{})
 		err := i.ClearAll()
 		if err != nil {
 			hlog.Error(err)
@@ -131,22 +182,17 @@ var dbReapCmd = &cobra.Command{
 }
 
 var dbRebaseCmd = &cobra.Command{
-	Use:   "rebase [SEQUENCE]",
-	Short: "rebases horizon history at ledger SEQUENCE",
-	Long:  "rebases clears the horizon history db and ingests the ledger at SEQUENCE",
+	Use:   "rebase",
+	Short: "rebases clears the horizon db and ingests the latest ledger segment from stellar-core",
+	Long:  "...",
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig()
 		hlog.DefaultLogger.Logger.Level = config.LogLevel
 
-		i := ingestSystem()
+		i := ingestSystem(ingest.Config{})
 		i.SkipCursorUpdate = true
 
-		parsed, err := strconv.ParseInt(args[0], 10, 32)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = i.RebaseHistory(int32(parsed))
+		err := i.RebaseHistory()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -161,7 +207,7 @@ var dbReingestCmd = &cobra.Command{
 		initConfig()
 		hlog.DefaultLogger.Logger.Level = config.LogLevel
 
-		i := ingestSystem()
+		i := ingestSystem(ingest.Config{})
 		i.SkipCursorUpdate = true
 		logStatus := func(stage string) {
 			count := i.Metrics.IngestLedgerTimer.Count()
@@ -204,6 +250,7 @@ var dbReingestCmd = &cobra.Command{
 
 func init() {
 	dbCmd.AddCommand(dbInitCmd)
+	dbCmd.AddCommand(dbInitAssetStatsCmd)
 	dbCmd.AddCommand(dbBackfillCmd)
 	dbCmd.AddCommand(dbClearCmd)
 	dbCmd.AddCommand(dbMigrateCmd)
@@ -212,7 +259,7 @@ func init() {
 	dbCmd.AddCommand(dbRebaseCmd)
 }
 
-func ingestSystem() *ingest.System {
+func ingestSystem(ingestConfig ingest.Config) *ingest.System {
 	hdb, err := db.Open("postgres", config.DatabaseURL)
 	if err != nil {
 		log.Fatal(err)
@@ -228,7 +275,11 @@ func ingestSystem() *ingest.System {
 		log.Fatal("network-passphrase is blank: reingestion requires manually setting passphrase")
 	}
 
+<<<<<<< HEAD
 	i := ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, config.CursorName)
+=======
+	i := ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, ingestConfig)
+>>>>>>> horizon-v0.15.3
 	return i
 }
 

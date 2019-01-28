@@ -3,9 +3,16 @@ package horizon
 import (
 	"testing"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/resource"
 	"github.com/kinecosystem/go/services/horizon/internal/resource/base"
 	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
+=======
+	"github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/protocols/horizon/base"
+	"github.com/stellar/go/services/horizon/internal/test"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> horizon-v0.15.3
 )
 
 func TestAssetsActions(t *testing.T) {
@@ -20,7 +27,7 @@ func TestAssetsActions(t *testing.T) {
 		Toml: hal.NewLink(""),
 	}
 
-	BTCGateway := resource.AssetStat{
+	BTCGateway := horizon.AssetStat{
 		Links: testDomain,
 		Asset: base.Asset{
 			Type:   "credit_alphanum4",
@@ -30,12 +37,12 @@ func TestAssetsActions(t *testing.T) {
 		PT:          "BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 		Amount:      "10098.76000",
 		NumAccounts: 1,
-		Flags: resource.AccountFlags{
+		Flags: horizon.AccountFlags{
 			AuthRequired:  true,
 			AuthRevocable: false,
 		},
 	}
-	SCOTScott := resource.AssetStat{
+	SCOTScott := horizon.AssetStat{
 		Links: empty,
 		Asset: base.Asset{
 			Type:   "credit_alphanum4",
@@ -45,12 +52,12 @@ func TestAssetsActions(t *testing.T) {
 		PT:          "SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4",
 		Amount:      "100000.00000",
 		NumAccounts: 1,
-		Flags: resource.AccountFlags{
+		Flags: horizon.AccountFlags{
 			AuthRequired:  false,
 			AuthRevocable: true,
 		},
 	}
-	USDGateway := resource.AssetStat{
+	USDGateway := horizon.AssetStat{
 		Links: testDomain,
 		Asset: base.Asset{
 			Type:   "credit_alphanum4",
@@ -60,7 +67,7 @@ func TestAssetsActions(t *testing.T) {
 		PT:          "USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 		Amount:      "30000104.34000",
 		NumAccounts: 2,
-		Flags: resource.AccountFlags{
+		Flags: horizon.AccountFlags{
 			AuthRequired:  true,
 			AuthRevocable: false,
 		},
@@ -71,14 +78,14 @@ func TestAssetsActions(t *testing.T) {
 		wantSelf     string
 		wantPrevious string
 		wantNext     string
-		wantItems    []resource.AssetStat
+		wantItems    []horizon.AssetStat
 	}{
 		{
 			"/assets",
 			"/assets?order=asc&limit=10&cursor=",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{BTCGateway, SCOTScott, USDGateway},
+			[]horizon.AssetStat{BTCGateway, SCOTScott, USDGateway},
 		},
 		// limit
 		{
@@ -86,13 +93,13 @@ func TestAssetsActions(t *testing.T) {
 			"/assets?order=asc&limit=3&cursor=",
 			"/assets?order=desc&limit=3&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=3&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{BTCGateway, SCOTScott, USDGateway},
+			[]horizon.AssetStat{BTCGateway, SCOTScott, USDGateway},
 		}, {
 			"/assets?limit=1",
 			"/assets?order=asc&limit=1&cursor=",
 			"/assets?order=desc&limit=1&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=1&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{BTCGateway},
+			[]horizon.AssetStat{BTCGateway},
 		},
 		// cursor
 		{
@@ -100,25 +107,25 @@ func TestAssetsActions(t *testing.T) {
 			"/assets?order=asc&limit=10&cursor=0",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{BTCGateway, SCOTScott, USDGateway},
+			[]horizon.AssetStat{BTCGateway, SCOTScott, USDGateway},
 		}, {
 			"/assets?cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=desc&limit=10&cursor=SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{SCOTScott, USDGateway},
+			[]horizon.AssetStat{SCOTScott, USDGateway},
 		}, {
 			"/assets?cursor=SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4",
 			"/assets?order=desc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{USDGateway},
+			[]horizon.AssetStat{USDGateway},
 		}, {
 			"/assets?cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=desc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4", // TODO NNS 2 - I think this should be cursor=current+1 but it returns cursor=3, is that a bug?
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{},
+			[]horizon.AssetStat{},
 		},
 		// order
 		{
@@ -126,25 +133,25 @@ func TestAssetsActions(t *testing.T) {
 			"/assets?order=asc&limit=10&cursor=",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{BTCGateway, SCOTScott, USDGateway},
+			[]horizon.AssetStat{BTCGateway, SCOTScott, USDGateway},
 		}, {
 			"/assets?order=desc",
 			"/assets?order=desc&limit=10&cursor=",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{USDGateway, SCOTScott, BTCGateway},
+			[]horizon.AssetStat{USDGateway, SCOTScott, BTCGateway},
 		}, {
 			"/assets?order=desc&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=desc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{SCOTScott, BTCGateway},
+			[]horizon.AssetStat{SCOTScott, BTCGateway},
 		}, {
 			"/assets?order=desc&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4", // TODO NNS 2 - I think this should be cursor="/"
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
-			[]resource.AssetStat{},
+			[]horizon.AssetStat{},
 		},
 		// asset_code
 		{
@@ -152,25 +159,25 @@ func TestAssetsActions(t *testing.T) {
 			"/assets?order=asc&limit=10&cursor=&asset_code=noexist",
 			"/assets?order=desc&limit=10&cursor=&asset_code=noexist", // TODO NNS 2 - imo, should be cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4
 			"/assets?order=asc&limit=10&cursor=&asset_code=noexist",
-			[]resource.AssetStat{},
+			[]horizon.AssetStat{},
 		}, {
 			"/assets?asset_code=USD",
 			"/assets?order=asc&limit=10&cursor=&asset_code=USD",
 			"/assets?order=desc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=USD",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=USD",
-			[]resource.AssetStat{USDGateway},
+			[]horizon.AssetStat{USDGateway},
 		}, {
 			"/assets?asset_code=BTC",
 			"/assets?order=asc&limit=10&cursor=&asset_code=BTC",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC",
 			"/assets?order=asc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC",
-			[]resource.AssetStat{BTCGateway},
+			[]horizon.AssetStat{BTCGateway},
 		}, {
 			"/assets?asset_code=SCOT",
 			"/assets?order=asc&limit=10&cursor=&asset_code=SCOT",
 			"/assets?order=desc&limit=10&cursor=SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4&asset_code=SCOT",
 			"/assets?order=asc&limit=10&cursor=SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4&asset_code=SCOT",
-			[]resource.AssetStat{SCOTScott},
+			[]horizon.AssetStat{SCOTScott},
 		},
 		// asset_issuer
 		{
@@ -178,19 +185,19 @@ func TestAssetsActions(t *testing.T) {
 			"/assets?order=asc&limit=10&cursor=&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
-			[]resource.AssetStat{BTCGateway, USDGateway},
+			[]horizon.AssetStat{BTCGateway, USDGateway},
 		}, {
 			"/assets?asset_issuer=GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU",
 			"/assets?order=asc&limit=10&cursor=&asset_issuer=GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU",
 			"/assets?order=desc&limit=10&cursor=SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4&asset_issuer=GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU",
 			"/assets?order=asc&limit=10&cursor=SCOT_GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU_credit_alphanum4&asset_issuer=GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU",
-			[]resource.AssetStat{SCOTScott},
+			[]horizon.AssetStat{SCOTScott},
 		}, {
 			"/assets?asset_issuer=GA5WBPYA5Y4WAEHXWR2UKO2UO4BUGHUQ74EUPKON2QHV4WRHOIRNKKH2",
 			"/assets?order=asc&limit=10&cursor=&asset_issuer=GA5WBPYA5Y4WAEHXWR2UKO2UO4BUGHUQ74EUPKON2QHV4WRHOIRNKKH2",
 			"/assets?order=desc&limit=10&cursor=&asset_issuer=GA5WBPYA5Y4WAEHXWR2UKO2UO4BUGHUQ74EUPKON2QHV4WRHOIRNKKH2", // TODO NNS 2 - imo should be cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4
 			"/assets?order=asc&limit=10&cursor=&asset_issuer=GA5WBPYA5Y4WAEHXWR2UKO2UO4BUGHUQ74EUPKON2QHV4WRHOIRNKKH2",
-			[]resource.AssetStat{},
+			[]horizon.AssetStat{},
 		},
 		// combined
 		{
@@ -198,31 +205,31 @@ func TestAssetsActions(t *testing.T) {
 			"/assets?order=asc&limit=10&cursor=-&asset_code=USD&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=desc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=USD&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=USD&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
-			[]resource.AssetStat{USDGateway},
+			[]horizon.AssetStat{USDGateway},
 		}, {
 			"/assets?asset_code=USD&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=USD&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=desc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=USD&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=USD&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
-			[]resource.AssetStat{USDGateway},
+			[]horizon.AssetStat{USDGateway},
 		}, {
 			"/assets?asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4",
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=desc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4", // TODO NNS 2 - imo, should be cursor=cursor+1 or lastCursor
 			"/assets?order=asc&limit=10&cursor=USD_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
-			[]resource.AssetStat{},
+			[]horizon.AssetStat{},
 		}, {
 			"/assets?asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=asc&limit=10&cursor=&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=desc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=asc&limit=10&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
-			[]resource.AssetStat{BTCGateway},
+			[]horizon.AssetStat{BTCGateway},
 		}, {
 			"/assets?asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4&limit=1&order=desc",
 			"/assets?order=desc&limit=1&cursor=&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=asc&limit=1&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
 			"/assets?order=desc&limit=1&cursor=BTC_GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4_credit_alphanum4&asset_code=BTC&asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4",
-			[]resource.AssetStat{BTCGateway},
+			[]horizon.AssetStat{BTCGateway},
 		},
 	}
 
@@ -231,11 +238,20 @@ func TestAssetsActions(t *testing.T) {
 			ht := StartHTTPTest(t, "ingest_asset_stats")
 			defer ht.Finish()
 
+			// Ugly but saves us time needed to change each `StartHTTPTest` occurence.
+			appConfig := NewTestConfig()
+			appConfig.EnableAssetStats = true
+
+			var err error
+			ht.App, err = NewApp(appConfig)
+			ht.Assert.Nil(err)
+			ht.RH = test.NewRequestHelper(ht.App.web.router)
+
 			w := ht.Get(kase.path)
 			ht.Assert.Equal(200, w.Code)
 			ht.Assert.PageOf(len(kase.wantItems), w.Body)
 
-			records := []resource.AssetStat{}
+			records := []horizon.AssetStat{}
 			links := ht.UnmarshalPage(w.Body, &records)
 			if ht.Assert.Equal(len(kase.wantItems), len(records)) {
 				for i := range kase.wantItems {
@@ -254,6 +270,15 @@ func TestInvalidAssetCode(t *testing.T) {
 	ht := StartHTTPTest(t, "ingest_asset_stats")
 	defer ht.Finish()
 
+	// Ugly but saves us time needed to change each `StartHTTPTest` occurence.
+	appConfig := NewTestConfig()
+	appConfig.EnableAssetStats = true
+
+	var err error
+	ht.App, err = NewApp(appConfig)
+	ht.Assert.Nil(err)
+	ht.RH = test.NewRequestHelper(ht.App.web.router)
+
 	w := ht.Get("/assets?asset_code=ABCDEFGHIJKL")
 	ht.Assert.Equal(200, w.Code)
 
@@ -265,9 +290,26 @@ func TestInvalidAssetIssuer(t *testing.T) {
 	ht := StartHTTPTest(t, "ingest_asset_stats")
 	defer ht.Finish()
 
+	// Ugly but saves us time needed to change each `StartHTTPTest` occurence.
+	appConfig := NewTestConfig()
+	appConfig.EnableAssetStats = true
+
+	var err error
+	ht.App, err = NewApp(appConfig)
+	ht.Assert.Nil(err)
+	ht.RH = test.NewRequestHelper(ht.App.web.router)
+
 	w := ht.Get("/assets?asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4")
 	ht.Assert.Equal(200, w.Code)
 
 	w = ht.Get("/assets?asset_issuer=invalid")
 	ht.Assert.Equal(400, w.Code)
+}
+
+func TestAssetStatsDisabledByDefault(t *testing.T) {
+	ht := StartHTTPTest(t, "ingest_asset_stats")
+	defer ht.Finish()
+
+	w := ht.Get("/assets?asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4")
+	ht.Assert.Equal(404, w.Code)
 }

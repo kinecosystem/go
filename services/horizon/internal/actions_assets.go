@@ -3,11 +3,20 @@ package horizon
 import (
 	"fmt"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/assets"
 	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
 	"github.com/kinecosystem/go/services/horizon/internal/resource"
 	halRender "github.com/kinecosystem/go/support/render/hal"
+=======
+	"github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/services/horizon/internal/actions"
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/assets"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> horizon-v0.15.3
 )
 
 // This file contains the actions:
@@ -33,7 +42,7 @@ func (action *AssetsAction) JSON() {
 		action.loadRecords,
 		action.loadPage,
 		func() {
-			halRender.Render(action.W, action.Page)
+			hal.Render(action.W, action.Page)
 		},
 	)
 }
@@ -52,7 +61,7 @@ func (action *AssetsAction) loadParams() {
 		}
 		action.AssetIssuer = issuerAccount.Address()
 	}
-	action.PagingParams = action.GetPageQuery()
+	action.PagingParams = action.GetPageQuery(actions.DisableCursorValidation)
 }
 
 func (action *AssetsAction) loadRecords() {
@@ -70,8 +79,12 @@ func (action *AssetsAction) loadRecords() {
 
 func (action *AssetsAction) loadPage() {
 	for _, record := range action.Records {
-		var res resource.AssetStat
-		res.Populate(action.Ctx, record)
+		var res horizon.AssetStat
+		err := resourceadapter.PopulateAssetStat(action.R.Context(), &res, record)
+		if err != nil {
+			action.Err = err
+			return
+		}
 		action.Page.Add(res)
 	}
 

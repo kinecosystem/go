@@ -11,5 +11,5 @@ type NotFoundAction struct {
 
 // JSON is a method for actions.JSON
 func (action *NotFoundAction) JSON() {
-	problem.Render(action.Ctx, action.W, problem.NotFound)
+	problem.Render(action.R.Context(), action.W, problem.NotFound)
 }

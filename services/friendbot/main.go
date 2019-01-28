@@ -2,33 +2,40 @@ package main
 
 import (
 	"database/sql"
-	"net/http"
+	"fmt"
+	stdhttp "net/http"
 	"os"
-	"runtime"
 
 	"github.com/go-chi/chi"
-	"github.com/pkg/errors"
-	"github.com/rs/cors"
 	"github.com/spf13/cobra"
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/friendbot/internal"
 	"github.com/kinecosystem/go/support/config"
 	"github.com/kinecosystem/go/support/http/server"
 	"github.com/kinecosystem/go/support/log"
 	"github.com/kinecosystem/go/support/render/problem"
+=======
+	"github.com/stellar/go/services/friendbot/internal"
+	"github.com/stellar/go/support/app"
+	"github.com/stellar/go/support/config"
+	"github.com/stellar/go/support/errors"
+	"github.com/stellar/go/support/http"
+	"github.com/stellar/go/support/log"
+	"github.com/stellar/go/support/render/problem"
+>>>>>>> horizon-v0.15.3
 )
 
 // Config represents the configuration of a friendbot server
 type Config struct {
-	Port              int               `toml:"port" valid:"required"`
-	FriendbotSecret   string            `toml:"friendbot_secret" valid:"required"`
-	NetworkPassphrase string            `toml:"network_passphrase" valid:"required"`
-	HorizonURL        string            `toml:"horizon_url" valid:"required"`
-	StartingBalance   string            `toml:"starting_balance" valid:"required"`
-	TLS               *server.TLSConfig `valid:"optional"`
+	Port              int         `toml:"port" valid:"required"`
+	FriendbotSecret   string      `toml:"friendbot_secret" valid:"required"`
+	NetworkPassphrase string      `toml:"network_passphrase" valid:"required"`
+	HorizonURL        string      `toml:"horizon_url" valid:"required"`
+	StartingBalance   string      `toml:"starting_balance" valid:"required"`
+	TLS               *config.TLS `valid:"optional"`
 }
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	rootCmd := &cobra.Command{
 		Use:   "friendbot",
@@ -47,6 +54,7 @@ func run(cmd *cobra.Command, args []string) {
 		cfgPath = cmd.PersistentFlags().Lookup("conf").Value.String()
 	)
 	log.SetLevel(log.InfoLevel)
+
 	err := config.Read(cfgPath, &cfg)
 	if err != nil {
 		switch cause := errors.Cause(err).(type) {
@@ -62,24 +70,24 @@ func run(cmd *cobra.Command, args []string) {
 	router := initRouter(fb)
 	registerProblems()
 
-	server.Serve(router, cfg.Port, cfg.TLS)
+	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Port)
+
+	http.Run(http.Config{
+		ListenAddr: addr,
+		Handler:    router,
+		TLS:        cfg.TLS,
+		OnStarting: func() {
+			log.Infof("starting friendbot server - %s", app.Version())
+			log.Infof("listening on %s", addr)
+		},
+	})
 }
 
 func initRouter(fb *internal.Bot) *chi.Mux {
-	routerConfig := server.EmptyConfig()
+	mux := http.NewAPIMux(false)
 
-	// middleware
-	server.AddBasicMiddleware(routerConfig)
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedHeaders: []string{"*"},
-	})
-	routerConfig.Middleware(func(h http.Handler) http.Handler {
-		return c.Handler(h)
-	})
-
-	// endpoints
 	handler := &internal.FriendbotHandler{Friendbot: fb}
+<<<<<<< HEAD
 	routerConfig.Route(http.MethodGet, "/", http.HandlerFunc(handler.Handle))
 	routerConfig.Route(http.MethodPost, "/", http.HandlerFunc(handler.Handle))
 	// fund handler
@@ -87,10 +95,15 @@ func initRouter(fb *internal.Bot) *chi.Mux {
 	routerConfig.Route(http.MethodPost, "/fund", http.HandlerFunc(handler.Handle))
 	// not found handler
 	routerConfig.NotFound(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+=======
+	mux.Get("/", handler.Handle)
+	mux.Post("/", handler.Handle)
+	mux.NotFound(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+>>>>>>> horizon-v0.15.3
 		problem.Render(r.Context(), w, problem.NotFound)
 	}))
 
-	return server.NewRouter(routerConfig)
+	return mux
 }
 
 func registerProblems() {

@@ -1,141 +1,155 @@
 package txsub
 
 import (
+	"context"
 	"testing"
 	"time"
 
+<<<<<<< HEAD
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
+=======
+	"github.com/stellar/go/services/horizon/internal/test"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+>>>>>>> horizon-v0.15.3
 )
 
-func TestDefaultSubmissionList(t *testing.T) {
-	ctx := test.Context()
+type SubmissionListTestSuite struct {
+	suite.Suite
+	list      OpenSubmissionList
+	realList  *submissionList
+	listeners []chan Result
+	hashes []string
+	ctx       context.Context
+}
 
-	Convey("submissionList (The default OpenSubmissionList implementation)", t, func() {
-		list := NewDefaultSubmissionList()
-		realList := list.(*submissionList)
-		hashes := []string{
-			"0000000000000000000000000000000000000000000000000000000000000000",
-			"0000000000000000000000000000000000000000000000000000000000000001",
-		}
+func (suite *SubmissionListTestSuite) SetupTest() {
+	suite.list = NewDefaultSubmissionList()
+	suite.realList = suite.list.(*submissionList)
+	suite.hashes = []string{
+		"0000000000000000000000000000000000000000000000000000000000000000",
+		"0000000000000000000000000000000000000000000000000000000000000001",
+	}
+	suite.listeners = []chan Result{
+		make(chan Result, 1),
+		make(chan Result, 1),
+	}
+	suite.ctx = test.Context()
+}
 
-		listeners := []chan Result{
-			make(chan Result, 1),
-			make(chan Result, 1),
-		}
+func (suite *SubmissionListTestSuite) TestSubmissionList_Add() {
+	// adds an entry to the submission list when a new hash is used
+	suite.list.Add(suite.ctx, suite.hashes[0], suite.listeners[0])
+	sub := suite.realList.submissions[suite.hashes[0]]
+	assert.Equal(suite.T(), suite.hashes[0], sub.Hash)
+	assert.WithinDuration(suite.T(), sub.SubmittedAt, time.Now(), 1*time.Second)
 
-		Convey("Add()", func() {
-			Convey("adds an entry to the submission list when a new hash is used", func() {
-				list.Add(ctx, hashes[0], listeners[0])
-				sub := realList.submissions[hashes[0]]
-				So(sub.Hash, ShouldEqual, hashes[0])
-				So(sub.SubmittedAt, ShouldHappenWithin, 1*time.Second, time.Now())
+	// drop the send side of the channel by casting to listener
+	var l Listener = suite.listeners[0]
+	assert.Equal(suite.T(), l, sub.Listeners[0])
 
-				// drop the send side of the channel by casting to listener
-				var l Listener = listeners[0]
-				So(sub.Listeners[0], ShouldEqual, l)
-			})
+}
 
-			Convey("adds an listener to an existing entry when a hash is used with a new listener", func() {
-				list.Add(ctx, hashes[0], listeners[0])
-				sub := realList.submissions[hashes[0]]
-				st := sub.SubmittedAt
-				<-time.After(20 * time.Millisecond)
-				list.Add(ctx, hashes[0], listeners[1])
+func (suite *SubmissionListTestSuite) TestSubmissionList_AddListener() {
+	// adds an listener to an existing entry when a hash is used with a new listener
+	suite.list.Add(suite.ctx, suite.hashes[0], suite.listeners[0])
+	sub := suite.realList.submissions[suite.hashes[0]]
+	st := sub.SubmittedAt
+	<-time.After(20 * time.Millisecond)
+	suite.list.Add(suite.ctx, suite.hashes[0], suite.listeners[1])
 
-				// increases the size of the listener
-				So(len(sub.Listeners), ShouldEqual, 2)
-				// doesn't update the submitted at time
-				So(st == sub.SubmittedAt, ShouldEqual, true)
-			})
+	// increases the size of the listener
+	assert.Equal(suite.T(), 2, len(sub.Listeners))
+	// doesn't update the submitted at time
+	assert.Equal(suite.T(), true, st == sub.SubmittedAt)
 
-			Convey("panics when the listener is not buffered", func() {
-				So(func() { list.Add(ctx, hashes[0], make(Listener)) }, ShouldPanic)
-			})
-
-			Convey("errors when the provided hash is not 64-bytes", func() {
-				err := list.Add(ctx, "123", listeners[0])
-				So(err, ShouldNotBeNil)
-			})
-		})
-
-		Convey("Finish()", func() {
-			list.Add(ctx, hashes[0], listeners[0])
-			list.Add(ctx, hashes[0], listeners[1])
-			r := Result{
-				Hash: hashes[0],
-			}
-			list.Finish(ctx, r)
-
-			Convey("writes to every listener", func() {
-				r1, ok1 := <-listeners[0]
-				So(r1, ShouldResemble, r)
-				So(ok1, ShouldBeTrue)
-
-				r2, ok2 := <-listeners[1]
-				So(r2, ShouldResemble, r)
-				So(ok2, ShouldBeTrue)
-			})
-
-			Convey("removes the entry", func() {
-				_, ok := realList.submissions[hashes[0]]
-				So(ok, ShouldBeFalse)
-			})
-
-			Convey("closes every listener", func() {
-				_, _ = <-listeners[0]
-				_, more := <-listeners[0]
-				So(more, ShouldBeFalse)
-
-				_, _ = <-listeners[1]
-				_, more = <-listeners[1]
-				So(more, ShouldBeFalse)
-			})
-
-			Convey("works when the noone is waiting for the result", func() {
-				err := list.Finish(ctx, r)
-				So(err, ShouldBeNil)
-			})
-
-		})
-
-		Convey("Clean()", func() {
-			list.Add(ctx, hashes[0], listeners[0])
-			<-time.After(200 * time.Millisecond)
-			list.Add(ctx, hashes[1], listeners[1])
-			left, err := list.Clean(ctx, 200*time.Millisecond)
-
-			So(err, ShouldBeNil)
-			So(left, ShouldEqual, 1)
-
-			Convey("removes submissions older than the maxAge provided", func() {
-				_, ok := realList.submissions[hashes[0]]
-				So(ok, ShouldBeFalse)
-			})
-
-			Convey("leaves submissions that are younger than the maxAge provided", func() {
-				_, ok := realList.submissions[hashes[1]]
-				So(ok, ShouldBeTrue)
-			})
-
-			Convey("closes any cleaned listeners", func() {
-				So(len(listeners[0]), ShouldEqual, 1)
-				<-listeners[0]
-				select {
-				case _, stillOpen := <-listeners[0]:
-					So(stillOpen, ShouldBeFalse)
-				default:
-					panic("cleaned listener is still open")
-				}
-			})
-		})
-
-		Convey("Pending() works as expected", func() {
-			So(len(list.Pending(ctx)), ShouldEqual, 0)
-			list.Add(ctx, hashes[0], listeners[0])
-			So(len(list.Pending(ctx)), ShouldEqual, 1)
-			list.Add(ctx, hashes[1], listeners[1])
-			So(len(list.Pending(ctx)), ShouldEqual, 2)
-		})
+	// Panics when the listener is not buffered
+	// panics when the listener is not buffered
+	assert.Panics(suite.T(), func() {
+		suite.list.Add(suite.ctx, suite.hashes[0], make(Listener))
 	})
+
+	// errors when the provided hash is not 64-bytes
+	err := suite.list.Add(suite.ctx, "123", suite.listeners[0])
+	assert.NotNil(suite.T(), err)
+}
+
+func (suite *SubmissionListTestSuite) TestSubmissionList_Finish() {
+
+	suite.list.Add(suite.ctx, suite.hashes[0], suite.listeners[0])
+	suite.list.Add(suite.ctx, suite.hashes[0], suite.listeners[1])
+	r := Result{
+		Hash: suite.hashes[0],
+	}
+	suite.list.Finish(suite.ctx, r)
+
+	// Wries to every listener
+	r1, ok1 := <-suite.listeners[0]
+
+	assert.Equal(suite.T(), r, r1)
+	assert.True(suite.T(), ok1)
+
+	r2, ok2 := <-suite.listeners[1]
+	assert.Equal(suite.T(), r, r2)
+	assert.True(suite.T(), ok2)
+
+	// Removes the entry
+	_, ok := suite.realList.submissions[suite.hashes[0]]
+	assert.False(suite.T(), ok)
+
+	// Closes every ledger
+	_, _ = <-suite.listeners[0]
+	_, more := <-suite.listeners[0]
+	assert.False(suite.T(), more)
+
+	_, _ = <-suite.listeners[1]
+	_, more = <-suite.listeners[1]
+	assert.False(suite.T(), more)
+
+	// works when no one is waiting for the result
+	err := suite.list.Finish(suite.ctx, r)
+	assert.Nil(suite.T(), err)
+}
+
+func (suite *SubmissionListTestSuite) TestSubmissionList_Clean() {
+
+	suite.list.Add(suite.ctx, suite.hashes[0], suite.listeners[0])
+	<-time.After(200 * time.Millisecond)
+	suite.list.Add(suite.ctx, suite.hashes[1], suite.listeners[1])
+	left, err := suite.list.Clean(suite.ctx, 200*time.Millisecond)
+
+	assert.Nil(suite.T(), err)
+	assert.Equal(suite.T(), 1, left)
+
+	// removes submissions older than the maxAge provided
+	_, ok := suite.realList.submissions[suite.hashes[0]]
+	assert.False(suite.T(), ok)
+
+	// leaves submissions that are younger than the maxAge provided
+	_, ok = suite.realList.submissions[suite.hashes[1]]
+	assert.True(suite.T(), ok)
+
+	// closes any cleaned listeners
+	assert.Equal(suite.T(), 1, len(suite.listeners[0]))
+	<-suite.listeners[0]
+	select {
+	case _, stillOpen := <-suite.listeners[0]:
+		assert.False(suite.T(), stillOpen)
+	default:
+		panic("cleaned listener is still open")
+	}
+}
+
+//Tests that Pending works as expected
+func (suite *SubmissionListTestSuite) TestSubmissionList_Pending() {
+	assert.Equal(suite.T(), 0, len(suite.list.Pending(suite.ctx)))
+	suite.list.Add(suite.ctx, suite.hashes[0], suite.listeners[0])
+	assert.Equal(suite.T(), 1, len(suite.list.Pending(suite.ctx)))
+	suite.list.Add(suite.ctx, suite.hashes[1], suite.listeners[1])
+	assert.Equal(suite.T(), 2, len(suite.list.Pending(suite.ctx)))
+}
+
+func TestSubmissionListTestSuite(t *testing.T) {
+	suite.Run(t, new(SubmissionListTestSuite))
 }

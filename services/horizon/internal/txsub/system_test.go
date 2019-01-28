@@ -1,138 +1,163 @@
 package txsub
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
 
+<<<<<<< HEAD
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/kinecosystem/go/build"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub/sequence"
+=======
+	"github.com/stellar/go/build"
+	"github.com/stellar/go/services/horizon/internal/test"
+	"github.com/stellar/go/services/horizon/internal/txsub/sequence"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+>>>>>>> horizon-v0.15.3
 )
 
-func TestTxsub(t *testing.T) {
-	Convey("txsub.System", t, func() {
-		ctx := test.Context()
-		submitter := &MockSubmitter{}
-		results := &MockResultProvider{}
-		sequences := &MockSequenceProvider{}
+type SystemTestSuite struct {
+	suite.Suite
+	ctx       context.Context
+	submitter *MockSubmitter
+	results   *MockResultProvider
+	sequences *MockSequenceProvider
+	system    *System
+	noResults Result
+	successTx Result
+	badSeq    SubmissionResult
+}
 
-		system := &System{
-			Pending:           NewDefaultSubmissionList(),
-			Submitter:         submitter,
-			Results:           results,
-			Sequences:         sequences,
-			SubmissionQueue:   sequence.NewManager(),
-			NetworkPassphrase: build.TestNetwork.Passphrase,
-		}
+func (suite *SystemTestSuite) SetupTest() {
+	suite.ctx = test.Context()
+	suite.submitter = &MockSubmitter{}
+	suite.results = &MockResultProvider{}
+	suite.sequences = &MockSequenceProvider{}
 
-		noResults := Result{Err: ErrNoResults}
-		successTx := Result{
-			Hash:           "2374e99349b9ef7dba9a5db3339b78fda8f34777b1af33ba468ad5c0df946d4d",
-			LedgerSequence: 2,
-			EnvelopeXDR:    "AAAAAGL8HQvQkbK2HA3WVjRrKmjX00fG8sLI7m0ERwJW/AX3AAAAZAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAArqN6LeOagjxMaUP96Bzfs9e0corNZXzBWJkFoK7kvkwAAAAAO5rKAAAAAAAAAAABVvwF9wAAAECDzqvkQBQoNAJifPRXDoLhvtycT3lFPCQ51gkdsFHaBNWw05S/VhW0Xgkr0CBPE4NaFV2Kmcs3ZwLmib4TRrML",
-			ResultXDR:      "I3Tpk0m57326ml2zM5t4/ajzR3exrzO6RorVwN+UbU0AAAAAAAAAZAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAA==",
-		}
+	suite.system = &System{
+		Pending:           NewDefaultSubmissionList(),
+		Submitter:         suite.submitter,
+		Results:           suite.results,
+		Sequences:         suite.sequences,
+		SubmissionQueue:   sequence.NewManager(),
+		NetworkPassphrase: build.TestNetwork.Passphrase,
+	}
 
-		badSeq := SubmissionResult{
-			Err: ErrBadSequence,
-		}
+	suite.noResults = Result{Err: ErrNoResults}
+	suite.successTx = Result{
+		Hash:           "2374e99349b9ef7dba9a5db3339b78fda8f34777b1af33ba468ad5c0df946d4d",
+		LedgerSequence: 2,
+		EnvelopeXDR:    "AAAAAGL8HQvQkbK2HA3WVjRrKmjX00fG8sLI7m0ERwJW/AX3AAAAZAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAArqN6LeOagjxMaUP96Bzfs9e0corNZXzBWJkFoK7kvkwAAAAAO5rKAAAAAAAAAAABVvwF9wAAAECDzqvkQBQoNAJifPRXDoLhvtycT3lFPCQ51gkdsFHaBNWw05S/VhW0Xgkr0CBPE4NaFV2Kmcs3ZwLmib4TRrML",
+		ResultXDR:      "I3Tpk0m57326ml2zM5t4/ajzR3exrzO6RorVwN+UbU0AAAAAAAAAZAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAA==",
+	}
 
-		sequences.Results = map[string]uint64{
-			"GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H": 0,
-		}
+	suite.badSeq = SubmissionResult{
+		Err: ErrBadSequence,
+	}
 
-		Convey("Submit", func() {
-			Convey("returns the result provided by the ResultProvider", func() {
-				results.Results = []Result{successTx}
-				r := <-system.Submit(ctx, successTx.EnvelopeXDR)
+	suite.sequences.Results = map[string]uint64{
+		"GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H": 0,
+	}
+}
 
-				So(r.Err, ShouldBeNil)
-				So(r.Hash, ShouldEqual, successTx.Hash)
-				So(submitter.WasSubmittedTo, ShouldBeFalse)
-			})
+// Returns the result provided by the ResultProvider.
+func (suite *SystemTestSuite) TestSubmit_Basic() {
+	suite.results.Results = []Result{suite.successTx}
+	r := <-suite.system.Submit(suite.ctx, suite.successTx.EnvelopeXDR)
 
-			Convey("returns the error from submission if no result is found by hash and the submitter returns an error", func() {
-				submitter.R.Err = errors.New("busted for some reason")
-				r := <-system.Submit(ctx, successTx.EnvelopeXDR)
+	assert.Nil(suite.T(), r.Err)
+	assert.Equal(suite.T(), suite.successTx.Hash, r.Hash)
+	assert.False(suite.T(), suite.submitter.WasSubmittedTo)
+}
 
-				So(r.Err, ShouldNotBeNil)
-				So(submitter.WasSubmittedTo, ShouldBeTrue)
-				So(system.Metrics.SuccessfulSubmissionsMeter.Count(), ShouldEqual, 0)
-				So(system.Metrics.FailedSubmissionsMeter.Count(), ShouldEqual, 1)
-				So(system.Metrics.SubmissionTimer.Count(), ShouldEqual, 1)
-			})
+// Returns the error from submission if no result is found by hash and the suite.submitter returns an error.
+func (suite *SystemTestSuite) TestSubmit_NotFoundError() {
+	suite.submitter.R.Err = errors.New("busted for some reason")
+	r := <-suite.system.Submit(suite.ctx, suite.successTx.EnvelopeXDR)
 
-			Convey("if the error is bad_seq and the result at the transaction's sequence number is for the same hash, return result", func() {
-				submitter.R = badSeq
-				results.Results = []Result{noResults, successTx}
+	assert.NotNil(suite.T(), r.Err)
+	assert.True(suite.T(), suite.submitter.WasSubmittedTo)
+	assert.Equal(suite.T(), int64(0), suite.system.Metrics.SuccessfulSubmissionsMeter.Count())
+	assert.Equal(suite.T(), int64(1), suite.system.Metrics.FailedSubmissionsMeter.Count())
+	assert.Equal(suite.T(), int64(1), suite.system.Metrics.SubmissionTimer.Count())
+}
 
-				r := <-system.Submit(ctx, successTx.EnvelopeXDR)
+// If the error is bad_seq and the result at the transaction's sequence number is for the same hash, return result.
+func (suite *SystemTestSuite) TestSubmit_BadSeq() {
+	suite.submitter.R = suite.badSeq
+	suite.results.Results = []Result{suite.noResults, suite.successTx}
 
-				So(r.Err, ShouldBeNil)
-				So(r.Hash, ShouldEqual, successTx.Hash)
-				So(submitter.WasSubmittedTo, ShouldBeTrue)
-			})
+	r := <-suite.system.Submit(suite.ctx, suite.successTx.EnvelopeXDR)
 
-			Convey("if error is bad_seq and no result is found, return error", func() {
-				submitter.R = badSeq
-				r := <-system.Submit(ctx, successTx.EnvelopeXDR)
+	assert.Nil(suite.T(), r.Err)
+	assert.Equal(suite.T(), suite.successTx.Hash, r.Hash)
+	assert.True(suite.T(), suite.submitter.WasSubmittedTo)
+}
 
-				So(r.Err, ShouldNotBeNil)
-				So(submitter.WasSubmittedTo, ShouldBeTrue)
-			})
+// If error is bad_seq and no result is found, return error.
+func (suite *SystemTestSuite) TestSubmit_BadSeqNotFound() {
+	suite.submitter.R = suite.badSeq
+	suite.submitter.R = suite.badSeq
+	r := <-suite.system.Submit(suite.ctx, suite.successTx.EnvelopeXDR)
 
-			Convey("if no result found and no error submitting, add to open transaction list", func() {
-				_ = system.Submit(ctx, successTx.EnvelopeXDR)
-				pending := system.Pending.Pending(ctx)
-				So(len(pending), ShouldEqual, 1)
-				So(pending[0], ShouldEqual, successTx.Hash)
-				So(system.Metrics.SuccessfulSubmissionsMeter.Count(), ShouldEqual, 1)
-				So(system.Metrics.FailedSubmissionsMeter.Count(), ShouldEqual, 0)
-				So(system.Metrics.SubmissionTimer.Count(), ShouldEqual, 1)
-			})
-		})
+	assert.NotNil(suite.T(), r.Err)
+	assert.True(suite.T(), suite.submitter.WasSubmittedTo)
+}
 
-		Convey("Tick", func() {
+// If no result found and no error submitting, add to open transaction list.
+func (suite *SystemTestSuite) TestSubmit_OpenTransactionList() {
+	_ = suite.system.Submit(suite.ctx, suite.successTx.EnvelopeXDR)
+	pending := suite.system.Pending.Pending(suite.ctx)
+	assert.Equal(suite.T(), 1, len(pending))
+	assert.Equal(suite.T(), suite.successTx.Hash, pending[0])
+	assert.Equal(suite.T(), int64(1), suite.system.Metrics.SuccessfulSubmissionsMeter.Count())
+	assert.Equal(suite.T(), int64(0), suite.system.Metrics.FailedSubmissionsMeter.Count())
+	assert.Equal(suite.T(), int64(1), suite.system.Metrics.SubmissionTimer.Count())
+}
 
-			Convey("no-ops if there are no open submissions", func() {
-				system.Tick(ctx)
-			})
+// Tick should be a no-op if there are no open submissions.
+func (suite *SystemTestSuite) TestTick_Noop() {
+	suite.system.Tick(suite.ctx)
+}
 
-			Convey("finishes any available transactions", func() {
-				l := make(chan Result, 1)
-				system.Pending.Add(ctx, successTx.Hash, l)
-				system.Tick(ctx)
-				So(len(l), ShouldEqual, 0)
-				So(len(system.Pending.Pending(ctx)), ShouldEqual, 1)
+// Test that Tick finishes any available transactions,
+func (suite *SystemTestSuite) TestTick_FinishesTransactions() {
+	l := make(chan Result, 1)
+	suite.system.Pending.Add(suite.ctx, suite.successTx.Hash, l)
+	suite.system.Tick(suite.ctx)
+	assert.Equal(suite.T(), 0, len(l))
+	assert.Equal(suite.T(), 1, len(suite.system.Pending.Pending(suite.ctx)))
 
-				results.Results = []Result{successTx}
-				system.Tick(ctx)
+	suite.results.Results = []Result{suite.successTx}
+	suite.system.Tick(suite.ctx)
 
-				So(len(l), ShouldEqual, 1)
-				So(len(system.Pending.Pending(ctx)), ShouldEqual, 0)
-			})
+	assert.Equal(suite.T(), 1, len(l))
+	assert.Equal(suite.T(), 0, len(suite.system.Pending.Pending(suite.ctx)))
+}
 
-			Convey("removes old submissions that have timed out", func() {
-				l := make(chan Result, 1)
-				system.SubmissionTimeout = 100 * time.Millisecond
-				system.Pending.Add(ctx, successTx.Hash, l)
-				<-time.After(101 * time.Millisecond)
-				system.Tick(ctx)
+// Test that Tick removes old submissions that have timed out.
+func (suite *SystemTestSuite) TestTick_RemovesStaleSubmissions() {
+	l := make(chan Result, 1)
+	suite.system.SubmissionTimeout = 100 * time.Millisecond
+	suite.system.Pending.Add(suite.ctx, suite.successTx.Hash, l)
+	<-time.After(101 * time.Millisecond)
+	suite.system.Tick(suite.ctx)
 
-				So(len(system.Pending.Pending(ctx)), ShouldEqual, 0)
-				So(len(l), ShouldEqual, 1)
-				<-l
-				select {
-				case _, stillOpen := <-l:
-					So(stillOpen, ShouldBeFalse)
-				default:
-					panic("could not read from listener")
-				}
+	assert.Equal(suite.T(), 0, len(suite.system.Pending.Pending(suite.ctx)))
+	assert.Equal(suite.T(), 1, len(l))
+	<-l
+	select {
+	case _, stillOpen := <-l:
+		assert.False(suite.T(), stillOpen)
+	default:
+		panic("could not read from listener")
+	}
+}
 
-			})
-		})
-
-	})
+func TestSystemTestSuite(t *testing.T) {
+	suite.Run(t, new(SystemTestSuite))
 }

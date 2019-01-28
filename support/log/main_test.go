@@ -2,25 +2,25 @@ package log
 
 import (
 	"bytes"
+	"context"
 	"errors"
-	"net/http"
 	"testing"
 
-	"goji.io"
-	"goji.io/pat"
-
 	"github.com/sirupsen/logrus"
+<<<<<<< HEAD
 	serr "github.com/kinecosystem/go/support/errors"
 	"github.com/kinecosystem/go/support/http/httptest"
+=======
+	serr "github.com/stellar/go/support/errors"
+>>>>>>> horizon-v0.15.3
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/net/context"
 )
 
 func TestSet(t *testing.T) {
-	assert.Nil(t, context.Background().Value(&contextKey))
+	assert.Nil(t, context.Background().Value(&loggerContextKey))
 	l := New()
 	ctx := Set(context.Background(), l)
-	assert.Equal(t, l, ctx.Value(&contextKey))
+	assert.Equal(t, l, ctx.Value(&loggerContextKey))
 }
 
 func TestCtx(t *testing.T) {
@@ -106,28 +106,4 @@ func TestWithStack(t *testing.T) {
 	l.WithStack(err).Error("test")
 	// simply ensure that the line creating the above error is in the log
 	assert.Contains(t, output.String(), "main_test.go:")
-}
-
-func TestHTTPMiddleware(t *testing.T) {
-	done := DefaultLogger.StartTest(InfoLevel)
-	mux := goji.NewMux()
-	mux.Use(HTTPMiddleware)
-	mux.Handle(pat.Get("/"), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	}))
-	mux.Handle(pat.Get("/not_found"), http.NotFoundHandler())
-
-	src := httptest.NewServer(t, mux)
-	src.GET("/").Expect().Status(http.StatusOK)
-	src.GET("/not_found").Expect().Status(http.StatusNotFound)
-
-	// get the log buffer and ensure it has both the start and end log lines for
-	// each request
-	logged := done()
-
-	if assert.Len(t, logged, 4, "unexpected log line count") {
-		assert.Equal(t, "starting request", logged[0].Message)
-		assert.Equal(t, "starting request", logged[2].Message)
-		assert.Equal(t, "finished request", logged[1].Message)
-		assert.Equal(t, "finished request", logged[3].Message)
-	}
 }

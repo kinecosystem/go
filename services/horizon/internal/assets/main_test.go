@@ -4,55 +4,61 @@ import (
 	"testing"
 
 	"github.com/go-errors/errors"
+<<<<<<< HEAD
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/kinecosystem/go/xdr"
+=======
+	"github.com/stellar/go/xdr"
+	"github.com/stretchr/testify/assert"
+>>>>>>> horizon-v0.15.3
 )
 
-func TestAssets(t *testing.T) {
-	Convey("Parse", t, func() {
-		var (
-			result xdr.AssetType
-			err    error
-		)
+// Tests for Parse
+func TestParseAssets(t *testing.T) {
+	var (
+		result xdr.AssetType
+		err    error
+	)
 
-		result, err = Parse("native")
-		So(result, ShouldEqual, xdr.AssetTypeAssetTypeNative)
-		So(err, ShouldBeNil)
+	result, err = Parse("native")
+	assert.Equal(t, xdr.AssetTypeAssetTypeNative, result)
 
-		result, err = Parse("credit_alphanum4")
-		So(result, ShouldEqual, xdr.AssetTypeAssetTypeCreditAlphanum4)
-		So(err, ShouldBeNil)
+	assert.Nil(t, err)
 
-		result, err = Parse("credit_alphanum12")
-		So(result, ShouldEqual, xdr.AssetTypeAssetTypeCreditAlphanum12)
-		So(err, ShouldBeNil)
+	result, err = Parse("credit_alphanum4")
+	assert.Equal(t, xdr.AssetTypeAssetTypeCreditAlphanum4, result)
+	assert.Nil(t, err)
 
-		_, err = Parse("not_real")
-		So(errors.Is(err, ErrInvalidString), ShouldBeTrue)
+	result, err = Parse("credit_alphanum12")
+	assert.Equal(t, xdr.AssetTypeAssetTypeCreditAlphanum12, result)
+	assert.Nil(t, err)
 
-		_, err = Parse("")
-		So(errors.Is(err, ErrInvalidString), ShouldBeTrue)
-	})
+	_, err = Parse("not_real")
+	assert.True(t, errors.Is(err, ErrInvalidString))
 
-	Convey("String", t, func() {
-		var (
-			result string
-			err    error
-		)
+	_, err = Parse("")
+	assert.True(t, errors.Is(err, ErrInvalidString))
+}
 
-		result, err = String(xdr.AssetTypeAssetTypeNative)
-		So(result, ShouldEqual, "native")
-		So(err, ShouldBeNil)
+// Tests for String
+func TestStringAssets(t *testing.T) {
+	var (
+		result string
+		err    error
+	)
 
-		result, err = String(xdr.AssetTypeAssetTypeCreditAlphanum4)
-		So(result, ShouldEqual, "credit_alphanum4")
-		So(err, ShouldBeNil)
+	result, err = String(xdr.AssetTypeAssetTypeNative)
+	assert.Equal(t, "native", result)
+	assert.Nil(t, err)
 
-		result, err = String(xdr.AssetTypeAssetTypeCreditAlphanum12)
-		So(result, ShouldEqual, "credit_alphanum12")
-		So(err, ShouldBeNil)
+	result, err = String(xdr.AssetTypeAssetTypeCreditAlphanum4)
+	assert.Equal(t, "credit_alphanum4", result)
+	assert.Nil(t, err)
 
-		_, err = String(xdr.AssetType(15))
-		So(errors.Is(err, ErrInvalidValue), ShouldBeTrue)
-	})
+	result, err = String(xdr.AssetTypeAssetTypeCreditAlphanum12)
+	assert.Equal(t, "credit_alphanum12", result)
+	assert.Nil(t, err)
+
+	_, err = String(xdr.AssetType(15))
+	assert.True(t, errors.Is(err, ErrInvalidValue))
 }

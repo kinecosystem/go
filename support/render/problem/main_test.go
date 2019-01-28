@@ -1,6 +1,7 @@
 package problem
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http/httptest"
@@ -10,7 +11,6 @@ import (
 	ge "github.com/go-errors/errors"
 	"github.com/kinecosystem/go/support/test"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/net/context"
 )
 
 // TestRender tests the render cases
