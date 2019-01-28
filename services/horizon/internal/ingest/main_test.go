@@ -80,10 +80,7 @@ func sys(tt *test.T, enableAssetStats bool) *System {
 		"",
 		tt.CoreSession(),
 		tt.HorizonSession(),
-<<<<<<< HEAD
 		"HORIZON",
-=======
 		Config{EnableAssetStats: enableAssetStats},
->>>>>>> horizon-v0.15.3
 	)
 }

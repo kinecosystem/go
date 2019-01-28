@@ -268,11 +268,7 @@ func ingestSystem(ingestConfig ingest.Config) *ingest.System {
 		log.Fatal("network-passphrase is blank: reingestion requires manually setting passphrase")
 	}
 
-<<<<<<< HEAD
-	i := ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, config.CursorName)
-=======
-	i := ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, ingestConfig)
->>>>>>> horizon-v0.15.3
+	i := ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, config.CursorName, ingestConfig)
 	return i
 }
 
