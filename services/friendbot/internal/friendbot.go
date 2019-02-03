@@ -30,35 +30,22 @@ type Bot struct {
 	lock                 sync.Mutex
 }
 
-<<<<<<< HEAD
-// Pay funds to account.
-//
-// amount is the amount to fund, capped at Bot.StartingBalance.
-// Setting isFundRequest to true will submit a transaction with a Payment instead of CreateAccount operation.
-func (bot *Bot) Pay(destAddress string, amount string, isFundRequest bool) (*horizon.TransactionSuccess, error) {
-	channel := make(chan interface{})
-	shouldReadChannel, result, err := bot.lockedPay(channel, destAddress, amount, isFundRequest)
-	if !shouldReadChannel {
-		return result, err
-=======
 // Pay funds the account at `destAddress`
-func (bot *Bot) Pay(destAddress string) (*horizon.TransactionSuccess, error) {
+//
+// `amount` is the amount to fund, capped at Bot.StartingBalance.
+// Setting `isFundRequest` to true will submit a transaction with a Payment instead of CreateAccount operation.
+func (bot *Bot) Pay(destAddress string, amount string, isFundRequest bool) (*horizon.TransactionSuccess, error) {
 	channel := make(chan TxResult)
-	err := bot.lockedPay(channel, destAddress)
+	err := bot.lockedPay(channel, destAddress, amount, isFundRequest)
 	if err != nil {
 		return nil, err
->>>>>>> horizon-v0.15.3
 	}
 
 	v := <-channel
 	return v.maybeTransactionSuccess, v.maybeErr
 }
 
-<<<<<<< HEAD
-func (bot *Bot) lockedPay(channel chan interface{}, destAddress string, amount string, isFundRequest bool) (bool, *horizon.TransactionSuccess, error) {
-=======
-func (bot *Bot) lockedPay(channel chan TxResult, destAddress string) error {
->>>>>>> horizon-v0.15.3
+func (bot *Bot) lockedPay(channel chan TxResult, destAddress string, amount string, isFundRequest bool) error {
 	bot.lock.Lock()
 	defer bot.lock.Unlock()
 
@@ -124,11 +111,13 @@ func (bot *Bot) makeTx(destAddress string, amount string, isFundRequest bool) (s
 	if isFundRequest {
 		ops = append(ops, b.Payment(
 			b.Destination{AddressOrSeed: destAddress},
-			b.NativeAmount{Amount: amount}))
+			b.NativeAmount{Amount: amount},
+		))
 	} else {
 		ops = append(ops, b.CreateAccount(
 			b.Destination{AddressOrSeed: destAddress},
-			b.NativeAmount{Amount: amount}))
+			b.NativeAmount{Amount: amount},
+		))
 	}
 
 	txn, err := b.Transaction(ops...)

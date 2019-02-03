@@ -79,19 +79,11 @@ func initRouter(fb *internal.Bot) *chi.Mux {
 	mux := http.NewAPIMux(false)
 
 	handler := &internal.FriendbotHandler{Friendbot: fb}
-<<<<<<< HEAD
-	routerConfig.Route(http.MethodGet, "/", http.HandlerFunc(handler.Handle))
-	routerConfig.Route(http.MethodPost, "/", http.HandlerFunc(handler.Handle))
-	// fund handler
-	routerConfig.Route(http.MethodGet, "/fund", http.HandlerFunc(handler.Handle))
-	routerConfig.Route(http.MethodPost, "/fund", http.HandlerFunc(handler.Handle))
-	// not found handler
-	routerConfig.NotFound(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-=======
 	mux.Get("/", handler.Handle)
 	mux.Post("/", handler.Handle)
+	mux.Get("/fund", handler.Handle)
+	mux.Post("/fund", handler.Handle)
 	mux.NotFound(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
->>>>>>> horizon-v0.15.3
 		problem.Render(r.Context(), w, problem.NotFound)
 	}))
 

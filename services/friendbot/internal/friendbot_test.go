@@ -20,67 +20,42 @@ func TestFriendbot_Pay(t *testing.T) {
 	}
 
 	fb := &Bot{
-<<<<<<< HEAD
-		Secret:          "SAQWC7EPIYF3XGILYVJM4LVAVSLZKT27CTEI3AFBHU2VRCMQ3P3INPG5",
-		Network:         "Test SDF Network ; September 2015",
-		StartingBalance: "10000",
-		sequence:        2,
+		Secret:            "SAQWC7EPIYF3XGILYVJM4LVAVSLZKT27CTEI3AFBHU2VRCMQ3P3INPG5",
+		Network:           "Test SDF Network ; September 2015",
+		StartingBalance:   "10000",
+		SubmitTransaction: mockSubmitTransaction,
+		sequence:          2,
 	}
 
-	txn, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
+	txSuccess, err := fb.Pay("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
 	if !assert.NoError(t, err) {
 		return
 	}
 	expectedTxn := "AAAAAPuYf7x7KGvFX9fjCR9WIaoTX3yHJYwX6ZSx6w76HPjEAAAAZAAAAAAAAAADAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA" +
 		"0ob63nrm9S1s7+lvdyfgUTpejMQOhgMlxcvOvzUFhhQAAAAAO5rKAAAAAAAAAAAB+hz4xAAAAECzNV2yXevMYKzm7OhXX2gYwmLZ5V37yeRHUX" +
 		"3Vhb6eT8wkUtpj2vJsUwzLWjdKMyGonFCPkaG4twRFUVqBRLEH"
-	assert.Equal(t, expectedTxn, txn)
+	assert.Equal(t, expectedTxn, txSuccess.Env)
 
-	txn, err = fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, true)
+	txSuccess, err = fb.Pay("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, true)
 	if !assert.NoError(t, err) {
 		return
 	}
 	expectedTxn = "AAAAAPuYf7x7KGvFX9fjCR9WIaoTX3yHJYwX6ZSx6w76HPjEAAAAZAAAAAAAAAAEAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAA0o" +
 		"b63nrm9S1s7+lvdyfgUTpejMQOhgMlxcvOvzUFhhQAAAAAAAAAADuaygAAAAAAAAAAAfoc+MQAAABAYOKOlEGCt+A6DGPi4GXbRWtQnyNSUn" +
 		"V/hE4vcfAe0Z6z/d0U4BoqlwUx6/bPHq5+VMaKysU8xeJJ2GZMxWhNCg=="
-	assert.Equal(t, expectedTxn, txn)
-=======
-		Secret:            "SAQWC7EPIYF3XGILYVJM4LVAVSLZKT27CTEI3AFBHU2VRCMQ3P3INPG5",
-		Network:           "Test SDF Network ; September 2015",
-		StartingBalance:   "100.00",
-		SubmitTransaction: mockSubmitTransaction,
-		sequence:          2,
-	}
-
-	txSuccess, err := fb.Pay("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z")
-	if !assert.NoError(t, err) {
-		return
-	}
-	expectedTxn := "AAAAAPuYf7x7KGvFX9fjCR9WIaoTX3yHJYwX6ZSx6w76HPjEAAAAZAAAAAAAAAADAAAAAAAAAAAAAAAB" +
-		"AAAAAAAAAAAAAAAA0ob63nrm9S1s7+lvdyfgUTpejMQOhgMlxcvOvzUFhhQAAAAAO5rKAAAAAAAAAAAB+hz4xAAAAEC" +
-		"zNV2yXevMYKzm7OhXX2gYwmLZ5V37yeRHUX3Vhb6eT8wkUtpj2vJsUwzLWjdKMyGonFCPkaG4twRFUVqBRLEH"
 	assert.Equal(t, expectedTxn, txSuccess.Env)
->>>>>>> horizon-v0.15.3
 
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
-<<<<<<< HEAD
-		_, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
-=======
-		_, err := fb.Pay("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z")
->>>>>>> horizon-v0.15.3
+		_, err := fb.Pay("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
 		// don't assert on the txn value here because the ordering is not guaranteed between these 2 goroutines
 		assert.NoError(t, err)
 		wg.Done()
 	}()
 	go func() {
-<<<<<<< HEAD
-		_, err := fb.makeTx("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
-=======
-		_, err := fb.Pay("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z")
+		_, err := fb.Pay("GDJIN6W6PLTPKLLM57UW65ZH4BITUXUMYQHIMAZFYXF45PZVAWDBI77Z", fb.StartingBalance, false)
 		// don't assert on the txn value here because the ordering is not guaranteed between these 2 goroutines
->>>>>>> horizon-v0.15.3
 		assert.NoError(t, err)
 		wg.Done()
 	}()
