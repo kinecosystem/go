@@ -15,7 +15,6 @@ type Config struct {
 	StellarCoreDatabaseURL string
 	StellarCoreURL         string
 	Port                   int
-	MaxDBConnections       int
 	SSEUpdateFrequency     time.Duration
 	ConnectionTimeout      time.Duration
 	RateLimit              *throttled.RateQuota
@@ -51,19 +50,14 @@ type Config struct {
 	// SkipCursorUpdate causes the ingestor to skip reporting the "last imported
 	// ledger" state to stellar-core.
 	SkipCursorUpdate bool
-<<<<<<< HEAD
-
 	// Database connection pool configuration
 	HorizonDBMaxOpenConnections int
 	HorizonDBMaxIdleConnections int
-
-	CoreDBMaxOpenConnections int
-	CoreDBMaxIdleConnections int
-=======
+	CoreDBMaxOpenConnections    int
+	CoreDBMaxIdleConnections    int
 	// EnableAssetStats is a feature flag that determines whether to calculate
 	// asset stats during the ingestion and expose `/assets` endpoint.
 	// Enabling it has a negative impact on CPU when ingesting ledgers full of
 	// many different assets related operations.
 	EnableAssetStats bool
->>>>>>> horizon-v0.15.3
 }

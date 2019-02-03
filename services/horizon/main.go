@@ -36,7 +36,6 @@ func init() {
 	viper.BindEnv("db-url", "DATABASE_URL")
 	viper.BindEnv("stellar-core-db-url", "STELLAR_CORE_DATABASE_URL")
 	viper.BindEnv("stellar-core-url", "STELLAR_CORE_URL")
-	viper.BindEnv("max-db-connections", "MAX_DB_CONNECTIONS")
 	viper.BindEnv("sse-update-frequency", "SSE_UPDATE_FREQUENCY")
 	viper.BindEnv("connection-timeout", "CONNECTION_TIMEOUT")
 	viper.BindEnv("per-hour-rate-limit", "PER_HOUR_RATE_LIMIT")
@@ -102,12 +101,6 @@ func init() {
 		"per-hour-rate-limit",
 		3600,
 		"max count of requests allowed in a one hour period, by remote ip address",
-	)
-
-	rootCmd.PersistentFlags().Int(
-		"max-db-connections",
-		20,
-		"max db connections (per DB), may need to be increased when responses are slow but DB CPU is normal",
 	)
 
 	rootCmd.PersistentFlags().Int(
@@ -301,11 +294,10 @@ func initConfig() {
 	}
 
 	config = horizon.Config{
-		DatabaseURL:                 viper.GetString("db-url"),
-		StellarCoreDatabaseURL:      viper.GetString("stellar-core-db-url"),
-		StellarCoreURL:              viper.GetString("stellar-core-url"),
-		Port:                        viper.GetInt("port"),
-		MaxDBConnections:            viper.GetInt("max-db-connections"),
+		DatabaseURL:            viper.GetString("db-url"),
+		StellarCoreDatabaseURL: viper.GetString("stellar-core-db-url"),
+		StellarCoreURL:         viper.GetString("stellar-core-url"),
+		Port:                   viper.GetInt("port"),
 		HorizonDBMaxOpenConnections: viper.GetInt("horizon-db-max-open-connections"),
 		HorizonDBMaxIdleConnections: viper.GetInt("horizon-db-max-idle-connections"),
 		CoreDBMaxOpenConnections:    viper.GetInt("core-db-max-open-connections"),
