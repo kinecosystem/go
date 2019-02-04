@@ -292,17 +292,8 @@ func (a *App) DeleteUnretainedHistory() error {
 func (a *App) Tick() {
 	var wg sync.WaitGroup
 	log.Debug("ticking app")
-<<<<<<< HEAD
-	// update ledger state and stellar-core info in parallel
-
-	// Getting current ledger as reference, to avoid running sse tick in case of no ledger change
-	initialLedgerState := ledger.CurrentState()
-
-	wg.Add(2)
-=======
 	// update ledger state, operation fee state, and stellar-core info in parallel
 	wg.Add(3)
->>>>>>> horizon-v0.15.3
 	go func() { a.UpdateLedgerState(); wg.Done() }()
 	go func() { a.UpdateOperationFeeStatsState(); wg.Done() }()
 	go func() { a.UpdateStellarCoreInfo(); wg.Done() }()
@@ -317,16 +308,6 @@ func (a *App) Tick() {
 	go func() { a.submitter.Tick(a.ctx); wg.Done() }()
 	wg.Wait()
 
-<<<<<<< HEAD
-	// Execute SSE only if there were in changes to ledger or history
-	newLedgerState := ledger.CurrentState()
-	if newLedgerState.CoreLatest > initialLedgerState.CoreLatest ||
-		newLedgerState.HistoryLatest > initialLedgerState.HistoryLatest {
-		sse.Tick()
-	}
-
-=======
->>>>>>> horizon-v0.15.3
 	// finally, update metrics
 	a.UpdateMetrics()
 	log.Debug("finished ticking app")

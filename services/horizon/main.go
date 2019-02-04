@@ -36,7 +36,6 @@ func init() {
 	viper.BindEnv("db-url", "DATABASE_URL")
 	viper.BindEnv("stellar-core-db-url", "STELLAR_CORE_DATABASE_URL")
 	viper.BindEnv("stellar-core-url", "STELLAR_CORE_URL")
-	viper.BindEnv("sse-update-frequency", "SSE_UPDATE_FREQUENCY")
 	viper.BindEnv("connection-timeout", "CONNECTION_TIMEOUT")
 	viper.BindEnv("per-hour-rate-limit", "PER_HOUR_RATE_LIMIT")
 	viper.BindEnv("rate-limit-redis-key", "RATE_LIMIT_REDIS_KEY")
@@ -101,12 +100,6 @@ func init() {
 		"per-hour-rate-limit",
 		3600,
 		"max count of requests allowed in a one hour period, by remote ip address",
-	)
-
-	rootCmd.PersistentFlags().Int(
-		"sse-update-frequency",
-		5,
-		"defines how often streams should check if there's a new ledger (in seconds), may need to increase in case of big number of streams",
 	)
 
 	rootCmd.PersistentFlags().Int(
@@ -302,7 +295,6 @@ func initConfig() {
 		HorizonDBMaxIdleConnections: viper.GetInt("horizon-db-max-idle-connections"),
 		CoreDBMaxOpenConnections:    viper.GetInt("core-db-max-open-connections"),
 		CoreDBMaxIdleConnections:    viper.GetInt("core-db-max-idle-connections"),
-		SSEUpdateFrequency:          time.Duration(viper.GetInt("sse-update-frequency")) * time.Second,
 		ConnectionTimeout:           time.Duration(viper.GetInt("connection-timeout")) * time.Second,
 		Ingest:                      viper.GetBool("ingest"),
 		LogFile:                     lf,

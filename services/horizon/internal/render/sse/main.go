@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
+
+	"github.com/cskr/pubsub"
+	"github.com/kinecosystem/go/support/log"
 )
 
 const pubsubCapacity = 0
@@ -32,25 +34,6 @@ type Eventable interface {
 	SseEvent() Event
 }
 
-<<<<<<< HEAD
-// Pumped returns a channel that will be closed the next time the input pump
-// sends.  It can be used similar to `ctx.Done()`, like so:  `<-sse.Pumped()`
-func Pumped() <-chan interface{} {
-	return nextTick
-}
-
-// Tick triggers any open SSE streams to tick by replacing and closing the
-// `nextTick` trigger channel.
-func Tick() {
-	lock.Lock()
-	prev := nextTick
-	nextTick = make(chan interface{})
-	lock.Unlock()
-	close(prev)
-}
-
-=======
->>>>>>> horizon-v0.15.3
 // WritePreamble prepares this http connection for streaming using Server Sent
 // Events.  It sends the initial http response with the appropriate headers to
 // do so.
@@ -121,16 +104,6 @@ var helloEvent = Event{
 	Retry: 1000,
 }
 
-<<<<<<< HEAD
-var lock sync.Mutex
-var nextTick chan interface{}
-=======
-var (
-	lock     sync.Mutex
-	nextTick = make(chan struct{})
-)
->>>>>>> horizon-v0.15.3
-
 func getJSON(val interface{}) string {
 	js, err := json.Marshal(val)
 
@@ -140,7 +113,6 @@ func getJSON(val interface{}) string {
 
 	return string(js)
 }
-<<<<<<< HEAD
 
 // Pubsub for SSE requests, so they will run SSE.action only upon relevant data changes.
 var ssePubsub = pubsub.New(pubsubCapacity)
@@ -182,11 +154,3 @@ func Publish(topic string, blocking bool) {
 		ssePubsub.TryPub(0, topic)
 	}
 }
-
-func init() {
-	lock.Lock()
-	nextTick = make(chan interface{})
-	lock.Unlock()
-}
-=======
->>>>>>> horizon-v0.15.3

@@ -15,7 +15,6 @@ type Config struct {
 	StellarCoreDatabaseURL string
 	StellarCoreURL         string
 	Port                   int
-	SSEUpdateFrequency     time.Duration
 	ConnectionTimeout      time.Duration
 	RateLimit              *throttled.RateQuota
 	RateLimitRedisKey      string

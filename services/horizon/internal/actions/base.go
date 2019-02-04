@@ -3,10 +3,8 @@ package actions
 import (
 	"database/sql"
 	"net/http"
-	"time"
 
 	horizonContext "github.com/stellar/go/services/horizon/internal/context"
-	"github.com/stellar/go/services/horizon/internal/ledger"
 	"github.com/stellar/go/services/horizon/internal/render"
 	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
 	"github.com/stellar/go/services/horizon/internal/render/sse"
@@ -24,17 +22,15 @@ type Base struct {
 	R   *http.Request
 	Err error
 
-	sseUpdateFrequency time.Duration
-	isSetup            bool
+	isSetup bool
 }
 
 // Prepare established the common attributes that get used in nearly every
 // action.  "Child" actions may override this method to extend action, but it
 // is advised you also call this implementation to maintain behavior.
-func (base *Base) Prepare(w http.ResponseWriter, r *http.Request, sseUpdateFrequency time.Duration) {
+func (base *Base) Prepare(w http.ResponseWriter, r *http.Request) {
 	base.W = w
 	base.R = r
-	base.sseUpdateFrequency = sseUpdateFrequency
 }
 
 // Execute trigger content negotiation and the actual execution of one of the
@@ -66,7 +62,6 @@ func (base *Base) Execute(action interface{}) {
 			goto NotAcceptable
 		}
 
-<<<<<<< HEAD
 		// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
 		// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
 		topic := action.GetTopic()
@@ -75,14 +70,9 @@ func (base *Base) Execute(action interface{}) {
 			defer sse.Unsubscribe(pumped, topic)
 		}
 
-		stream := sse.NewStream(base.Ctx, base.W, base.R)
-=======
 		stream := sse.NewStream(ctx, base.W)
->>>>>>> horizon-v0.15.3
 
 		for {
-			lastLedgerState := ledger.CurrentState()
-
 			// Rate limit the request if it's a call to stream since it queries the DB every second. See
 			// https://github.com/stellar/go/issues/715 for more details.
 			app := base.R.Context().Value(&horizonContext.AppContextKey)
@@ -131,32 +121,12 @@ func (base *Base) Execute(action interface{}) {
 				return
 			}
 
-			// Make sure this is buffered channel of size 1. Otherwise, the go routine below
-			// will never return if `newLedgers` channel is not read. From Effective Go:
-			// > If the channel is unbuffered, the sender blocks until the receiver has received the value.
-			newLedgers := make(chan bool, 1)
-			go func() {
-				for {
-					time.Sleep(base.sseUpdateFrequency)
-					currentLedgerState := ledger.CurrentState()
-					if currentLedgerState.HistoryLatest >= lastLedgerState.HistoryLatest+1 {
-						newLedgers <- true
-						return
-					}
-				}
-			}()
-
 			select {
 			case <-ctx.Done():
 				stream.Done()
 				return
-<<<<<<< HEAD
 			case <-pumped:
 				//no-op, continue onto the next iteration
-=======
-			case <-newLedgers:
-				continue
->>>>>>> horizon-v0.15.3
 			}
 		}
 	case render.MimeRaw:

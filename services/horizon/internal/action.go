@@ -54,7 +54,7 @@ func (action *Action) HistoryQ() *history.Q {
 func (action *Action) Prepare(w http.ResponseWriter, r *http.Request) {
 	base := &action.Base
 	action.App = AppFromContext(r.Context())
-	base.Prepare(w, r, action.App.config.SSEUpdateFrequency)
+	base.Prepare(w, r)
 	if action.R.Context() != nil {
 		action.Log = log.Ctx(action.R.Context())
 	} else {

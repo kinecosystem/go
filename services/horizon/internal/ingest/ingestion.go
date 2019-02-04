@@ -13,9 +13,9 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/sqx"
-	"github.com/kinecosystem/go/services/horizon/internal/log"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/support/errors"
+	ilog "github.com/kinecosystem/go/support/log"
 	"github.com/kinecosystem/go/xdr"
 )
 
@@ -190,7 +190,7 @@ func (ingest *Ingestion) getCommitChannel() chan interface{} {
 // Listen until the insert action committed to the DB and then publish to sse subscriptors and
 // then publish the topic that was ingested.
 func (ingest *Ingestion) waitAndPublish(committed chan interface{}, topic string) {
-	l := log.WithFields(log.F{"topic": topic, "channel": committed})
+	l := log.WithFields(ilog.F{"topic": topic, "channel": committed})
 	l.Debug("Waiting for topic")
 	select {
 	case <-committed:
