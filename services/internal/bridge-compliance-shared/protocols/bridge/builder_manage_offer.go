@@ -3,11 +3,11 @@ package bridge
 import (
 	"strconv"
 
-	b "github.com/stellar/go/build"
+	b "github.com/kinecosystem/go/build"
 
-	shared "github.com/stellar/go/services/internal/bridge-compliance-shared"
-	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
-	"github.com/stellar/go/services/internal/bridge-compliance-shared/protocols"
+	shared "github.com/kinecosystem/go/services/internal/bridge-compliance-shared"
+	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
+	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/protocols"
 )
 
 // ManageOfferOperationBody represents manage_offer operation

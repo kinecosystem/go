@@ -3,8 +3,8 @@ package resourceadapter
 import (
 	"context"
 
-	"github.com/stellar/go/xdr"
-	. "github.com/stellar/go/protocols/horizon"
+	"github.com/kinecosystem/go/xdr"
+	. "github.com/kinecosystem/go/protocols/horizon"
 
 )
 

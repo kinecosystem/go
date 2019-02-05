@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 
-	"github.com/stellar/go/services/bifrost/sse"
+	"github.com/kinecosystem/go/services/bifrost/sse"
 )
 
 func (s *Server) onStellarAccountCreated(destination string) {

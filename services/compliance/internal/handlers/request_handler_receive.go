@@ -4,8 +4,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 
-	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
-	callback "github.com/stellar/go/services/internal/bridge-compliance-shared/protocols/compliance"
+	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
+	callback "github.com/kinecosystem/go/services/internal/bridge-compliance-shared/protocols/compliance"
 )
 
 // HandlerReceive implements /receive endpoint

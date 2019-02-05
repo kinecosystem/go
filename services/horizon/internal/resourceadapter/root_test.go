@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stellar/go/clients/horizon"
-	"github.com/stellar/go/services/horizon/internal/ledger"
+	"github.com/kinecosystem/go/clients/horizon"
+	"github.com/kinecosystem/go/services/horizon/internal/ledger"
 	"github.com/stretchr/testify/assert"
 )
 

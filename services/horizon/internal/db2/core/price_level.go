@@ -19,7 +19,7 @@ func (p *PriceLevel) PriceAsString() string {
 }
 
 // AmountAsString returns the amount as a string, formatted using
-// the amount.String() utility from github.com/stellar/go.
+// the amount.String() utility from github.com/kinecosystem/go.
 func (p *PriceLevel) AmountAsString() string {
 	return amount.String(xdr.Int64(p.Amount))
 }

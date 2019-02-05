@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/url"
 
-	"github.com/stellar/go/keypair"
-	"github.com/stellar/go/support/config"
+	"github.com/kinecosystem/go/keypair"
+	"github.com/kinecosystem/go/support/config"
 )
 
 // Config contains config params of the compliance server

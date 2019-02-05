@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/support/log"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/support/log"
 )
 
 // P is a struct that represents an error response to be rendered to a connected
@@ -118,7 +118,7 @@ var ServerError = P{
 	Detail: "An error occurred while processing this request.  This is usually due " +
 		"to a bug within the server software.  Trying this request again may " +
 		"succeed if the bug is transient, otherwise please report this issue " +
-		"to the issue tracker at: https://github.com/stellar/go/services/horizon/internal/issues." +
+		"to the issue tracker at: https://github.com/kinecosystem/go/services/horizon/internal/issues." +
 		" Please include this response in your issue.",
 }
 

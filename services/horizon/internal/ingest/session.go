@@ -7,17 +7,17 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/stellar/go/clients/stellarcore"
+	"github.com/kinecosystem/go/clients/stellarcore"
 
-	"github.com/stellar/go/amount"
-	"github.com/stellar/go/keypair"
-	"github.com/stellar/go/meta"
-	"github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/services/horizon/internal/ingest/participants"
-	"github.com/stellar/go/support/errors"
-	ilog "github.com/stellar/go/support/log"
-	sTime "github.com/stellar/go/support/time"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/amount"
+	"github.com/kinecosystem/go/keypair"
+	"github.com/kinecosystem/go/meta"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/services/horizon/internal/ingest/participants"
+	"github.com/kinecosystem/go/support/errors"
+	ilog "github.com/kinecosystem/go/support/log"
+	sTime "github.com/kinecosystem/go/support/time"
+	"github.com/kinecosystem/go/xdr"
 )
 
 // Run starts an attempt to ingest the range of ledgers specified in this

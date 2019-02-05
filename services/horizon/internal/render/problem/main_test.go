@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stellar/go/support/context/requestid"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/support/context/requestid"
+	"github.com/kinecosystem/go/support/render/problem"
 	"github.com/stretchr/testify/assert"
 )
 

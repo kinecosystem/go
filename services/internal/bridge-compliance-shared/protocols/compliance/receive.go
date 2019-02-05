@@ -3,7 +3,7 @@ package compliance
 import (
 	"encoding/json"
 
-	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
+	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
 )
 
 // ReceiveRequest represents request sent to /receive endpoint of compliance server

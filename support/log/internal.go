@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/stellar/go/support/http/mutil"
+	"github.com/kinecosystem/go/support/http/mutil"
 )
 
 // logStartOfRequest emits the logline that reports that an http request is

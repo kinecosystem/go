@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/stellar/go/clients/stellarcore"
-	proto "github.com/stellar/go/protocols/stellarcore"
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/support/log"
+	"github.com/kinecosystem/go/clients/stellarcore"
+	proto "github.com/kinecosystem/go/protocols/stellarcore"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/support/log"
 )
 
 // NewDefaultSubmitter returns a new, simple Submitter implementation

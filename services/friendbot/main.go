@@ -8,13 +8,13 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/spf13/cobra"
-	"github.com/stellar/go/services/friendbot/internal"
-	"github.com/stellar/go/support/app"
-	"github.com/stellar/go/support/config"
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/support/http"
-	"github.com/stellar/go/support/log"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/services/friendbot/internal"
+	"github.com/kinecosystem/go/support/app"
+	"github.com/kinecosystem/go/support/config"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/support/http"
+	"github.com/kinecosystem/go/support/log"
+	"github.com/kinecosystem/go/support/render/problem"
 )
 
 // Config represents the configuration of a friendbot server

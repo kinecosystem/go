@@ -3,8 +3,8 @@ package horizon
 import (
 	"net/http"
 
-	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
-	"github.com/stellar/go/support/render/problem"
+	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
+	"github.com/kinecosystem/go/support/render/problem"
 )
 
 // RateLimitExceededAction renders a 429 response

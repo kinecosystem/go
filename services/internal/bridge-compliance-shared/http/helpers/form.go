@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/stellar/go/support/errors"
+	"github.com/kinecosystem/go/support/errors"
 )
 
 // FromRequest will populate destination fields using http.Request post values.

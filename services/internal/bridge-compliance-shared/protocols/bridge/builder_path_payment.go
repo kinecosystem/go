@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/stellar/go/amount"
-	b "github.com/stellar/go/build"
-	shared "github.com/stellar/go/services/internal/bridge-compliance-shared"
-	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
-	"github.com/stellar/go/services/internal/bridge-compliance-shared/protocols"
+	"github.com/kinecosystem/go/amount"
+	b "github.com/kinecosystem/go/build"
+	shared "github.com/kinecosystem/go/services/internal/bridge-compliance-shared"
+	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
+	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/protocols"
 )
 
 // PathPaymentOperationBody represents path_payment operation

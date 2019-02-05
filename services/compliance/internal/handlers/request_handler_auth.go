@@ -14,13 +14,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	baseAmount "github.com/stellar/go/amount"
-	"github.com/stellar/go/protocols/compliance"
-	"github.com/stellar/go/services/compliance/internal/db"
-	shared "github.com/stellar/go/services/internal/bridge-compliance-shared"
-	httpHelpers "github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
-	callback "github.com/stellar/go/services/internal/bridge-compliance-shared/protocols/compliance"
-	"github.com/stellar/go/xdr"
+	baseAmount "github.com/kinecosystem/go/amount"
+	"github.com/kinecosystem/go/protocols/compliance"
+	"github.com/kinecosystem/go/services/compliance/internal/db"
+	shared "github.com/kinecosystem/go/services/internal/bridge-compliance-shared"
+	httpHelpers "github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
+	callback "github.com/kinecosystem/go/services/internal/bridge-compliance-shared/protocols/compliance"
+	"github.com/kinecosystem/go/xdr"
 )
 
 // HandlerAuth implements authorize endpoint

@@ -1,10 +1,10 @@
 package bridge
 
 import (
-	"github.com/stellar/go/amount"
-	b "github.com/stellar/go/build"
-	shared "github.com/stellar/go/services/internal/bridge-compliance-shared"
-	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
+	"github.com/kinecosystem/go/amount"
+	b "github.com/kinecosystem/go/build"
+	shared "github.com/kinecosystem/go/services/internal/bridge-compliance-shared"
+	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
 )
 
 // CreateAccountOperationBody represents create_account operation

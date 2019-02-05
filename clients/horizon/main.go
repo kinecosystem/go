@@ -12,9 +12,9 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/stellar/go/build"
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/xdr"
+	"github.com/kinecosystem/go/build"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/xdr"
 )
 
 // DefaultTestNetClient is a default client to connect to test network

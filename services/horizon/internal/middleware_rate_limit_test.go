@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stellar/go/services/horizon/internal/test"
+	"github.com/kinecosystem/go/services/horizon/internal/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/throttled/throttled"

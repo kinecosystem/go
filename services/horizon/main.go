@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/kinecosystem/go/services/horizon/internal"
+	"github.com/kinecosystem/go/support/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/stellar/go/services/horizon/internal"
-	"github.com/stellar/go/support/log"
 	"github.com/throttled/throttled"
 )
 
