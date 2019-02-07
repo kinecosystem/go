@@ -15,9 +15,10 @@ import (
 // Its methods tie together the various pieces used to reliably submit transactions
 // to a stellar-core instance.
 type System struct {
-	initializer    sync.Once
-	tickInProgress bool
+	initializer sync.Once
+
 	tickMutex      sync.Mutex
+	tickInProgress bool
 
 	Pending           OpenSubmissionList
 	Results           ResultProvider
@@ -73,11 +74,19 @@ func (sys *System) Submit(ctx context.Context, env string) (result <-chan Result
 	// check the configured result provider for an existing result
 	r := sys.Results.ResultByHash(ctx, info.Hash)
 
-	if r.Err != ErrNoResults {
+	if r.Err == nil {
 		sys.Log.Ctx(ctx).WithField("hash", info.Hash).Info("Found submission result in a DB")
 		sys.finish(ctx, response, r)
 		return
 	}
+
+	if r.Err != ErrNoResults {
+		sys.Log.Ctx(ctx).WithField("hash", info.Hash).Info("Error getting submission result from a DB")
+		sys.finish(ctx, response, r)
+		return
+	}
+
+	// From now: r.Err == ErrNoResults
 
 	curSeq, err := sys.Sequences.Get([]string{info.SourceAddress})
 	if err != nil {
@@ -170,25 +179,40 @@ func (sys *System) submitOnce(ctx context.Context, env string) SubmissionResult 
 	return sr
 }
 
+// setTickInProgress sets `tickInProgress` to `true` if it's not
+// `false`. Returns `true` if `tickInProgress` has been switched
+// to `true` inside this method and `Tick()` should continue.
+func (sys *System) setTickInProgress(ctx context.Context) bool {
+	sys.tickMutex.Lock()
+	defer sys.tickMutex.Unlock()
+
+	if sys.tickInProgress {
+		logger := log.Ctx(ctx)
+		logger.Info("ticking in progress")
+		return false
+	}
+
+	sys.tickInProgress = true
+	return true
+}
+
+func (sys *System) unsetTickInProgress() {
+	sys.tickMutex.Lock()
+	defer sys.tickMutex.Unlock()
+	sys.tickInProgress = false
+}
+
 // Tick triggers the system to update itself with any new data available.
 func (sys *System) Tick(ctx context.Context) {
 	sys.Init()
 	logger := log.Ctx(ctx)
 
 	// Make sure Tick is not run concurrently
-	sys.tickMutex.Lock()
-	if sys.tickInProgress {
-		logger.Debug("ticking in progress")
+	if !sys.setTickInProgress(ctx) {
 		return
 	}
-	sys.tickInProgress = true
-	sys.tickMutex.Unlock()
 
-	defer func() {
-		sys.tickMutex.Lock()
-		sys.tickInProgress = false
-		sys.tickMutex.Unlock()
-	}()
+	defer sys.unsetTickInProgress()
 
 	logger.
 		WithField("queued", sys.SubmissionQueue.String()).
@@ -199,6 +223,7 @@ func (sys *System) Tick(ctx context.Context) {
 		curSeq, err := sys.Sequences.Get(addys)
 		if err != nil {
 			logger.WithStack(err).Error(err)
+			return
 		} else {
 			sys.SubmissionQueue.Update(curSeq)
 		}
@@ -229,6 +254,7 @@ func (sys *System) Tick(ctx context.Context) {
 	stillOpen, err := sys.Pending.Clean(ctx, sys.SubmissionTimeout)
 	if err != nil {
 		logger.WithStack(err).Error(err)
+		return
 	}
 
 	sys.Metrics.OpenSubmissionsGauge.Update(int64(stillOpen))

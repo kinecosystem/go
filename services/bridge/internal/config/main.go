@@ -89,14 +89,14 @@ func (c *Config) Validate() (err error) {
 			}
 		}
 
-		matched, err := regexp.MatchString("^[a-zA-Z0-9]{1,12}$", asset.Code)
+		var matched bool
+		matched, err = regexp.MatchString("^[a-zA-Z0-9]{1,12}$", asset.Code)
 		if err != nil {
 			return err
 		}
 
 		if !matched {
-			err = errors.New("Invalid asset code: " + asset.Code)
-			return err
+			return errors.New("Invalid asset code: " + asset.Code)
 		}
 	}
 

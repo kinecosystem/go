@@ -174,8 +174,8 @@ func (ac *AccountConfigurator) submitTransaction(transaction string) error {
 	_, err := ac.Horizon.SubmitTransaction(transaction)
 	if err != nil {
 		fields := log.F{"err": err}
-		if err, ok := err.(*horizon.Error); ok {
-			fields["result"] = string(err.Problem.Extras["result_xdr"])
+		if err2, ok := err.(*horizon.Error); ok {
+			fields["result"] = string(err2.Problem.Extras["result_xdr"])
 			ac.updateSignerSequence()
 		}
 		localLog.WithFields(fields).Error("Error submitting transaction")

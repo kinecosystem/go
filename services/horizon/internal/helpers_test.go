@@ -7,8 +7,14 @@ import (
 	"log"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 	supportLog "github.com/kinecosystem/go/support/log"
+=======
+	"github.com/stellar/go/network"
+	"github.com/stellar/go/services/horizon/internal/test"
+	supportLog "github.com/stellar/go/support/log"
+>>>>>>> horizon-v0.15.4
 	"github.com/throttled/throttled"
 )
 
@@ -32,6 +38,7 @@ func NewTestConfig() Config {
 		},
 		ConnectionTimeout: 55 * time.Second, // Default
 		LogLevel:          supportLog.InfoLevel,
+		NetworkPassphrase: network.TestNetworkPassphrase,
 	}
 }
 

@@ -49,7 +49,7 @@ func dialRedis(redisURL *url.URL) func() (redis.Conn, error) {
 		}
 
 		if pass, ok := redisURL.User.Password(); ok {
-			if _, err := c.Do("AUTH", pass); err != nil {
+			if _, err = c.Do("AUTH", pass); err != nil {
 				c.Close()
 				return nil, err
 			}

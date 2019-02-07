@@ -243,13 +243,15 @@ func (pl *PaymentListener) process(payment horizon.Payment) error {
 		complianceRequestBody := url.Values{"memo": {string(payment.Memo.Value)}}
 
 		pl.log.WithFields(logrus.Fields{"url": complianceRequestURL, "body": complianceRequestBody}).Info("Sending request to compliance server")
-		resp, err := pl.postForm(complianceRequestURL, complianceRequestBody)
+		var resp *http.Response
+		resp, err = pl.postForm(complianceRequestURL, complianceRequestBody)
 		if err != nil {
 			return errors.Wrap(err, "Error sending request to compliance server")
 		}
 
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		var body []byte
+		body, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return errors.Wrap(err, "Error reading compliance server response")
 		}
@@ -348,7 +350,8 @@ func (pl *PaymentListener) postForm(
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	if pl.config.MACKey != "" {
-		rawMAC, err := pl.getMAC(pl.config.MACKey, []byte(strbody))
+		var rawMAC []byte
+		rawMAC, err = pl.getMAC(pl.config.MACKey, []byte(strbody))
 		if err != nil {
 			return nil, errors.Wrap(err, "getMAC failed")
 		}

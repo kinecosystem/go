@@ -22,7 +22,7 @@ func initSubmissionSystem(app *App) {
 			History: &history.Q{Session: app.HorizonSession(nil)},
 		},
 		Sequences:         cq.SequenceProvider(),
-		NetworkPassphrase: app.networkPassphrase,
+		NetworkPassphrase: app.config.NetworkPassphrase,
 	}
 }
 

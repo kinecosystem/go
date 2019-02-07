@@ -19,6 +19,7 @@ type Config struct {
 	RateLimit              *throttled.RateQuota
 	RateLimitRedisKey      string
 	RedisURL               string
+	NetworkPassphrase      string
 	FriendbotURL           *url.URL
 	LogLevel               logrus.Level
 	LogFile                string

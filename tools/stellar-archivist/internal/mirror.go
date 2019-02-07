@@ -47,9 +47,9 @@ func Mirror(src *Archive, dst *Archive, opts *CommandOptions) error {
 				if !ok {
 					break
 				}
-				has, e := src.GetCheckpointHAS(ix)
-				if e != nil {
-					atomic.AddUint32(&errs, noteError(e))
+				has, err := src.GetCheckpointHAS(ix)
+				if err != nil {
+					atomic.AddUint32(&errs, noteError(err))
 					continue
 				}
 				for _, bucket := range has.Buckets() {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/address"
 	b "github.com/kinecosystem/go/build"
 	"github.com/kinecosystem/go/protocols/compliance"
@@ -15,6 +16,18 @@ import (
 	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
 	callback "github.com/kinecosystem/go/services/internal/bridge-compliance-shared/protocols/compliance"
 	"github.com/kinecosystem/go/xdr"
+=======
+	"github.com/stellar/go/address"
+	b "github.com/stellar/go/build"
+	"github.com/stellar/go/clients/stellartoml"
+	"github.com/stellar/go/protocols/compliance"
+	"github.com/stellar/go/protocols/federation"
+	"github.com/stellar/go/services/compliance/internal/db"
+	shared "github.com/stellar/go/services/internal/bridge-compliance-shared"
+	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
+	callback "github.com/stellar/go/services/internal/bridge-compliance-shared/protocols/compliance"
+	"github.com/stellar/go/xdr"
+>>>>>>> horizon-v0.15.4
 )
 
 // HandlerSend implements /send endpoint
@@ -47,7 +60,8 @@ func (rh *RequestHandler) HandlerSend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if authDataEntity != nil {
-		stellarToml, err := rh.StellarTomlResolver.GetStellarToml(authDataEntity.Domain)
+		var stellarToml *stellartoml.Response
+		stellarToml, err = rh.StellarTomlResolver.GetStellarToml(authDataEntity.Domain)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"destination": request.Destination,
@@ -183,7 +197,8 @@ func (rh *RequestHandler) HandlerSend(w http.ResponseWriter, r *http.Request) {
 
 	if rh.Config.Callbacks.FetchInfo != "" {
 		fetchInfoRequest := &callback.FetchInfoRequest{Address: request.Sender}
-		resp, err := rh.Client.PostForm(
+		var resp *http.Response
+		resp, err = rh.Client.PostForm(
 			rh.Config.Callbacks.FetchInfo,
 			helpers.ToValues(fetchInfoRequest),
 		)
@@ -197,7 +212,8 @@ func (rh *RequestHandler) HandlerSend(w http.ResponseWriter, r *http.Request) {
 		}
 
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		var body []byte
+		body, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"fetch_info": rh.Config.Callbacks.FetchInfo,

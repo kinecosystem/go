@@ -194,7 +194,8 @@ func (ts *TransactionSubmitter) SignAndSubmitRawTransaction(paymentID *string, s
 			return
 		}
 
-		result, err := herr.ResultString()
+		var result string
+		result, err = herr.ResultString()
 		if err != nil {
 			result = errors.Wrap(err, "Error getting tx result").Error()
 		}
@@ -221,8 +222,9 @@ func (ts *TransactionSubmitter) SignAndSubmitRawTransaction(paymentID *string, s
 
 		account.Mutex.Lock()
 		ts.log.Print("Syncing sequence number for ", account.Keypair.Address())
-		accountResponse, err2 := ts.Horizon.LoadAccount(account.Keypair.Address())
-		if err2 != nil {
+		var accountResponse horizon.Account
+		accountResponse, err = ts.Horizon.LoadAccount(account.Keypair.Address())
+		if err != nil {
 			ts.log.Error("Error updating sequence number ", err)
 		} else {
 			account.SequenceNumber, _ = strconv.ParseUint(accountResponse.Sequence, 10, 64)

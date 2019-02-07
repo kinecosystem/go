@@ -57,7 +57,7 @@ func (rh *RequestHandler) Authorize(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(herr.Problem.Status)
-		err := jsonEncoder.Encode(herr.Problem)
+		err = jsonEncoder.Encode(herr.Problem)
 		if err != nil {
 			log.WithFields(log.Fields{"err": err}).Error("Error encoding response")
 			helpers.Write(w, helpers.InternalServerError)

@@ -5,12 +5,14 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
 	"runtime"
 	"sync"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/rcrowley/go-metrics"
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/build"
 	"github.com/kinecosystem/go/clients/stellarcore"
 	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
@@ -25,6 +27,21 @@ import (
 	"github.com/kinecosystem/go/support/app"
 	"github.com/kinecosystem/go/support/db"
 	"github.com/kinecosystem/go/support/log"
+=======
+	"github.com/stellar/go/clients/stellarcore"
+	horizonContext "github.com/stellar/go/services/horizon/internal/context"
+	"github.com/stellar/go/services/horizon/internal/db2/core"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/ingest"
+	"github.com/stellar/go/services/horizon/internal/ledger"
+	"github.com/stellar/go/services/horizon/internal/operationfeestats"
+	"github.com/stellar/go/services/horizon/internal/paths"
+	"github.com/stellar/go/services/horizon/internal/reap"
+	"github.com/stellar/go/services/horizon/internal/txsub"
+	"github.com/stellar/go/support/app"
+	"github.com/stellar/go/support/db"
+	"github.com/stellar/go/support/log"
+>>>>>>> horizon-v0.15.4
 	"github.com/throttled/throttled"
 	"golang.org/x/net/http2"
 	"gopkg.in/tylerb/graceful.v1"
@@ -32,22 +49,21 @@ import (
 
 // App represents the root of the state of a horizon instance.
 type App struct {
-	config            Config
-	web               *Web
-	historyQ          *history.Q
-	coreQ             *core.Q
-	ctx               context.Context
-	cancel            func()
-	redis             *redis.Pool
-	coreVersion       string
-	horizonVersion    string
-	networkPassphrase string
-	protocolVersion   int32
-	submitter         *txsub.System
-	paths             paths.Finder
-	ingester          *ingest.System
-	reaper            *reap.System
-	ticks             *time.Ticker
+	config          Config
+	web             *Web
+	historyQ        *history.Q
+	coreQ           *core.Q
+	ctx             context.Context
+	cancel          func()
+	redis           *redis.Pool
+	coreVersion     string
+	horizonVersion  string
+	protocolVersion int32
+	submitter       *txsub.System
+	paths           paths.Finder
+	ingester        *ingest.System
+	reaper          *reap.System
+	ticks           *time.Ticker
 
 	// metrics
 	metrics                  metrics.Registry
@@ -64,7 +80,6 @@ func NewApp(config Config) (*App, error) {
 
 	result := &App{config: config}
 	result.horizonVersion = app.Version()
-	result.networkPassphrase = build.TestNetwork.Passphrase
 	result.ticks = time.NewTicker(1 * time.Second)
 	result.init()
 	return result, nil
@@ -110,14 +125,21 @@ func (a *App) Serve() {
 		log.Panic(err)
 	}
 
+	a.CloseDB()
+
 	log.Info("stopped")
 }
 
-// Close cancels the app and forces the closure of db connections
+// Close cancels the app. It does not close DB connections - use App.CloseDB().
 func (a *App) Close() {
 	a.cancel()
 	a.ticks.Stop()
+}
 
+// CloseDB closes DB connections. When using during web server shut down make
+// sure all requests are first properly finished to avoid "sql: database is
+// closed" errors.
+func (a *App) CloseDB() {
 	a.historyQ.Session.DB.Close()
 	a.coreQ.Session.DB.Close()
 }
@@ -263,8 +285,18 @@ func (a *App) UpdateStellarCoreInfo() {
 		return
 	}
 
+	// Check if NetworkPassphrase is different, if so exit Horizon as it can break the
+	// state of the application.
+	if resp.Info.Network != a.config.NetworkPassphrase {
+		log.Errorf(
+			"Network passphrase of stellar-core (%s) does not match Horizon configuration (%s). Exiting...",
+			resp.Info.Network,
+			a.config.NetworkPassphrase,
+		)
+		os.Exit(1)
+	}
+
 	a.coreVersion = resp.Info.Build
-	a.networkPassphrase = resp.Info.Network
 	a.protocolVersion = int32(resp.Info.ProtocolVersion)
 }
 

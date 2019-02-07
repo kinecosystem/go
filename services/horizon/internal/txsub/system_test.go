@@ -3,6 +3,7 @@ package txsub
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -52,9 +53,9 @@ func (suite *SystemTestSuite) SetupTest() {
 		Err: ErrBadSequence,
 	}
 
-	suite.sequences.Results = map[string]uint64{
-		"GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H": 0,
-	}
+	suite.sequences.On("Get", []string{"GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H"}).
+		Return(map[string]uint64{"GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H": 0}, nil).
+		Once()
 }
 
 // Returns the result provided by the ResultProvider.
@@ -115,6 +116,48 @@ func (suite *SystemTestSuite) TestSubmit_OpenTransactionList() {
 // Tick should be a no-op if there are no open submissions.
 func (suite *SystemTestSuite) TestTick_Noop() {
 	suite.system.Tick(suite.ctx)
+}
+
+// TestTick_Deadlock is a regression test for Tick() deadlock: if for any reason
+// call to Tick() takes more time and another Tick() is called.
+// This test starts two go routines: both calling Tick() but the call to
+// `sys.Sequences.Get(addys)` is delayed by 1 second. It allows to simulate two
+// calls to `Tick()` executed at the same time.
+func (suite *SystemTestSuite) TestTick_Deadlock() {
+	secondDone := make(chan bool, 1)
+	testDone := make(chan bool)
+
+	go func() {
+		select {
+		case <-secondDone:
+			// OK!
+		case <-time.After(5 * time.Second):
+			assert.Fail(suite.T(), "Timeout, likely a deadlock in Tick()")
+		}
+
+		testDone <- true
+	}()
+
+	// Start first Tick
+	suite.system.SubmissionQueue.Push("address", 0)
+	// Configure suite.sequences to return after 1 second in a first call
+	suite.sequences.On("Get", []string{"address"}).After(time.Second).Return(map[string]uint64{}, nil)
+
+	go func() {
+		fmt.Println("Starting first Tick()")
+		suite.system.Tick(suite.ctx)
+		fmt.Println("Finished first Tick()")
+	}()
+
+	go func() {
+		// Start second Tick - should be deadlocked if mutex is not Unlock()'ed.
+		fmt.Println("Starting second Tick()")
+		suite.system.Tick(suite.ctx)
+		fmt.Println("Finished second Tick()")
+		secondDone <- true
+	}()
+
+	<-testDone
 }
 
 // Test that Tick finishes any available transactions,

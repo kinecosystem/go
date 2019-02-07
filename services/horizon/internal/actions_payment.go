@@ -20,7 +20,7 @@ type PaymentsIndexAction struct {
 	TransactionFilter string
 	PagingParams      db2.PageQuery
 	Records           []history.Operation
-	Ledgers           history.LedgerCache
+	Ledgers           *history.LedgerCache
 	Page              hal.Page
 }
 
@@ -116,6 +116,8 @@ func (action *PaymentsIndexAction) loadRecords() {
 
 // loadLedgers populates the ledger cache for this action
 func (action *PaymentsIndexAction) loadLedgers() {
+	action.Ledgers = &history.LedgerCache{}
+
 	for _, op := range action.Records {
 		action.Ledgers.Queue(op.LedgerSequence())
 	}

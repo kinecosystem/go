@@ -7,9 +7,16 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+<<<<<<< HEAD
 	b "github.com/kinecosystem/go/build"
 	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
 	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/protocols/bridge"
+=======
+	b "github.com/stellar/go/build"
+	"github.com/stellar/go/clients/horizon"
+	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
+	"github.com/stellar/go/services/internal/bridge-compliance-shared/protocols/bridge"
+>>>>>>> horizon-v0.15.4
 )
 
 // Builder implements /builder endpoint
@@ -49,7 +56,8 @@ func (rh *RequestHandler) Builder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if request.SequenceNumber == "" {
-		accountResponse, err := rh.Horizon.LoadAccount(request.Source)
+		var accountResponse horizon.Account
+		accountResponse, err = rh.Horizon.LoadAccount(request.Source)
 		if err != nil {
 			log.WithFields(log.Fields{"err": err}).Error("Error when loading account")
 			helpers.Write(w, helpers.InternalServerError)
