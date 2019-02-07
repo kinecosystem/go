@@ -186,7 +186,7 @@ func TestAmount(t *testing.T) {
 
 	result := action.GetAmount("minus_one")
 	tt.Assert.NoError(action.Err)
-	tt.Assert.Equal(xdr.Int64(-10000000), result)
+	tt.Assert.Equal(xdr.Int64(-100000), result)
 
 	result = action.GetAmount("zero")
 	tt.Assert.NoError(action.Err)
@@ -194,11 +194,11 @@ func TestAmount(t *testing.T) {
 
 	result = action.GetAmount("two")
 	tt.Assert.NoError(action.Err)
-	tt.Assert.Equal(xdr.Int64(20000000), result)
+	tt.Assert.Equal(xdr.Int64(200000), result)
 
 	result = action.GetAmount("twenty")
 	tt.Assert.NoError(action.Err)
-	tt.Assert.Equal(xdr.Int64(200000000), result)
+	tt.Assert.Equal(xdr.Int64(2000000), result)
 }
 
 func TestPositiveAmount(t *testing.T) {
@@ -218,12 +218,12 @@ func TestPositiveAmount(t *testing.T) {
 
 	result = action.GetPositiveAmount("two")
 	tt.Assert.NoError(action.Err)
-	tt.Assert.Equal(xdr.Int64(20000000), result)
+	tt.Assert.Equal(xdr.Int64(200000), result)
 	action.Err = nil
 
 	result = action.GetPositiveAmount("twenty")
 	tt.Assert.NoError(action.Err)
-	tt.Assert.Equal(xdr.Int64(200000000), result)
+	tt.Assert.Equal(xdr.Int64(2000000), result)
 	action.Err = nil
 }
 
