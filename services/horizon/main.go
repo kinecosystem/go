@@ -302,7 +302,6 @@ func initConfig() {
 		HorizonDBMaxIdleConnections: viper.GetInt("horizon-db-max-idle-connections"),
 		CoreDBMaxOpenConnections:    viper.GetInt("core-db-max-open-connections"),
 		CoreDBMaxIdleConnections:    viper.GetInt("core-db-max-idle-connections"),
-		SSEUpdateFrequency:          time.Duration(viper.GetInt("sse-update-frequency")) * time.Second,
 		ConnectionTimeout:           time.Duration(viper.GetInt("connection-timeout")) * time.Second,
 		RateLimit:                   rateLimit,
 		RateLimitRedisKey:           viper.GetString("rate-limit-redis-key"),

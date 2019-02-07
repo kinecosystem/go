@@ -54,11 +54,7 @@ func (action *Action) HistoryQ() *history.Q {
 func (action *Action) Prepare(w http.ResponseWriter, r *http.Request) {
 	base := &action.Base
 	action.App = AppFromContext(r.Context())
-<<<<<<< HEAD
-	base.Prepare(w, r)
-=======
-	base.Prepare(w, r, action.App.ctx, action.App.config.SSEUpdateFrequency)
->>>>>>> horizon-v0.15.4
+	base.Prepare(w, r, action.App.ctx)
 	if action.R.Context() != nil {
 		action.Log = log.Ctx(action.R.Context())
 	} else {
