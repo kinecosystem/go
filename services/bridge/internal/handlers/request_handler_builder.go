@@ -7,16 +7,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-<<<<<<< HEAD
-	b "github.com/kinecosystem/go/build"
-	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
-	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/protocols/bridge"
-=======
 	b "github.com/stellar/go/build"
 	"github.com/stellar/go/clients/horizon"
 	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
 	"github.com/stellar/go/services/internal/bridge-compliance-shared/protocols/bridge"
->>>>>>> horizon-v0.15.4
 )
 
 // Builder implements /builder endpoint

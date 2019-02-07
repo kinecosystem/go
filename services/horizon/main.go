@@ -11,12 +11,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-<<<<<<< HEAD
-=======
 	"github.com/stellar/go/network"
 	"github.com/stellar/go/services/horizon/internal"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.4
 	"github.com/throttled/throttled"
 )
 

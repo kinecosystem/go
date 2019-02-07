@@ -12,22 +12,6 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/rcrowley/go-metrics"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/build"
-	"github.com/kinecosystem/go/clients/stellarcore"
-	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
-	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/ingest"
-	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	"github.com/kinecosystem/go/services/horizon/internal/operationfeestats"
-	"github.com/kinecosystem/go/services/horizon/internal/paths"
-	"github.com/kinecosystem/go/services/horizon/internal/reap"
-	"github.com/kinecosystem/go/services/horizon/internal/txsub"
-	"github.com/kinecosystem/go/support/app"
-	"github.com/kinecosystem/go/support/db"
-	"github.com/kinecosystem/go/support/log"
-=======
 	"github.com/stellar/go/clients/stellarcore"
 	horizonContext "github.com/stellar/go/services/horizon/internal/context"
 	"github.com/stellar/go/services/horizon/internal/db2/core"
@@ -41,7 +25,6 @@ import (
 	"github.com/stellar/go/support/app"
 	"github.com/stellar/go/support/db"
 	"github.com/stellar/go/support/log"
->>>>>>> horizon-v0.15.4
 	"github.com/throttled/throttled"
 	"golang.org/x/net/http2"
 	"gopkg.in/tylerb/graceful.v1"

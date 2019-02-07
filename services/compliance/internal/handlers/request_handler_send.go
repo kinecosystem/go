@@ -6,17 +6,6 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/address"
-	b "github.com/kinecosystem/go/build"
-	"github.com/kinecosystem/go/protocols/compliance"
-	"github.com/kinecosystem/go/protocols/federation"
-	"github.com/kinecosystem/go/services/compliance/internal/db"
-	shared "github.com/kinecosystem/go/services/internal/bridge-compliance-shared"
-	"github.com/kinecosystem/go/services/internal/bridge-compliance-shared/http/helpers"
-	callback "github.com/kinecosystem/go/services/internal/bridge-compliance-shared/protocols/compliance"
-	"github.com/kinecosystem/go/xdr"
-=======
 	"github.com/stellar/go/address"
 	b "github.com/stellar/go/build"
 	"github.com/stellar/go/clients/stellartoml"
@@ -27,7 +16,6 @@ import (
 	"github.com/stellar/go/services/internal/bridge-compliance-shared/http/helpers"
 	callback "github.com/stellar/go/services/internal/bridge-compliance-shared/protocols/compliance"
 	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.15.4
 )
 
 // HandlerSend implements /send endpoint
