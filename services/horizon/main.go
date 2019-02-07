@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/kinecosystem/go/network"
 	"github.com/kinecosystem/go/services/horizon/internal"
 	"github.com/kinecosystem/go/support/log"
 	"github.com/sirupsen/logrus"
@@ -182,7 +183,7 @@ func init() {
 
 	rootCmd.PersistentFlags().String(
 		"network-passphrase",
-		"",
+		network.TestNetworkPassphrase,
 		"Override the network passphrase",
 	)
 
@@ -241,6 +242,10 @@ func initConfig() {
 		stdLog.Fatal("Invalid config: stellar-core-url is blank.  Please specify --stellar-core-url on the command line or set the STELLAR_CORE_URL environment variable.")
 	}
 
+	if viper.GetString("network-passphrase") == "" {
+		stdLog.Fatal("Invalid config: network-passphrase is blank.  Please specify --network-passphrase on the command line or set the NETWORK_PASSPHRASE environment variable.")
+	}
+
 	ll, err := logrus.ParseLevel(viper.GetString("log-level"))
 
 	if err != nil {
@@ -296,19 +301,20 @@ func initConfig() {
 		CoreDBMaxOpenConnections:    viper.GetInt("core-db-max-open-connections"),
 		CoreDBMaxIdleConnections:    viper.GetInt("core-db-max-idle-connections"),
 		ConnectionTimeout:           time.Duration(viper.GetInt("connection-timeout")) * time.Second,
-		Ingest:                      viper.GetBool("ingest"),
-		LogFile:                     lf,
-		LogLevel:                    ll,
-		LogglyTag:                   viper.GetString("loggly-tag"),
-		LogglyToken:                 viper.GetString("loggly-token"),
-		MaxPathLength:               uint(viper.GetInt("max-path-length")),
 		RateLimit:                   rateLimit,
 		RateLimitRedisKey:           viper.GetString("rate-limit-redis-key"),
 		RedisURL:                    viper.GetString("redis-url"),
 		FriendbotURL:                friendbotURL,
+		LogLevel:                    ll,
+		LogFile:                     lf,
+		MaxPathLength:               uint(viper.GetInt("max-path-length")),
+		NetworkPassphrase:           viper.GetString("network-passphrase"),
 		SentryDSN:                   viper.GetString("sentry-dsn"),
+		LogglyToken:                 viper.GetString("loggly-token"),
+		LogglyTag:                   viper.GetString("loggly-tag"),
 		TLSCert:                     cert,
 		TLSKey:                      key,
+		Ingest:                      viper.GetBool("ingest"),
 		HistoryRetentionCount:       uint(viper.GetInt("history-retention-count")),
 		StaleThreshold:              uint(viper.GetInt("history-stale-threshold")),
 		SkipCursorUpdate:            viper.GetBool("skip-cursor-update"),

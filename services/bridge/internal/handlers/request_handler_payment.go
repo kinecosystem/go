@@ -256,7 +256,8 @@ func (rh *RequestHandler) standardPayment(w http.ResponseWriter, request *bridge
 	case memoType == "":
 		break
 	case memoType == "id":
-		id, err := strconv.ParseUint(memo, 10, 64)
+		var id uint64
+		id, err = strconv.ParseUint(memo, 10, 64)
 		if err != nil {
 			log.WithFields(log.Fields{"memo": memo}).Print("Cannot convert memo_id value to uint64")
 			helpers.Write(w, helpers.NewInvalidParameterError("memo", "Memo.id must be a number"))
@@ -266,7 +267,8 @@ func (rh *RequestHandler) standardPayment(w http.ResponseWriter, request *bridge
 	case memoType == "text":
 		memoMutator = b.MemoText{memo}
 	case memoType == "hash":
-		memoBytes, err := hex.DecodeString(memo)
+		var memoBytes []byte
+		memoBytes, err = hex.DecodeString(memo)
 		if err != nil || len(memoBytes) != 32 {
 			log.WithFields(log.Fields{"memo": memo}).Print("Cannot decode hash memo value")
 			helpers.Write(w, helpers.NewInvalidParameterError("memo", "Memo.hash must be 32 bytes and hex encoded."))
@@ -298,7 +300,7 @@ func (rh *RequestHandler) handleTransactionSubmitResponse(w http.ResponseWriter,
 		}
 
 		w.WriteHeader(herr.Problem.Status)
-		err := jsonEncoder.Encode(herr.Problem)
+		err = jsonEncoder.Encode(herr.Problem)
 		if err != nil {
 			log.WithFields(log.Fields{"err": err}).Error("Error encoding response")
 			helpers.Write(w, helpers.InternalServerError)

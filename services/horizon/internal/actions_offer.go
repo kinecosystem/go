@@ -20,7 +20,7 @@ type OffersByAccountAction struct {
 	Address   string
 	PageQuery db2.PageQuery
 	Records   []core.Offer
-	Ledgers   history.LedgerCache
+	Ledgers   *history.LedgerCache
 	Page      hal.Page
 }
 
@@ -74,6 +74,8 @@ func (action *OffersByAccountAction) loadParams() {
 
 // loadLedgers populates the ledger cache for this action
 func (action *OffersByAccountAction) loadLedgers() {
+	action.Ledgers = &history.LedgerCache{}
+
 	for _, offer := range action.Records {
 		action.Ledgers.Queue(offer.Lastmodified)
 	}

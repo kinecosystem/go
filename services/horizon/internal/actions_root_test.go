@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kinecosystem/go/services/horizon/internal/test"
 	"github.com/kinecosystem/go/protocols/horizon"
+	"github.com/kinecosystem/go/services/horizon/internal/test"
 )
 
 func TestRootAction(t *testing.T) {
@@ -23,6 +23,7 @@ func TestRootAction(t *testing.T) {
 
 	ht.App.horizonVersion = "test-horizon"
 	ht.App.config.StellarCoreURL = server.URL
+	ht.App.config.NetworkPassphrase = "test"
 	ht.App.UpdateStellarCoreInfo()
 
 	w := ht.Get("/")

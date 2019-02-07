@@ -50,50 +50,50 @@ func TestPageQuery(t *testing.T) {
 }
 
 func TestPageQuery_CursorInt64(t *testing.T) {
-	assert := assert.New(t)
-	require := require.New(t)
+	assertInstance := assert.New(t)
+	requireInstance := require.New(t)
 
 	var p PageQuery
 	var err error
 
 	p = MustPageQuery("1231-4456", false, "asc", 1)
 	l, r, err := p.CursorInt64Pair("-")
-	require.NoError(err)
-	assert.Equal(int64(1231), l)
-	assert.Equal(int64(4456), r)
+	requireInstance.NoError(err)
+	assertInstance.Equal(int64(1231), l)
+	assertInstance.Equal(int64(4456), r)
 
 	// Defaults
 	p = MustPageQuery("", false, "asc", 1)
 	l, r, err = p.CursorInt64Pair("-")
-	require.NoError(err)
-	assert.Equal(int64(0), l)
-	assert.Equal(int64(0), r)
+	requireInstance.NoError(err)
+	assertInstance.Equal(int64(0), l)
+	assertInstance.Equal(int64(0), r)
 	p = MustPageQuery("", false, "desc", 1)
 	l, r, err = p.CursorInt64Pair("-")
-	require.NoError(err)
-	assert.Equal(int64(math.MaxInt64), l)
-	assert.Equal(int64(math.MaxInt64), r)
+	requireInstance.NoError(err)
+	assertInstance.Equal(int64(math.MaxInt64), l)
+	assertInstance.Equal(int64(math.MaxInt64), r)
 	p = MustPageQuery("0", false, "", 1)
 	_, r, err = p.CursorInt64Pair("-")
-	require.NoError(err)
-	assert.Equal(int64(math.MaxInt64), r)
+	requireInstance.NoError(err)
+	assertInstance.Equal(int64(math.MaxInt64), r)
 
 	// Errors
 	p = MustPageQuery("123-foo", false, "", 1)
 	_, _, err = p.CursorInt64Pair("-")
-	assert.Error(err)
+	assertInstance.Error(err)
 	p = MustPageQuery("foo-123", false, "", 1)
 	_, _, err = p.CursorInt64Pair("-")
-	assert.Error(err)
+	assertInstance.Error(err)
 	p = MustPageQuery("-1:123", false, "", 1)
 	_, _, err = p.CursorInt64Pair("-")
-	assert.Error(err)
+	assertInstance.Error(err)
 	p = MustPageQuery("111:-123", false, "", 1)
 	_, _, err = p.CursorInt64Pair("-")
-	assert.Error(err)
+	assertInstance.Error(err)
 
 	// Regression: -23667108046966785
 	p = MustPageQuery("-23667108046966785", false, "asc", 100)
 	_, err = p.CursorInt64()
-	assert.Error(err)
+	assertInstance.Error(err)
 }

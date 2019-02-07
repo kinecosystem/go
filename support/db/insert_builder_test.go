@@ -23,7 +23,7 @@ func TestInsertBuilder_Exec(t *testing.T) {
 
 	if assert.NoError(t, err) {
 		var found []person
-		err := sess.SelectRaw(
+		err = sess.SelectRaw(
 			&found,
 			"SELECT * FROM people WHERE name = ?",
 			"bubba",
@@ -54,8 +54,8 @@ func TestInsertBuilder_Exec(t *testing.T) {
 	}).Exec()
 
 	if assert.NoError(t, err) {
-		count, err := r.RowsAffected()
-		require.NoError(t, err)
+		count, err2 := r.RowsAffected()
+		require.NoError(t, err2)
 		assert.Equal(t, int64(2), count)
 	}
 

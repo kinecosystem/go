@@ -22,7 +22,7 @@ func (action *RootAction) JSON() {
 		ledger.CurrentState(),
 		action.App.horizonVersion,
 		action.App.coreVersion,
-		action.App.networkPassphrase,
+		action.App.config.NetworkPassphrase,
 		action.App.protocolVersion,
 		action.App.config.FriendbotURL,
 	)

@@ -284,7 +284,7 @@ func (u *Users) getAccount(account string) (horizon.Account, bool, error) {
 	var hAccount horizon.Account
 	hAccount, err := u.Horizon.LoadAccount(account)
 	if err != nil {
-		if err, ok := err.(*horizon.Error); ok && err.Response.StatusCode == http.StatusNotFound {
+		if err2, ok := err.(*horizon.Error); ok && err2.Response.StatusCode == http.StatusNotFound {
 			return hAccount, false, nil
 		}
 		return hAccount, false, err

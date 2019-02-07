@@ -6,6 +6,12 @@ file.  This project adheres to [Semantic Versioning](http://semver.org/).
 As this project is pre 1.0, breaking changes may happen for minor version
 bumps.  A breaking change will get clearly notified in this log.
 
+## v0.15.4 - 2019-01-17
+
+* Fixed multiple issues in transaction submission subsystem.
+* Support for client fingerprint headers.
+* Fixed parameter checking in `horizon db backfill` command.
+
 ## v0.15.3 - 2019-01-07
 
 * Fixed a bug in Horizon DB reaping code.

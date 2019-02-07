@@ -13,6 +13,11 @@ import (
 	"github.com/kinecosystem/go/support/log"
 )
 
+const (
+	clientNameHeader    = "X-Client-Name"
+	clientVersionHeader = "X-Client-Version"
+)
+
 // LoggerMiddleware is the middleware that logs http requests and resposnes
 // to the logging subsytem of horizon.
 func LoggerMiddleware(h http.Handler) http.Handler {
@@ -38,15 +43,28 @@ func LoggerMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
+// getClientData gets client data (name or version) from header or GET parameter
+// (useful when not possible to set headers, like in EventStream).
+func getClientData(r *http.Request, headerName string) string {
+	value := r.Header.Get(headerName)
+	if value != "" {
+		return value
+	}
+
+	return r.URL.Query().Get(headerName)
+}
+
 func logStartOfRequest(ctx context.Context, r *http.Request, streaming bool) {
 	log.Ctx(ctx).WithFields(log.F{
-		"path":         r.URL.String(),
-		"method":       r.Method,
-		"ip":           remoteAddrIP(r),
-		"ip_port":      r.RemoteAddr,
-		"forwarded_ip": firstXForwardedFor(r),
-		"host":         r.Host,
-		"streaming":    streaming,
+		"client_name":    getClientData(r, clientNameHeader),
+		"client_version": getClientData(r, clientVersionHeader),
+		"forwarded_ip":   firstXForwardedFor(r),
+		"host":           r.Host,
+		"ip":             remoteAddrIP(r),
+		"ip_port":        r.RemoteAddr,
+		"method":         r.Method,
+		"path":           r.URL.String(),
+		"streaming":      streaming,
 	}).Info("Starting request")
 }
 
@@ -59,16 +77,18 @@ func logEndOfRequest(ctx context.Context, r *http.Request, duration time.Duratio
 	}
 
 	log.Ctx(ctx).WithFields(log.F{
-		"path":         r.URL.String(),
-		"route":        routePattern,
-		"method":       r.Method,
-		"ip":           remoteAddrIP(r),
-		"ip_port":      r.RemoteAddr,
-		"forwarded_ip": firstXForwardedFor(r),
-		"host":         r.Host,
-		"status":       mw.Status(),
-		"bytes":        mw.BytesWritten(),
-		"duration":     duration.Seconds(),
-		"streaming":    streaming,
+		"bytes":          mw.BytesWritten(),
+		"client_name":    getClientData(r, clientNameHeader),
+		"client_version": getClientData(r, clientVersionHeader),
+		"duration":       duration.Seconds(),
+		"forwarded_ip":   firstXForwardedFor(r),
+		"host":           r.Host,
+		"ip":             remoteAddrIP(r),
+		"ip_port":        r.RemoteAddr,
+		"method":         r.Method,
+		"path":           r.URL.String(),
+		"route":          chi.RouteContext(r.Context()).RoutePattern(),
+		"status":         mw.Status(),
+		"streaming":      streaming,
 	}).Info("Finished request")
 }

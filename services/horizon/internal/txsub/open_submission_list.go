@@ -29,7 +29,7 @@ type openSubmission struct {
 
 type submissionList struct {
 	sync.Mutex
-	submissions map[string]*openSubmission
+	submissions map[string]*openSubmission // hash => `*openSubmission`
 	log         *log.Entry
 }
 

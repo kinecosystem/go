@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/kinecosystem/go/address"
 	b "github.com/kinecosystem/go/build"
+	"github.com/kinecosystem/go/clients/stellartoml"
 	"github.com/kinecosystem/go/protocols/compliance"
 	"github.com/kinecosystem/go/protocols/federation"
 	"github.com/kinecosystem/go/services/compliance/internal/db"
@@ -47,7 +48,8 @@ func (rh *RequestHandler) HandlerSend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if authDataEntity != nil {
-		stellarToml, err := rh.StellarTomlResolver.GetStellarToml(authDataEntity.Domain)
+		var stellarToml *stellartoml.Response
+		stellarToml, err = rh.StellarTomlResolver.GetStellarToml(authDataEntity.Domain)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"destination": request.Destination,
@@ -183,7 +185,8 @@ func (rh *RequestHandler) HandlerSend(w http.ResponseWriter, r *http.Request) {
 
 	if rh.Config.Callbacks.FetchInfo != "" {
 		fetchInfoRequest := &callback.FetchInfoRequest{Address: request.Sender}
-		resp, err := rh.Client.PostForm(
+		var resp *http.Response
+		resp, err = rh.Client.PostForm(
 			rh.Config.Callbacks.FetchInfo,
 			helpers.ToValues(fetchInfoRequest),
 		)
@@ -197,7 +200,8 @@ func (rh *RequestHandler) HandlerSend(w http.ResponseWriter, r *http.Request) {
 		}
 
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		var body []byte
+		body, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"fetch_info": rh.Config.Callbacks.FetchInfo,

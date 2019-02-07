@@ -19,9 +19,9 @@ var _ = Describe("TransactionEnvelope Mutators:", func() {
 	Describe("TransactionBuilder", func() {
 		Context("that is valid", func() {
 			BeforeEach(func() {
-				var err error
-				mut, err = Transaction(Sequence{10})
-				Expect(err).NotTo(HaveOccurred())
+				var err2 error
+				mut, err2 = Transaction(Sequence{10})
+				Expect(err2).NotTo(HaveOccurred())
 			})
 			It("succeeds", func() { Expect(err).NotTo(HaveOccurred()) })
 			It("sets the TX", func() { Expect(subject.E.Tx.SeqNum).To(BeEquivalentTo(10)) })
