@@ -32,7 +32,7 @@ for i in $PACKAGES; do
 
   # import the core data into horizon
   $GOTOP/bin/horizon db init
-  $GOTOP/bin/horizon db reingest
+  $GOTOP/bin/horizon db rebase
 
   # write horizon data to sql file
   pg_dump $DATABASE_URL \

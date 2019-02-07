@@ -1,6 +1,7 @@
 package horizon
 
 import (
+	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/support/render/hal"
@@ -65,7 +66,7 @@ func (action *DataShowAction) GetTopic() string {
 }
 
 func (action *DataShowAction) loadParams() {
-	action.Address = action.GetString("account_id")
+	action.Address = action.GetAddress("account_id", actions.RequiredParam)
 	action.Key = action.GetString("key")
 }
 

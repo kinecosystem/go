@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/rcrowley/go-metrics"
-	"github.com/kinecosystem/go/services/horizon/internal/log"
+	"github.com/kinecosystem/go/services/horizon/internal/logmetrics"
 )
 
 func initMetrics(app *App) {
@@ -38,7 +38,7 @@ func initIngesterMetrics(app *App) {
 }
 
 func initLogMetrics(app *App) {
-	for level, meter := range *log.DefaultMetrics {
+	for level, meter := range *logmetrics.DefaultMetrics {
 		key := fmt.Sprintf("logging.%s", level)
 		app.metrics.Register(key, meter)
 	}

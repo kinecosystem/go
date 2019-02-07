@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -11,7 +12,6 @@ import (
 	"github.com/kinecosystem/go/support/db/sqlutils"
 	"github.com/kinecosystem/go/support/errors"
 	"github.com/kinecosystem/go/support/log"
-	"golang.org/x/net/context"
 )
 
 // Begin binds this session to a new transaction.

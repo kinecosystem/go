@@ -4,3 +4,5 @@
 /local-archive
 /.vscode/*.sql
 .idea
+debug
+.bundle

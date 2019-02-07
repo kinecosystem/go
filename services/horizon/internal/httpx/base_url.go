@@ -1,9 +1,8 @@
 package httpx
 
 import (
+	"context"
 	"net/url"
-
-	"golang.org/x/net/context"
 )
 
 // BaseURL returns the "base" url for this request, defined as a url containing

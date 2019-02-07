@@ -4,8 +4,9 @@ clientData:
   laboratoryUrl: https://www.stellar.org/laboratory/#explorer?resource=transactions&endpoint=all
 ---
 
-This endpoint represents all validated [transactions](../resources/transaction.md).
-This endpoint can also be used in [streaming](../responses.md#streaming) mode. This makes it possible to use it to listen for new transactions as they get made in the Stellar network.
+This endpoint represents all successful [transactions](../resources/transaction.md).
+Please note that this endpoint does not return failed transactions that are included in the ledger.
+This endpoint can also be used in [streaming](../streaming.md) mode. This makes it possible to use it to listen for new transactions as they get made in the Stellar network.
 If called in streaming mode Horizon will start at the earliest known transaction unless a `cursor` is set. In that case it will start from the `cursor`. You can also set `cursor` value to `now` to only stream transaction created since your request time.
 
 ## Request
@@ -98,8 +99,6 @@ See [transaction resource](../resources/transaction.md) for reference.
         "max_fee": 0,
         "fee_paid": 0,
         "operation_count": 1,
-        "result_code": 0,
-        "result_code_s": "tx_success",
         "envelope_xdr": "AAAAAGXNhLrhGtltTwCpmqlarh7s1DB2hIkbP//jgzn4Fos/AAAACgAAAEEAAABnAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA2ddmTOFAgr21Crs2RXRGLhiAKxicZb/IERyEZL/Y2kUAAAAXSHboAAAAAAAAAAAB+BaLPwAAAECDEEZmzbgBr5fc3mfJsCjWPDtL6H8/vf16me121CC09ONyWJZnw0PUvp4qusmRwC6ZKfLDdk8F3Rq41s+yOgQD",
         "result_xdr": "AAAAAAAAAAoAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=",
         "result_meta_xdr": "AAAAAAAAAAEAAAACAAAAAAACPhoAAAAAAAAAANnXZkzhQIK9tQq7NkV0Ri4YgCsYnGW/yBEchGS/2NpFAAAAF0h26AAAAj4aAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAQACPhoAAAAAAAAAAGXNhLrhGtltTwCpmqlarh7s1DB2hIkbP//jgzn4Fos/AABT8kS2c/oAAABBAAAAZwAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA"
@@ -140,8 +139,6 @@ See [transaction resource](../resources/transaction.md) for reference.
         "max_fee": 0,
         "fee_paid": 0,
         "operation_count": 1,
-        "result_code": 0,
-        "result_code_s": "tx_success",
         "envelope_xdr": "AAAAAGXNhLrhGtltTwCpmqlarh7s1DB2hIkbP//jgzn4Fos/AAAACgAAAEEAAABmAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAMPT7P7buwqnMueFS4NV10vE2q3C/mcAy4jx03/RdSGsAAAAXSHboAAAAAAAAAAAB+BaLPwAAAEBPWWMNSWyPBbQlhRheXyvAFDVx1rnf68fdDOUHPdDIkHdUczBpzvCjpdgwhQ2NYOX5ga1ZgOIWLy789YNnuIcL",
         "result_xdr": "AAAAAAAAAAoAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=",
         "result_meta_xdr": "AAAAAAAAAAEAAAACAAAAAAACNZ4AAAAAAAAAADD0+z+27sKpzLnhUuDVddLxNqtwv5nAMuI8dN/0XUhrAAAAF0h26AAAAjWeAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAQACNZ4AAAAAAAAAAGXNhLrhGtltTwCpmqlarh7s1DB2hIkbP//jgzn4Fos/AABUCY0tXAQAAABBAAAAZgAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA"
@@ -201,8 +198,6 @@ See [transaction resource](../resources/transaction.md) for reference.
   "max_fee": 0,
   "fee_paid": 0,
   "operation_count": 1,
-  "result_code": 0,
-  "result_code_s": "tx_success",
   "envelope_xdr": "AAAAAGXNhLrhGtltTwCpmqlarh7s1DB2hIkbP//jgzn4Fos/AAAACgAAAEEAAABnAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA2ddmTOFAgr21Crs2RXRGLhiAKxicZb/IERyEZL/Y2kUAAAAXSHboAAAAAAAAAAAB+BaLPwAAAECDEEZmzbgBr5fc3mfJsCjWPDtL6H8/vf16me121CC09ONyWJZnw0PUvp4qusmRwC6ZKfLDdk8F3Rq41s+yOgQD",
   "result_xdr": "AAAAAAAAAAoAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=",
   "result_meta_xdr": "AAAAAAAAAAEAAAACAAAAAAACPhoAAAAAAAAAANnXZkzhQIK9tQq7NkV0Ri4YgCsYnGW/yBEchGS/2NpFAAAAF0h26AAAAj4aAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAQACPhoAAAAAAAAAAGXNhLrhGtltTwCpmqlarh7s1DB2hIkbP//jgzn4Fos/AABT8kS2c/oAAABBAAAAZwAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA"

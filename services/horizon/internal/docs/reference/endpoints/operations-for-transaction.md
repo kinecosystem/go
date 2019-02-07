@@ -4,7 +4,7 @@ clientData:
   laboratoryUrl: https://www.stellar.org/laboratory/#explorer?resource=operations&endpoint=for_transaction
 ---
 
-This endpoint represents all [operations](../resources/operation.md) that are part of a given [transaction](../resources/transaction.md).
+This endpoint represents successful [operations](../resources/operation.md) that are part of a given [transaction](../resources/transaction.md).
 
 ## Request
 

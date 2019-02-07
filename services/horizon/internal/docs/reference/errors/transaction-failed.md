@@ -40,9 +40,9 @@ In addition, the following additional data is provided in the `extras` field of 
   "status":   400,
   "details":  "...",
   "instance": "d3465740-ec3a-4a0b-9d4a-c9ea734ce58a",
-	"extras": {
-		"envelope_xdr": "...",
-		"result_xdr": "...",
+  "extras": {
+    "envelope_xdr": "...",
+    "result_xdr": "...",
     "result_codes": {
       "transaction": "tx_failed",
       "operations": [ "op_bad_auth" ]

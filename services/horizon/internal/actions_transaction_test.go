@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub/sequence"
+	"github.com/kinecosystem/go/protocols/horizon"
 )
 
 func TestTransactionActions_Show(t *testing.T) {
@@ -17,7 +17,7 @@ func TestTransactionActions_Show(t *testing.T) {
 	w := ht.Get("/transactions/2374e99349b9ef7dba9a5db3339b78fda8f34777b1af33ba468ad5c0df946d4d")
 
 	if ht.Assert.Equal(200, w.Code) {
-		var actual resource.Transaction
+		var actual horizon.Transaction
 		err := json.Unmarshal(w.Body.Bytes(), &actual)
 		ht.Require.NoError(err)
 
@@ -77,7 +77,7 @@ func TestTransactionActions_Index(t *testing.T) {
 		ht.Assert.PageOf(2, w.Body)
 	}
 
-	// regression: https://github.com/stellar/go/services/horizon/internal/issues/365
+	// regression: https://github.com/kinecosystem/go/services/horizon/internal/issues/365
 	w = ht.Get("/transactions?limit=200")
 	ht.Require.Equal(200, w.Code)
 	w = ht.Get("/transactions?limit=201")

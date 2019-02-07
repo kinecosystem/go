@@ -74,7 +74,7 @@ func binNamesForDir(dir string) []string {
 
 	result := []string{}
 	for _, file := range files {
-		if file.IsDir() {
+		if file.IsDir() && file.Name() != "internal" {
 			result = append(result, filepath.Join(dir, file.Name()))
 		}
 	}
@@ -85,8 +85,8 @@ func binNamesForDir(dir string) []string {
 func build(pkg, dest, version, buildOS, buildArch string) {
 	buildTime := time.Now().Format(time.RFC3339)
 
-	timeFlag := fmt.Sprintf("-X github.com/stellar/go/support/app.buildTime=%s", buildTime)
-	versionFlag := fmt.Sprintf("-X github.com/stellar/go/support/app.version=%s", version)
+	timeFlag := fmt.Sprintf("-X github.com/kinecosystem/go/support/app.buildTime=%s", buildTime)
+	versionFlag := fmt.Sprintf("-X github.com/kinecosystem/go/support/app.version=%s", version)
 
 	if buildOS == "windows" {
 		dest = dest + ".exe"

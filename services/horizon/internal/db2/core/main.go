@@ -11,14 +11,16 @@ import (
 
 // Account is a row of data from the `accounts` table
 type Account struct {
-	Accountid     string
-	Balance       xdr.Int64
-	Seqnum        string
-	Numsubentries int32
-	Inflationdest null.String
-	HomeDomain    null.String
-	Thresholds    xdr.Thresholds
-	Flags         xdr.AccountFlags
+	Accountid          string
+	Balance            xdr.Int64
+	Seqnum             string
+	Numsubentries      int32
+	Inflationdest      null.String
+	HomeDomain         null.String
+	Thresholds         xdr.Thresholds
+	Flags              xdr.AccountFlags
+	BuyingLiabilities  xdr.Int64 `db:"buyingliabilities"`
+	SellingLiabilities xdr.Int64 `db:"sellingliabilities"`
 }
 
 // AccountData is a row of data from the `accountdata` table
@@ -117,13 +119,15 @@ type TransactionFee struct {
 
 // Trustline is a row of data from the `trustlines` table from stellar-core
 type Trustline struct {
-	Accountid string
-	Assettype xdr.AssetType
-	Issuer    string
-	Assetcode string
-	Tlimit    xdr.Int64
-	Balance   xdr.Int64
-	Flags     int32
+	Accountid          string
+	Assettype          xdr.AssetType
+	Issuer             string
+	Assetcode          string
+	Tlimit             xdr.Int64
+	Balance            xdr.Int64
+	Flags              int32
+	BuyingLiabilities  xdr.Int64 `db:"buyingliabilities"`
+	SellingLiabilities xdr.Int64 `db:"sellingliabilities"`
 }
 
 // AssetFromDB produces an xdr.Asset by combining the constituent type, code and

@@ -21,6 +21,9 @@ func initIngester(app *App) {
 		app.CoreSession(nil),
 		app.HorizonSession(nil),
 		app.config.CursorName,
+		ingest.Config{
+			EnableAssetStats: app.config.EnableAssetStats,
+		},
 	)
 
 	app.ingester.SkipCursorUpdate = app.config.SkipCursorUpdate

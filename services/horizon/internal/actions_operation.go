@@ -7,12 +7,11 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
 	"github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
+	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
 	"github.com/kinecosystem/go/services/horizon/internal/toid"
-	halRender "github.com/kinecosystem/go/support/render/hal"
+	"github.com/kinecosystem/go/support/render/hal"
 )
 
 // This file contains the actions:
@@ -44,7 +43,7 @@ func (action *OperationIndexAction) JSON() {
 		action.loadLedgers,
 		action.loadPage)
 	action.Do(func() {
-		halRender.Render(action.W, action.Page)
+		hal.Render(action.W, action.Page)
 	})
 }
 
@@ -66,14 +65,14 @@ func (action *OperationIndexAction) SSE(stream sse.Stream) {
 				ledger, found := action.Ledgers.Records[record.LedgerSequence()]
 				if !found {
 					msg := fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence())
-					stream.Err(errors.New(msg))
+					action.Err = errors.New(msg)
 					return
 				}
 
-				res, err := resource.NewOperation(action.Ctx, record, ledger)
+				res, err := resourceadapter.NewOperation(action.R.Context(), record, ledger)
 
 				if err != nil {
-					stream.Err(err)
+					action.Err = err
 					return
 				}
 
@@ -102,7 +101,7 @@ func (action *OperationIndexAction) GetTopic() string {
 
 func (action *OperationIndexAction) loadParams() {
 	action.ValidateCursorAsDefault()
-	action.AccountFilter = action.GetString("account_id")
+	action.AccountFilter = action.GetAddress("account_id")
 	action.LedgerFilter = action.GetInt32("ledger_id")
 	action.TransactionFilter = action.GetString("tx_id")
 	action.PagingParams = action.GetPageQuery()
@@ -144,7 +143,7 @@ func (action *OperationIndexAction) loadPage() {
 		}
 
 		var res hal.Pageable
-		res, action.Err = resource.NewOperation(action.Ctx, record, ledger)
+		res, action.Err = resourceadapter.NewOperation(action.R.Context(), record, ledger)
 		if action.Err != nil {
 			return
 		}
@@ -180,7 +179,7 @@ func (action *OperationShowAction) loadLedger() {
 }
 
 func (action *OperationShowAction) loadResource() {
-	action.Resource, action.Err = resource.NewOperation(action.Ctx, action.Record, action.Ledger)
+	action.Resource, action.Err = resourceadapter.NewOperation(action.R.Context(), action.Record, action.Ledger)
 }
 
 // JSON is a method for actions.JSON
@@ -194,7 +193,7 @@ func (action *OperationShowAction) JSON() {
 		action.loadResource,
 	)
 	action.Do(func() {
-		halRender.Render(action.W, action.Resource)
+		hal.Render(action.W, action.Resource)
 	})
 }
 

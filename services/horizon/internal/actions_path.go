@@ -1,10 +1,11 @@
 package horizon
 
 import (
+	"github.com/kinecosystem/go/protocols/horizon"
+	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/paths"
-	"github.com/kinecosystem/go/services/horizon/internal/render/hal"
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
-	halRender "github.com/kinecosystem/go/support/render/hal"
+	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
+	"github.com/kinecosystem/go/support/render/hal"
 )
 
 // PathIndexAction provides path finding
@@ -23,34 +24,38 @@ func (action *PathIndexAction) JSON() {
 		action.loadRecords,
 		action.loadPage,
 		func() {
-			halRender.Render(action.W, action.Page)
+			hal.Render(action.W, action.Page)
 		},
 	)
 }
 
 func (action *PathIndexAction) loadQuery() {
-	action.Query.DestinationAmount = action.GetAmount("destination_amount")
-	action.Query.DestinationAddress = action.GetAddress("destination_account")
+	action.Query.DestinationAmount = action.GetPositiveAmount("destination_amount")
+	action.Query.DestinationAddress = action.GetAddress("destination_account", actions.RequiredParam)
 	action.Query.DestinationAsset = action.GetAsset("destination_")
-
 }
 
 func (action *PathIndexAction) loadSourceAssets() {
+	app := AppFromContext(action.R.Context())
+	protocolVersion := app.protocolVersion
+
 	action.Err = action.CoreQ().AssetsForAddress(
 		&action.Query.SourceAssets,
 		action.GetAddress("source_account"),
+		protocolVersion,
 	)
 }
 
 func (action *PathIndexAction) loadRecords() {
-	action.Records, action.Err = action.App.paths.Find(action.Query)
+	action.Records, action.Err = action.App.paths.Find(action.Query, action.App.config.MaxPathLength)
 }
 
 func (action *PathIndexAction) loadPage() {
 	action.Page.Init()
 	for _, p := range action.Records {
-		var res resource.Path
-		action.Err = res.Populate(action.Ctx, action.Query, p)
+		var res horizon.Path
+		action.Err = resourceadapter.PopulatePath(action.R.Context(), &res, action.Query, p)
+
 		if action.Err != nil {
 			return
 		}

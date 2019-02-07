@@ -1,14 +1,13 @@
 package sse
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
 
 	"github.com/cskr/pubsub"
 	"github.com/kinecosystem/go/support/log"
-	"golang.org/x/net/context"
 )
 
 const pubsubCapacity = 0
@@ -33,22 +32,6 @@ func (e Event) SseEvent() Event {
 type Eventable interface {
 	// SseEvent returns the SSE compatible form of the implementer
 	SseEvent() Event
-}
-
-// Pumped returns a channel that will be closed the next time the input pump
-// sends.  It can be used similar to `ctx.Done()`, like so:  `<-sse.Pumped()`
-func Pumped() <-chan interface{} {
-	return nextTick
-}
-
-// Tick triggers any open SSE streams to tick by replacing and closing the
-// `nextTick` trigger channel.
-func Tick() {
-	lock.Lock()
-	prev := nextTick
-	nextTick = make(chan interface{})
-	lock.Unlock()
-	close(prev)
 }
 
 // WritePreamble prepares this http connection for streaming using Server Sent
@@ -82,7 +65,6 @@ func WriteEvent(ctx context.Context, w http.ResponseWriter, e Event) {
 		fmt.Fprint(w, "event: err\n")
 		fmt.Fprintf(w, "data: %s\n\n", e.Error.Error())
 		w.(http.Flusher).Flush()
-		log.Ctx(ctx).Error(e.Error)
 		return
 	}
 
@@ -121,9 +103,6 @@ var helloEvent = Event{
 	Event: "open",
 	Retry: 1000,
 }
-
-var lock sync.Mutex
-var nextTick chan interface{}
 
 func getJSON(val interface{}) string {
 	js, err := json.Marshal(val)
@@ -174,10 +153,4 @@ func Publish(topic string, blocking bool) {
 	} else {
 		ssePubsub.TryPub(0, topic)
 	}
-}
-
-func init() {
-	lock.Lock()
-	nextTick = make(chan interface{})
-	lock.Unlock()
 }

@@ -5,7 +5,7 @@ run_recipe File.dirname(__FILE__) + "/_common_accounts.rb"
 use_manual_close
 
 create_account :usd_gateway
-create_account :scott, :master, "6000.0"
+create_account :scott, :master, "1000000.0"
 create_account :andrew, :master, "6000.0"
 
 close_ledger

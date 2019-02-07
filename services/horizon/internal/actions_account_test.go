@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
+	"github.com/kinecosystem/go/protocols/horizon"
 )
 
 func TestAccountActions_Show(t *testing.T) {
@@ -17,14 +17,14 @@ func TestAccountActions_Show(t *testing.T) {
 	)
 	if ht.Assert.Equal(200, w.Code) {
 
-		var result resource.Account
+		var result horizon.Account
 		err := json.Unmarshal(w.Body.Bytes(), &result)
 		ht.Require.NoError(err)
 		ht.Assert.Equal("3", result.Sequence)
 	}
 
 	// missing account
-	w = ht.Get("/accounts/100")
+	w = ht.Get("/accounts/GDBAPLDCAEJV6LSEDFEAUDAVFYSNFRUYZ4X75YYJJMMX5KFVUOHX46SQ")
 	ht.Assert.Equal(404, w.Code)
 }
 
@@ -35,7 +35,7 @@ func TestAccountActions_ShowRegressions(t *testing.T) {
 	w := ht.Get(
 		"/accounts/GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
 	)
-	var result resource.Account
+	var result horizon.Account
 	err := json.Unmarshal(w.Body.Bytes(), &result)
 	ht.Require.NoError(err)
 
@@ -55,4 +55,15 @@ func TestAccountActions_ShowRegressions(t *testing.T) {
 	)
 	ht.Assert.Equal(200, w.Code)
 
+}
+
+func TestAccountActions_InvalidID(t *testing.T) {
+	ht := StartHTTPTest(t, "base")
+	defer ht.Finish()
+
+	// existing account
+	w := ht.Get(
+		"/accounts/=cr%FF%98%CB%F3%AF%E72%D85%FE%28%15y%8Fz%C4Ng%CE%98h%02%2A:%B6%FF%B9%CF%92%88O%91%10d&S%7C%9Bi%D4%CFI%28%CFo",
+	)
+	ht.Assert.Equal(400, w.Code)
 }

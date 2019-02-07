@@ -3,17 +3,16 @@ package horizon
 import (
 	"net/http"
 
-	"github.com/zenazn/goji/web"
-	"github.com/zenazn/goji/web/mutil"
+	"github.com/go-chi/chi/middleware"
 )
 
 // Middleware that records metrics.
 //
 // It records success and failures using a meter, and times every request
-func requestMetricsMiddleware(c *web.C, h http.Handler) http.Handler {
+func requestMetricsMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app := c.Env["app"].(*App)
-		mw := mutil.WrapWriter(w)
+		app := AppFromContext(r.Context())
+		mw := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
 		app.web.requestTimer.Time(func() {
 			h.ServeHTTP(mw.(http.ResponseWriter), r)

@@ -1,10 +1,12 @@
 package xdr_test
 
 import (
-	. "github.com/kinecosystem/go/xdr"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/kinecosystem/go/xdr"
+	"github.com/stretchr/testify/assert"
 )
 
 var _ = Describe("xdr.Asset#Extract()", func() {
@@ -175,3 +177,24 @@ var _ = Describe("xdr.Asset#Equals()", func() {
 	})
 
 })
+
+func TestAssetSetCredit(t *testing.T) {
+	issuer := AccountId{}
+	issuer.SetAddress("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H")
+
+	a := &Asset{}
+	a.SetCredit("USD", issuer)
+	assert.Nil(t, a.AlphaNum12)
+	assert.NotNil(t, a.AlphaNum4)
+	assert.Equal(t, AssetTypeAssetTypeCreditAlphanum4, a.Type)
+	assert.Equal(t, issuer, a.AlphaNum4.Issuer)
+	assert.Equal(t, [4]byte{'U', 'S', 'D', 0}, a.AlphaNum4.AssetCode)
+
+	a = &Asset{}
+	a.SetCredit("USDUSD", issuer)
+	assert.Nil(t, a.AlphaNum4)
+	assert.NotNil(t, a.AlphaNum12)
+	assert.Equal(t, AssetTypeAssetTypeCreditAlphanum12, a.Type)
+	assert.Equal(t, issuer, a.AlphaNum12.Issuer)
+	assert.Equal(t, [12]byte{'U', 'S', 'D', 'U', 'S', 'D', 0, 0, 0, 0, 0, 0}, a.AlphaNum12.AssetCode)
+}

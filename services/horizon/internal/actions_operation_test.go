@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kinecosystem/go/protocols/horizon/operations"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/resource/operations"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 )
 
@@ -104,7 +104,7 @@ func TestOperationActions_Regressions(t *testing.T) {
 
 	// ensure that trying to stream ops from an account that doesn't exist
 	// fails before streaming the hello message.  Regression test for #285
-	w := ht.Get("/accounts/foo/operations?limit=1", test.RequestHelperStreaming)
+	w := ht.Get("/accounts/GAS2FZOQRFVHIDY35TUSBWFGCROPLWPZVFRN5JZEOUUVRGDRZGHPBLYZ/operations?limit=1", test.RequestHelperStreaming)
 	if ht.Assert.Equal(404, w.Code) {
 		ht.Assert.ProblemType(w.Body, "not_found")
 	}
@@ -135,4 +135,18 @@ func TestOperation_CreatedAt(t *testing.T) {
 	ht.Require.NoError(hq.LedgerBySequence(&l, 3))
 
 	ht.Assert.WithinDuration(l.ClosedAt, records[0].LedgerCloseTime, 1*time.Second)
+}
+
+func TestOperation_BumpSequence(t *testing.T) {
+	ht := StartHTTPTest(t, "kahuna")
+	defer ht.Finish()
+
+	w := ht.Get("/operations/261993009153")
+	if ht.Assert.Equal(200, w.Code) {
+		var result operations.BumpSequence
+		err := json.Unmarshal(w.Body.Bytes(), &result)
+		ht.Require.NoError(err, "failed to parse body")
+		ht.Assert.Equal("bump_sequence", result.Type)
+		ht.Assert.Equal("300000000003", result.BumpTo)
+	}
 }

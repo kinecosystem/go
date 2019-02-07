@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"strconv"
 	"sync"
 
@@ -11,12 +10,19 @@ import (
 	"github.com/kinecosystem/go/support/errors"
 )
 
+// TxResult is the result from the asynchronous submit transaction method over a channel
+type TxResult struct {
+	maybeTransactionSuccess *horizon.TransactionSuccess
+	maybeErr                error
+}
+
 // Bot represents the friendbot subsystem.
 type Bot struct {
-	Horizon         *horizon.Client
-	Secret          string
-	Network         string
-	StartingBalance string
+	Horizon           *horizon.Client
+	Secret            string
+	Network           string
+	StartingBalance   string
+	SubmitTransaction func(bot *Bot, channel chan TxResult, signed string)
 
 	// uninitialized
 	sequence             uint64
@@ -24,47 +30,41 @@ type Bot struct {
 	lock                 sync.Mutex
 }
 
-// Pay funds to account.
+// Pay funds the account at `destAddress`
 //
-// amount is the amount to fund, capped at Bot.StartingBalance.
-// Setting isFundRequest to true will submit a transaction with a Payment instead of CreateAccount operation.
+// `amount` is the amount to fund, capped at Bot.StartingBalance.
+// Setting `isFundRequest` to true will submit a transaction with a Payment instead of CreateAccount operation.
 func (bot *Bot) Pay(destAddress string, amount string, isFundRequest bool) (*horizon.TransactionSuccess, error) {
-	channel := make(chan interface{})
-	shouldReadChannel, result, err := bot.lockedPay(channel, destAddress, amount, isFundRequest)
-	if !shouldReadChannel {
-		return result, err
+	channel := make(chan TxResult)
+	err := bot.lockedPay(channel, destAddress, amount, isFundRequest)
+	if err != nil {
+		return nil, err
 	}
 
 	v := <-channel
-	switch tv := v.(type) {
-	case horizon.TransactionSuccess:
-		return &tv, nil
-	case error:
-		return nil, tv
-	default:
-		return nil, fmt.Errorf("failed to submit async txn")
-	}
+	return v.maybeTransactionSuccess, v.maybeErr
 }
 
-func (bot *Bot) lockedPay(channel chan interface{}, destAddress string, amount string, isFundRequest bool) (bool, *horizon.TransactionSuccess, error) {
+func (bot *Bot) lockedPay(channel chan TxResult, destAddress string, amount string, isFundRequest bool) error {
 	bot.lock.Lock()
 	defer bot.lock.Unlock()
 
 	err := bot.checkSequenceRefresh()
 	if err != nil {
-		return false, nil, err
+		return err
 	}
 
 	signed, err := bot.makeTx(destAddress, amount, isFundRequest)
 	if err != nil {
-		return false, nil, err
+		return err
 	}
 
-	go bot.asyncSubmitTransaction(channel, signed)
-	return true, nil, nil
+	go bot.SubmitTransaction(bot, channel, signed)
+	return nil
 }
 
-func (bot *Bot) asyncSubmitTransaction(channel chan interface{}, signed string) {
+// AsyncSubmitTransaction should be passed into the bot
+func AsyncSubmitTransaction(bot *Bot, channel chan TxResult, signed string) {
 	result, err := bot.Horizon.SubmitTransaction(signed)
 	if err != nil {
 		switch e := err.(type) {
@@ -72,9 +72,15 @@ func (bot *Bot) asyncSubmitTransaction(channel chan interface{}, signed string) 
 			bot.checkHandleBadSequence(e)
 		}
 
-		channel <- err
+		channel <- TxResult{
+			maybeTransactionSuccess: nil,
+			maybeErr:                err,
+		}
 	} else {
-		channel <- result
+		channel <- TxResult{
+			maybeTransactionSuccess: &result,
+			maybeErr:                nil,
+		}
 	}
 }
 
@@ -105,11 +111,13 @@ func (bot *Bot) makeTx(destAddress string, amount string, isFundRequest bool) (s
 	if isFundRequest {
 		ops = append(ops, b.Payment(
 			b.Destination{AddressOrSeed: destAddress},
-			b.NativeAmount{Amount: amount}))
+			b.NativeAmount{Amount: amount},
+		))
 	} else {
 		ops = append(ops, b.CreateAccount(
 			b.Destination{AddressOrSeed: destAddress},
-			b.NativeAmount{Amount: amount}))
+			b.NativeAmount{Amount: amount},
+		))
 	}
 
 	txn, err := b.Transaction(ops...)

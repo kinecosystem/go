@@ -1,32 +1,33 @@
 package horizon
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"runtime"
 	"sync"
 	"time"
 
-	"github.com/kinecosystem/go/clients/stellarcore"
-
-	"github.com/kinecosystem/go/support/app"
-
-	"github.com/garyburd/redigo/redis"
-	metrics "github.com/rcrowley/go-metrics"
+	"github.com/gomodule/redigo/redis"
+	"github.com/rcrowley/go-metrics"
 	"github.com/kinecosystem/go/build"
+	"github.com/kinecosystem/go/clients/stellarcore"
+	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/ingest"
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	"github.com/kinecosystem/go/services/horizon/internal/log"
+	"github.com/kinecosystem/go/services/horizon/internal/operationfeestats"
 	"github.com/kinecosystem/go/services/horizon/internal/paths"
 	"github.com/kinecosystem/go/services/horizon/internal/reap"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub"
-	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
+	"github.com/kinecosystem/go/support/app"
 	"github.com/kinecosystem/go/support/db"
-	"golang.org/x/net/context"
+	"github.com/kinecosystem/go/support/log"
+	"github.com/throttled/throttled"
 	"golang.org/x/net/http2"
-	graceful "gopkg.in/tylerb/graceful.v1"
+	"gopkg.in/tylerb/graceful.v1"
 )
 
 // App represents the root of the state of a horizon instance.
@@ -73,7 +74,6 @@ func NewApp(config Config) (*App, error) {
 // the shutdown signals.
 func (a *App) Serve() {
 
-	a.web.router.Compile()
 	http.Handle("/", a.web.router)
 
 	addr := fmt.Sprintf(":%d", a.config.Port)
@@ -82,8 +82,9 @@ func (a *App) Serve() {
 		Timeout: 10 * time.Second,
 
 		Server: &http.Server{
-			Addr:    addr,
-			Handler: http.DefaultServeMux,
+			Addr:              addr,
+			Handler:           http.DefaultServeMux,
+			ReadHeaderTimeout: 5 * time.Second,
 		},
 
 		ShutdownInitiated: func() {
@@ -187,6 +188,59 @@ Failed:
 
 }
 
+// UpdateOperationFeeStatsState triggers a refresh of several operation fee metrics
+func (a *App) UpdateOperationFeeStatsState() {
+	var err error
+	var next operationfeestats.State
+
+	var latest history.LatestLedger
+	var feeStats history.FeeStats
+
+	cur := operationfeestats.CurrentState()
+
+	err = a.HistoryQ().LatestLedgerBaseFeeAndSequence(&latest)
+	if err != nil {
+		goto Failed
+	}
+
+	// finish early if no new ledgers
+	if cur.LastLedger == int64(latest.Sequence) {
+		return
+	}
+
+	next.LastBaseFee = int64(latest.BaseFee)
+	next.LastLedger = int64(latest.Sequence)
+
+	err = a.HistoryQ().TransactionsForLastXLedgers(latest.Sequence, &feeStats)
+	if err != nil {
+		goto Failed
+	}
+
+	// if no transactions in last X ledgers, return
+	// latest ledger's base fee for all
+	if !feeStats.Mode.Valid && !feeStats.Min.Valid {
+		next.Min = next.LastBaseFee
+		next.Mode = next.LastBaseFee
+	} else {
+		next.Min = feeStats.Min.Int64
+		next.Mode = feeStats.Mode.Int64
+	}
+
+	operationfeestats.SetState(next)
+	return
+
+Failed:
+	// If DB is empty ignore the error
+	if err == sql.ErrNoRows {
+		return
+	}
+
+	log.WithStack(err).
+		WithField("err", err.Error()).
+		Error("failed to load operation fee stats state")
+
+}
+
 // UpdateStellarCoreInfo updates the value of coreVersion and networkPassphrase
 // from the Stellar core API.
 func (a *App) UpdateStellarCoreInfo() {
@@ -238,13 +292,10 @@ func (a *App) DeleteUnretainedHistory() error {
 func (a *App) Tick() {
 	var wg sync.WaitGroup
 	log.Debug("ticking app")
-	// update ledger state and stellar-core info in parallel
-
-	// Getting current ledger as reference, to avoid running sse tick in case of no ledger change
-	initialLedgerState := ledger.CurrentState()
-
-	wg.Add(2)
+	// update ledger state, operation fee state, and stellar-core info in parallel
+	wg.Add(3)
 	go func() { a.UpdateLedgerState(); wg.Done() }()
+	go func() { a.UpdateOperationFeeStatsState(); wg.Done() }()
 	go func() { a.UpdateStellarCoreInfo(); wg.Done() }()
 	wg.Wait()
 
@@ -256,13 +307,6 @@ func (a *App) Tick() {
 	go func() { a.reaper.Tick(); wg.Done() }()
 	go func() { a.submitter.Tick(a.ctx); wg.Done() }()
 	wg.Wait()
-
-	// Execute SSE only if there were in changes to ledger or history
-	newLedgerState := ledger.CurrentState()
-	if newLedgerState.CoreLatest > initialLedgerState.CoreLatest ||
-		newLedgerState.HistoryLatest > initialLedgerState.HistoryLatest {
-		sse.Tick()
-	}
 
 	// finally, update metrics
 	a.UpdateMetrics()
@@ -287,4 +331,35 @@ func (a *App) run() {
 			return
 		}
 	}
+}
+
+// Context create a context on from the App type.
+func (a *App) Context(ctx context.Context) context.Context {
+	return context.WithValue(ctx, &horizonContext.AppContextKey, a)
+}
+
+// GetRateLimiter returns the HTTPRateLimiter of the App.
+func (a *App) GetRateLimiter() *throttled.HTTPRateLimiter {
+	return a.web.rateLimiter
+}
+
+// AppFromContext returns the set app, if one has been set, from the
+// provided context returns nil if no app has been set.
+func AppFromContext(ctx context.Context) *App {
+	if ctx == nil {
+		return nil
+	}
+
+	val := ctx.Value(&horizonContext.AppContextKey)
+	if val == nil {
+		return nil
+	}
+
+	result, ok := val.(*App)
+
+	if ok {
+		return result
+	}
+
+	return nil
 }

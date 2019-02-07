@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
+	"github.com/kinecosystem/go/protocols/horizon"
 )
 
 func TestOrderBookActions_Show(t *testing.T) {
 	ht := StartHTTPTest(t, "order_books")
 	defer ht.Finish()
 
-	var result resource.OrderBookSummary
+	var result horizon.OrderBookSummary
 
 	// with no query args
 	w := ht.Get("/order_book")

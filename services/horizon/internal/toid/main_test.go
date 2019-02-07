@@ -5,87 +5,133 @@ import (
 	"math"
 	"testing"
 
-	_ "github.com/lib/pq"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestTotalOrderID(t *testing.T) {
-	ledger := int64(4294967296) // ledger sequence 1
-	tx := int64(4096)           // tx index 1
-	op := int64(1)              // op index 1
+var ledger = int64(4294967296) // ledger sequence 1
+var tx = int64(4096)           // tx index 1
+var op = int64(1)              // op index 1
 
-	Convey("TotalOrderID.ToInt64", t, func() {
-		Convey("accomodates 12-bits of precision for the operation", func() {
-			So((&ID{0, 0, 1}).ToInt64(), ShouldEqual, 1)
-			So((&ID{0, 0, 4095}).ToInt64(), ShouldEqual, 4095)
-			So(func() { (&ID{0, 0, 4096}).ToInt64() }, ShouldPanic)
+func TestID_ToInt64(t *testing.T) {
+	testCases := []struct {
+		id          *ID
+		expected    int64
+		shouldPanic bool
+	}{
+		// accomodates 12-bits of precision for the operation field
+		{
+			id:       &ID{0, 0, 1},
+			expected: 1,
+		},
+		{
+			id:       &ID{0, 0, 4095},
+			expected: 4095,
+		},
+		{
+			id:          &ID{0, 0, 4096},
+			shouldPanic: true,
+		},
+		// accomodates 20-bits of precision for the transaction field
+		{
+			id:       &ID{0, 1, 0},
+			expected: 4096,
+		},
+		{
+			id:       &ID{0, 1048575, 0},
+			expected: 4294963200,
+		},
+		{
+			id:          &ID{0, 1048576, 0},
+			shouldPanic: true,
+		},
+		// accomodates 32-bits of precision for the ledger field
+		{
+			id:       &ID{1, 0, 0},
+			expected: 4294967296,
+		},
+		{
+			id:       &ID{math.MaxInt32, 0, 0},
+			expected: 9223372032559808512,
+		},
+		{
+			id:          &ID{-1, 0, 0},
+			shouldPanic: true,
+		},
+		{
+			id:          &ID{math.MinInt32, 0, 0},
+			shouldPanic: true,
+		},
+		// works as expected
+		{
+			id:       &ID{1, 1, 1},
+			expected: ledger + tx + op,
+		},
+		{
+			id:       &ID{1, 1, 0},
+			expected: ledger + tx,
+		},
+		{
+			id:       &ID{1, 0, 1},
+			expected: ledger + op,
+		},
+		{
+			id:       &ID{1, 0, 0},
+			expected: ledger,
+		},
+		{
+			id:       &ID{0, 1, 0},
+			expected: tx,
+		},
+		{
+			id:       &ID{0, 0, 1},
+			expected: op,
+		},
+		{
+			id:       &ID{0, 0, 0},
+			expected: 0,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run("Testing ToInt64", func(t *testing.T) {
+			if tc.shouldPanic {
+				assert.Panics(t, func() {
+					tc.id.ToInt64()
+				})
+				return
+			}
+			assert.Equal(t, tc.expected, tc.id.ToInt64())
 		})
+	}
+}
 
-		Convey("accomodates 20-bits of precision for the transaction", func() {
-			So((&ID{0, 1, 0}).ToInt64(), ShouldEqual, 4096)
-			So((&ID{0, 1048575, 0}).ToInt64(), ShouldEqual, 4294963200)
-			So(func() { (&ID{0, 1048576, 0}).ToInt64() }, ShouldPanic)
+func TestParse(t *testing.T) {
+	testCases := []struct {
+		parsed   ID
+		expected ID
+	}{
+		{Parse(ledger + tx + op), ID{1, 1, 1}},
+		{Parse(ledger + tx), ID{1, 1, 0}},
+		{Parse(ledger + op), ID{1, 0, 1}},
+		{Parse(ledger), ID{1, 0, 0}},
+		{Parse(tx), ID{0, 1, 0}},
+		{Parse(op), ID{0, 0, 1}},
+	}
+	for _, tc := range testCases {
+		t.Run("Testing Parse", func(t *testing.T) {
+			assert.Equal(t, tc.expected, tc.parsed)
 		})
+	}
+}
 
-		Convey("accomodates 32-bits of precision for the ledger", func() {
-			So((&ID{1, 0, 0}).ToInt64(), ShouldEqual, 4294967296)
-			So((&ID{math.MaxInt32, 0, 0}).ToInt64(), ShouldEqual, 9223372032559808512)
-			So(func() { (&ID{-1, 0, 0}).ToInt64() }, ShouldPanic)
-			So(func() { (&ID{math.MinInt32, 0, 0}).ToInt64() }, ShouldPanic)
-		})
-
-		Convey("works as expected", func() {
-			So((&ID{1, 1, 1}).ToInt64(), ShouldEqual, ledger+tx+op)
-			So((&ID{1, 1, 0}).ToInt64(), ShouldEqual, ledger+tx)
-			So((&ID{1, 0, 1}).ToInt64(), ShouldEqual, ledger+op)
-			So((&ID{1, 0, 0}).ToInt64(), ShouldEqual, ledger)
-			So((&ID{0, 1, 0}).ToInt64(), ShouldEqual, tx)
-			So((&ID{0, 0, 1}).ToInt64(), ShouldEqual, op)
-			So((&ID{0, 0, 0}).ToInt64(), ShouldEqual, 0)
-		})
-	})
-
-	Convey("Parse", t, func() {
-		toid := Parse(ledger + tx + op)
-		So(toid.LedgerSequence, ShouldEqual, 1)
-		So(toid.TransactionOrder, ShouldEqual, 1)
-		So(toid.OperationOrder, ShouldEqual, 1)
-
-		toid = Parse(ledger + tx)
-		So(toid.LedgerSequence, ShouldEqual, 1)
-		So(toid.TransactionOrder, ShouldEqual, 1)
-		So(toid.OperationOrder, ShouldEqual, 0)
-
-		toid = Parse(ledger + op)
-		So(toid.LedgerSequence, ShouldEqual, 1)
-		So(toid.TransactionOrder, ShouldEqual, 0)
-		So(toid.OperationOrder, ShouldEqual, 1)
-
-		toid = Parse(ledger)
-		So(toid.LedgerSequence, ShouldEqual, 1)
-		So(toid.TransactionOrder, ShouldEqual, 0)
-		So(toid.OperationOrder, ShouldEqual, 0)
-
-		toid = Parse(tx)
-		So(toid.LedgerSequence, ShouldEqual, 0)
-		So(toid.TransactionOrder, ShouldEqual, 1)
-		So(toid.OperationOrder, ShouldEqual, 0)
-
-		toid = Parse(op)
-		So(toid.LedgerSequence, ShouldEqual, 0)
-		So(toid.TransactionOrder, ShouldEqual, 0)
-		So(toid.OperationOrder, ShouldEqual, 1)
-	})
-
-	Convey("IncOperationOrder", t, func() {
-		tid := ID{0, 0, 0}
-		tid.IncOperationOrder()
-		So(tid.OperationOrder, ShouldEqual, 1)
-		tid.OperationOrder = OperationMask
-		tid.IncOperationOrder()
-		So(tid.OperationOrder, ShouldEqual, 0)
-		So(tid.LedgerSequence, ShouldEqual, 1)
-	})
+// Test InOperationOrder to make sure it rolls over to the next ledger sequence if overflow occurs.
+func TestID_IncOperationOrder(t *testing.T) {
+	tid := ID{0, 0, 0}
+	tid.IncOperationOrder()
+	assert.Equal(t, int32(1), tid.OperationOrder)
+	tid.OperationOrder = OperationMask
+	tid.IncOperationOrder()
+	assert.Equal(t, int32(0), tid.OperationOrder)
+	assert.Equal(t, int32(1), tid.LedgerSequence)
 }
 
 func ExampleParse() {

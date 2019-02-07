@@ -4,18 +4,19 @@ import (
 	"testing"
 
 	"github.com/kinecosystem/go/network"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 )
 
-func TestIngest(t *testing.T) {
+func TestIngest_Kahuna1(t *testing.T) {
 	tt := test.Start(t).ScenarioWithoutHorizon("kahuna")
 	defer tt.Finish()
 
-	s := ingest(tt)
+	s := ingest(tt, false)
 
 	tt.Require.NoError(s.Err)
-	tt.Assert.Equal(57, s.Ingested)
+	tt.Assert.Equal(62, s.Ingested)
 
 	// Test that re-importing fails
 	s.Err = nil
@@ -29,10 +30,29 @@ func TestIngest(t *testing.T) {
 	tt.Require.NoError(s.Err, "Couldn't re-import, even with clear allowed")
 }
 
+func TestIngest_Kahuna2(t *testing.T) {
+	tt := test.Start(t).ScenarioWithoutHorizon("kahuna-2")
+	defer tt.Finish()
+
+	s := ingest(tt, false)
+
+	tt.Require.NoError(s.Err)
+	tt.Assert.Equal(6, s.Ingested)
+
+	// ensure that the onetime signer is gone
+	q := core.Q{Session: tt.CoreSession()}
+	var signers []core.Signer
+
+	err := q.SignersByAddress(&signers, "GD6NTRJW5Z6NCWH4USWMNEYF77RUR2MTO6NP4KEDVJATTCUXDRO3YIFS")
+	tt.Require.NoError(err)
+
+	tt.Assert.Len(signers, 1)
+}
+
 func TestTick(t *testing.T) {
 	tt := test.Start(t).ScenarioWithoutHorizon("base")
 	defer tt.Finish()
-	sys := sys(tt)
+	sys := sys(tt, false)
 
 	// ingest by tick
 	s := sys.Tick()
@@ -45,8 +65,8 @@ func TestTick(t *testing.T) {
 	tt.Require.NoError(s.Err)
 }
 
-func ingest(tt *test.T) *Session {
-	sys := sys(tt)
+func ingest(tt *test.T, enableAssetStats bool) *Session {
+	sys := sys(tt, enableAssetStats)
 	s := NewSession(sys)
 	s.Cursor = NewCursor(1, ledger.CurrentState().CoreLatest, sys)
 	s.Run()
@@ -54,12 +74,13 @@ func ingest(tt *test.T) *Session {
 	return s
 }
 
-func sys(tt *test.T) *System {
+func sys(tt *test.T, enableAssetStats bool) *System {
 	return New(
 		network.TestNetworkPassphrase,
 		"",
 		tt.CoreSession(),
 		tt.HorizonSession(),
 		"HORIZON",
+		Config{EnableAssetStats: enableAssetStats},
 	)
 }

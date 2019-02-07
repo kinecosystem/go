@@ -72,6 +72,8 @@ func String(code interface{}) (string, error) {
 			return "op_bad_auth", nil
 		case xdr.OperationResultCodeOpNoAccount:
 			return "op_no_source_account", nil
+		case xdr.OperationResultCodeOpNotSupported:
+			return "op_not_supported", nil
 		}
 	case xdr.CreateAccountResultCode:
 		switch code {
@@ -228,6 +230,10 @@ func String(code interface{}) (string, error) {
 			return "op_immutable_set", nil
 		case xdr.AccountMergeResultCodeAccountMergeHasSubEntries:
 			return "op_has_sub_entries", nil
+		case xdr.AccountMergeResultCodeAccountMergeSeqnumTooFar:
+			return "op_seq_num_too_far", nil
+		case xdr.AccountMergeResultCodeAccountMergeDestFull:
+			return "op_dest_full", nil
 		}
 	case xdr.InflationResultCode:
 		switch code {
@@ -235,6 +241,26 @@ func String(code interface{}) (string, error) {
 			return OpSuccess, nil
 		case xdr.InflationResultCodeInflationNotTime:
 			return "op_not_time", nil
+		}
+	case xdr.ManageDataResultCode:
+		switch code {
+		case xdr.ManageDataResultCodeManageDataSuccess:
+			return OpSuccess, nil
+		case xdr.ManageDataResultCodeManageDataNotSupportedYet:
+			return "op_not_supported_yet", nil
+		case xdr.ManageDataResultCodeManageDataNameNotFound:
+			return "op_data_name_not_found", nil
+		case xdr.ManageDataResultCodeManageDataLowReserve:
+			return "op_low_reserve", nil
+		case xdr.ManageDataResultCodeManageDataInvalidName:
+			return "op_data_invalid_name", nil
+		}
+	case xdr.BumpSequenceResultCode:
+		switch code {
+		case xdr.BumpSequenceResultCodeBumpSequenceSuccess:
+			return OpSuccess, nil
+		case xdr.BumpSequenceResultCodeBumpSequenceBadSeq:
+			return "op_bad_seq", nil
 		}
 	}
 
@@ -272,6 +298,10 @@ func ForOperationResult(opr xdr.OperationResult) (string, error) {
 		ic = ir.MustAccountMergeResult().Code
 	case xdr.OperationTypeInflation:
 		ic = ir.MustInflationResult().Code
+	case xdr.OperationTypeManageData:
+		ic = ir.MustManageDataResult().Code
+	case xdr.OperationTypeBumpSequence:
+		ic = ir.MustBumpSeqResult().Code
 	}
 
 	return String(ic)

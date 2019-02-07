@@ -6,11 +6,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bartekn/go-bip39"
 	"github.com/spf13/cobra"
 	"github.com/kinecosystem/go/exp/crypto/derivation"
 	"github.com/kinecosystem/go/keypair"
 	"github.com/kinecosystem/go/support/errors"
+	"github.com/tyler-smith/go-bip39"
 )
 
 var wordsRegexp = regexp.MustCompile(`^[a-z]+$`)

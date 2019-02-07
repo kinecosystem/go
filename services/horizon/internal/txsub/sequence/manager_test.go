@@ -3,52 +3,53 @@ package sequence
 import (
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestManager(t *testing.T) {
-	Convey("Manager", t, func() {
-		mgr := NewManager()
+// Test the Push method
+func TestManager_Push(t *testing.T) {
+	mgr := NewManager()
 
-		Convey("Push", func() {
-			mgr.Push("1", 2)
-			mgr.Push("1", 2)
-			mgr.Push("1", 3)
-			mgr.Push("2", 2)
+	mgr.Push("1", 2)
+	mgr.Push("1", 2)
+	mgr.Push("1", 3)
+	mgr.Push("2", 2)
 
-			So(mgr.Size(), ShouldEqual, 4)
-			So(mgr.queues["1"].Size(), ShouldEqual, 3)
-			So(mgr.queues["2"].Size(), ShouldEqual, 1)
-		})
+	assert.Equal(t, 4, mgr.Size())
+	assert.Equal(t, 3, mgr.queues["1"].Size())
+	assert.Equal(t, 1, mgr.queues["2"].Size())
+}
 
-		Convey("Update", func() {
-			results := []<-chan error{
-				mgr.Push("1", 2),
-				mgr.Push("1", 3),
-				mgr.Push("2", 2),
-			}
+// Test the Update method
+func TestManager_Update(t *testing.T) {
+	mgr := NewManager()
+	results := []<-chan error{
+		mgr.Push("1", 2),
+		mgr.Push("1", 3),
+		mgr.Push("2", 2),
+	}
 
-			mgr.Update(map[string]uint64{
-				"1": 1,
-				"2": 1,
-			})
-
-			So(mgr.Size(), ShouldEqual, 1)
-			_, ok := mgr.queues["2"]
-			So(ok, ShouldBeFalse)
-
-			So(<-results[0], ShouldEqual, nil)
-			So(<-results[2], ShouldEqual, nil)
-			So(len(results[1]), ShouldEqual, 0)
-		})
-
-		Convey("Push returns ErrNoMoreRoom when fill", func() {
-			for i := 0; i < mgr.MaxSize; i++ {
-				mgr.Push("1", 2)
-			}
-
-			So(mgr.Size(), ShouldEqual, 1024)
-			So(<-mgr.Push("1", 2), ShouldEqual, ErrNoMoreRoom)
-		})
+	mgr.Update(map[string]uint64{
+		"1": 1,
+		"2": 1,
 	})
+
+	assert.Equal(t, 1, mgr.Size())
+	_, ok := mgr.queues["2"]
+	assert.False(t, ok)
+
+	assert.Equal(t, nil, <-results[0])
+	assert.Equal(t, nil, <-results[2])
+	assert.Equal(t, 0, len(results[1]))
+}
+
+// Push until maximum queue size is reached and check that another push results in ErrNoMoreRoom
+func TestManager_PushNoMoreRoom(t *testing.T) {
+	mgr := NewManager()
+	for i := 0; i < mgr.MaxSize; i++ {
+		mgr.Push("1", 2)
+	}
+
+	assert.Equal(t, 1024, mgr.Size())
+	assert.Equal(t, ErrNoMoreRoom, <-mgr.Push("1", 2))
 }

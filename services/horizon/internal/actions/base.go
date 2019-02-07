@@ -1,16 +1,16 @@
 package actions
 
 import (
+	"database/sql"
 	"net/http"
 
-	gctx "github.com/goji/context"
-
+	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
 	"github.com/kinecosystem/go/services/horizon/internal/render"
 	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/support/log"
 	"github.com/kinecosystem/go/support/render/problem"
-	"github.com/zenazn/goji/web"
-	"golang.org/x/net/context"
 )
 
 // Base is a helper struct you can use as part of a custom action via
@@ -18,11 +18,9 @@ import (
 //
 // TODO: example usage
 type Base struct {
-	Ctx     context.Context
-	GojiCtx web.C
-	W       http.ResponseWriter
-	R       *http.Request
-	Err     error
+	W   http.ResponseWriter
+	R   *http.Request
+	Err error
 
 	isSetup bool
 }
@@ -30,17 +28,16 @@ type Base struct {
 // Prepare established the common attributes that get used in nearly every
 // action.  "Child" actions may override this method to extend action, but it
 // is advised you also call this implementation to maintain behavior.
-func (base *Base) Prepare(c web.C, w http.ResponseWriter, r *http.Request) {
-	base.Ctx = gctx.FromC(c)
-	base.GojiCtx = c
+func (base *Base) Prepare(w http.ResponseWriter, r *http.Request) {
 	base.W = w
 	base.R = r
 }
 
-// Execute trigger content negottion and the actual execution of one of the
+// Execute trigger content negotiation and the actual execution of one of the
 // action's handlers.
 func (base *Base) Execute(action interface{}) {
-	contentType := render.Negotiate(base.Ctx, base.R)
+	ctx := base.R.Context()
+	contentType := render.Negotiate(base.R)
 
 	switch contentType {
 	case render.MimeHal, render.MimeJSON:
@@ -53,7 +50,7 @@ func (base *Base) Execute(action interface{}) {
 		action.JSON()
 
 		if base.Err != nil {
-			problem.Render(base.Ctx, base.W, base.Err)
+			problem.Render(ctx, base.W, base.Err)
 			return
 		}
 
@@ -73,29 +70,60 @@ func (base *Base) Execute(action interface{}) {
 			defer sse.Unsubscribe(pumped, topic)
 		}
 
-		stream := sse.NewStream(base.Ctx, base.W, base.R)
+		stream := sse.NewStream(ctx, base.W)
 
 		for {
+			// Rate limit the request if it's a call to stream since it queries the DB every second. See
+			// https://github.com/kinecosystem/go/issues/715 for more details.
+			app := base.R.Context().Value(&horizonContext.AppContextKey)
+			rateLimiter := app.(RateLimiterProvider).GetRateLimiter()
+			if rateLimiter != nil {
+				limited, _, err := rateLimiter.RateLimiter.RateLimit(rateLimiter.VaryBy.Key(base.R), 1)
+				if err != nil {
+					log.Ctx(ctx).Error(errors.Wrap(err, "RateLimiter error"))
+					stream.Err(errors.New("Unexpected stream error"))
+					return
+				}
+				if limited {
+					stream.Err(errors.New("rate limit exceeded"))
+					return
+				}
+			}
+
 			action.SSE(stream)
 
 			if base.Err != nil {
-				// in the case that we haven't yet sent an event, is also means we
-				// havent sent the preamble, meaning we should simply return the normal
+				// In the case that we haven't yet sent an event, is also means we
+				// haven't sent the preamble, meaning we should simply return the normal HTTP
 				// error.
 				if stream.SentCount() == 0 {
-					problem.Render(base.Ctx, base.W, base.Err)
+					problem.Render(ctx, base.W, base.Err)
 					return
 				}
 
+				if errors.Cause(base.Err) == sql.ErrNoRows {
+					base.Err = errors.New("Object not found")
+				} else {
+					log.Ctx(ctx).Error(base.Err)
+					base.Err = errors.New("Unexpected stream error")
+				}
+
+				// Send errors through the stream and then close the stream.
 				stream.Err(base.Err)
 			}
+
+			// Manually send the preamble in case there are no data events in SSE to trigger a stream.Send call.
+			// This method is called every iteration of the loop, but is protected by a sync.Once variable so it's
+			// only executed once.
+			stream.Init()
 
 			if stream.IsDone() {
 				return
 			}
 
 			select {
-			case <-base.Ctx.Done():
+			case <-ctx.Done():
+				stream.Done()
 				return
 			case <-pumped:
 				//no-op, continue onto the next iteration
@@ -111,7 +139,7 @@ func (base *Base) Execute(action interface{}) {
 		action.Raw()
 
 		if base.Err != nil {
-			problem.Render(base.Ctx, base.W, base.Err)
+			problem.Render(ctx, base.W, base.Err)
 			return
 		}
 	default:
@@ -120,7 +148,7 @@ func (base *Base) Execute(action interface{}) {
 	return
 
 NotAcceptable:
-	problem.Render(base.Ctx, base.W, hProblem.NotAcceptable)
+	problem.Render(ctx, base.W, hProblem.NotAcceptable)
 	return
 }
 

@@ -1,15 +1,16 @@
 package horizon
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"github.com/kinecosystem/go/support/errors"
 	"github.com/kinecosystem/go/support/http/httptest"
-	"golang.org/x/net/context"
+	"github.com/stretchr/testify/assert"
 )
 
 func ExampleClient_StreamLedgers() {
@@ -56,255 +57,513 @@ func ExampleClient_SubmitTransaction() {
 	fmt.Println(response)
 }
 
-func TestHorizon(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Package: github.com/stellar/go/horizon")
+func TestLoadAccount(t *testing.T) {
+	hmock := httptest.NewClient()
+	client := &Client{
+		URL:  "https://localhost",
+		HTTP: hmock,
+	}
+
+	// happy path
+	hmock.On(
+		"GET",
+		"https://localhost/accounts/GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
+	).ReturnString(200, accountResponse)
+
+	account, err := client.LoadAccount("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H")
+	if assert.NoError(t, err) {
+		assert.Equal(t, account.ID, "GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H")
+		assert.Equal(t, account.PT, "1")
+		assert.Equal(t, account.Signers[0].Key, "XBT5HNPK6DAL6222MAWTLHNOZSDKPJ2AKNEQ5Q324CHHCNQFQ7EHBHZN")
+		assert.Equal(t, account.Signers[0].Type, "sha256_hash")
+		assert.Equal(t, account.Data["test"], "R0NCVkwzU1FGRVZLUkxQNkFKNDdVS0tXWUVCWTQ1V0hBSkhDRVpLVldNVEdNQ1Q0SDROS1FZTEg=")
+		balance, err := account.GetNativeBalance()
+		assert.Nil(t, err)
+		assert.Equal(t, balance, "948522307.6146000")
+	}
+
+	// failure response
+	hmock.On(
+		"GET",
+		"https://localhost/accounts/GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
+	).ReturnString(404, notFoundResponse)
+
+	_, err = client.LoadAccount("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H")
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "Horizon error")
+		horizonError, ok := err.(*Error)
+		assert.Equal(t, ok, true)
+		assert.Equal(t, horizonError.Problem.Title, "Resource Missing")
+	}
+
+	// connection error
+	hmock.On(
+		"GET",
+		"https://localhost/accounts/GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
+	).ReturnError("http.Client error")
+
+	_, err = client.LoadAccount("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H")
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "http.Client error")
+		_, ok := err.(*Error)
+		assert.Equal(t, ok, false)
+	}
 }
 
-var _ = Describe("Horizon", func() {
-	var (
-		client *Client
-		hmock  *httptest.Client
-	)
+func TestLoadAccountMergeAmount(t *testing.T) {
+	hmock := httptest.NewClient()
+	client := &Client{
+		URL:  "https://localhost",
+		HTTP: hmock,
+	}
 
-	BeforeEach(func() {
-		hmock = httptest.NewClient()
-		client = &Client{
-			URL:  "https://localhost",
-			HTTP: hmock,
-		}
-	})
+	var payment Payment
+	b := bytes.NewBuffer([]byte(accountMergePayment))
 
-	Describe("LoadAccount", func() {
-		It("success response", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/accounts/GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
-			).ReturnString(200, accountResponse)
+	json.NewDecoder(b).Decode(&payment)
 
-			account, err := client.LoadAccount("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H")
-			Expect(err).To(BeNil())
-			Expect(account.ID).To(Equal("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H"))
-			Expect(account.PT).To(Equal("1"))
-			Expect(account.Signers[0].Key).To(Equal("XBT5HNPK6DAL6222MAWTLHNOZSDKPJ2AKNEQ5Q324CHHCNQFQ7EHBHZN"))
-			Expect(account.Signers[0].Type).To(Equal("sha256_hash"))
-			Expect(account.Data["test"]).To(Equal("R0NCVkwzU1FGRVZLUkxQNkFKNDdVS0tXWUVCWTQ1V0hBSkhDRVpLVldNVEdNQ1Q0SDROS1FZTEg="))
-			Expect(account.GetNativeBalance()).To(Equal("948522307.6146000"))
-		})
+	// happy path
+	hmock.On(
+		"GET",
+		"https://localhost/operations/43989725060534273/effects",
+	).ReturnString(200, accountMergeEffectsResponse)
 
-		It("failure response", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/accounts/GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
-			).ReturnString(404, notFoundResponse)
+	err := client.LoadAccountMergeAmount(&payment)
+	if assert.NoError(t, err) {
+		assert.Equal(t, "9999.9999900", payment.Amount)
+	}
 
-			_, err := client.LoadAccount("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H")
-			Expect(err).NotTo(BeNil())
-			Expect(err.Error()).To(HavePrefix("Horizon error"))
-			horizonError, ok := err.(*Error)
-			Expect(ok).To(BeTrue())
-			Expect(horizonError.Problem.Title).To(Equal("Resource Missing"))
-		})
+	// failure response -- decode error on horizon error
+	hmock.On(
+		"GET",
+		"https://localhost/operations/43989725060534273/effects",
+	).ReturnString(500, internalServerError)
 
-		It("connection error", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/accounts/GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
-			).ReturnError("http.Client error")
+	err = client.LoadAccountMergeAmount(&payment)
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "Internal Server Error")
+		assert.Contains(t, err.Error(), "Error decoding effects page")
+	}
 
-			_, err := client.LoadAccount("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H")
-			Expect(err).NotTo(BeNil())
-			Expect(err.Error()).To(ContainSubstring("http.Client error"))
-			_, ok := err.(*Error)
-			Expect(ok).To(BeFalse())
-		})
-	})
+	// failure response -- account_credited not found
+	hmock.On(
+		"GET",
+		"https://localhost/operations/43989725060534273/effects",
+	).ReturnString(200, accountMergeEffectsResponseIncomplete)
 
-	Describe("LoadAccountOffers", func() {
-		It("success response", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/accounts/GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK/offers?cursor=a&limit=50&order=desc",
-			).ReturnString(200, accountOffersResponse)
+	err = client.LoadAccountMergeAmount(&payment)
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "Could not find `account_credited` effect in `account_merge` operation effects")
+	}
 
-			offers, err := client.LoadAccountOffers("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK", Cursor("a"), Limit(50), OrderDesc)
-			Expect(err).To(BeNil())
-			Expect(len(offers.Embedded.Records)).To(Equal(2))
-			Expect(offers.Embedded.Records[0].ID).To(Equal(int64(161)))
-			Expect(offers.Embedded.Records[0].Seller).To(Equal("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK"))
-			Expect(offers.Embedded.Records[0].Price).To(Equal("450000.0000000"))
-			Expect(offers.Embedded.Records[0].Buying.Type).To(Equal("native"))
-			Expect(offers.Embedded.Records[0].Selling.Type).To(Equal("credit_alphanum4"))
-			Expect(offers.Embedded.Records[0].Selling.Code).To(Equal("XBT"))
-			Expect(offers.Embedded.Records[0].Selling.Issuer).To(Equal("GDI73WJ4SX7LOG3XZDJC3KCK6ED6E5NBYK2JUBQSPBCNNWEG3ZN7T75U"))
-		})
+	// connection error
+	hmock.On(
+		"GET",
+		"https://localhost/operations/43989725060534273/effects",
+	).ReturnError("http.Client error")
 
-		It("failure response", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/accounts/GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK/offers",
-			).ReturnString(404, notFoundResponse)
+	err = client.LoadAccountMergeAmount(&payment)
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "http.Client error")
+		_, ok := err.(*Error)
+		assert.Equal(t, ok, false)
+	}
+}
 
-			_, err := client.LoadAccountOffers("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK")
-			Expect(err).NotTo(BeNil())
-			Expect(err.Error()).To(HavePrefix("Horizon error"))
-			horizonError, ok := err.(*Error)
-			Expect(ok).To(BeTrue())
-			Expect(horizonError.Problem.Title).To(Equal("Resource Missing"))
-		})
+func TestLoadAccountOffers(t *testing.T) {
+	hmock := httptest.NewClient()
+	client := &Client{
+		URL:  "https://localhost",
+		HTTP: hmock,
+	}
 
-		It("connection error", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/accounts/GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK/offers",
-			).ReturnError("http.Client error")
+	// happy path
+	hmock.On(
+		"GET",
+		"https://localhost/accounts/GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK/offers?cursor=a&limit=50&order=desc",
+	).ReturnString(200, accountOffersResponse)
 
-			_, err := client.LoadAccountOffers("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK")
-			Expect(err).NotTo(BeNil())
-			Expect(err.Error()).To(ContainSubstring("http.Client error"))
-			_, ok := err.(*Error)
-			Expect(ok).To(BeFalse())
-		})
+	offers, err := client.LoadAccountOffers("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK", Cursor("a"), Limit(50), OrderDesc)
+	if assert.NoError(t, err) {
+		assert.Equal(t, len(offers.Embedded.Records), 2)
+		assert.Equal(t, offers.Embedded.Records[0].ID, int64(161))
+		assert.Equal(t, offers.Embedded.Records[0].Seller, "GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK")
+		assert.Equal(t, offers.Embedded.Records[0].Price, "450000.0000000")
+		assert.Equal(t, offers.Embedded.Records[0].Buying.Type, "native")
+		assert.Equal(t, offers.Embedded.Records[0].Selling.Type, "credit_alphanum4")
+		assert.Equal(t, offers.Embedded.Records[0].Selling.Code, "XBT")
+		assert.Equal(t, offers.Embedded.Records[0].Selling.Issuer, "GDI73WJ4SX7LOG3XZDJC3KCK6ED6E5NBYK2JUBQSPBCNNWEG3ZN7T75U")
+	}
 
-		It("overridden location", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/beepboop",
-			).ReturnString(200, accountOffersResponse)
+	// failure response
+	hmock.On(
+		"GET",
+		"https://localhost/accounts/GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK/offers",
+	).ReturnString(404, notFoundResponse)
 
-			offers, err := client.LoadAccountOffers("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK", At("https://localhost/beepboop"))
-			Expect(err).To(BeNil())
-			Expect(len(offers.Embedded.Records)).To(Equal(2))
-			Expect(offers.Embedded.Records[0].ID).To(Equal(int64(161)))
-			Expect(offers.Embedded.Records[0].Seller).To(Equal("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK"))
-			Expect(offers.Embedded.Records[0].Price).To(Equal("450000.0000000"))
-			Expect(offers.Embedded.Records[0].Buying.Type).To(Equal("native"))
-			Expect(offers.Embedded.Records[0].Selling.Type).To(Equal("credit_alphanum4"))
-			Expect(offers.Embedded.Records[0].Selling.Code).To(Equal("XBT"))
-			Expect(offers.Embedded.Records[0].Selling.Issuer).To(Equal("GDI73WJ4SX7LOG3XZDJC3KCK6ED6E5NBYK2JUBQSPBCNNWEG3ZN7T75U"))
-		})
-	})
+	_, err = client.LoadAccountOffers("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK")
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "Horizon error")
+		horizonError, ok := err.(*Error)
+		assert.Equal(t, ok, true)
+		assert.Equal(t, horizonError.Problem.Title, "Resource Missing")
+	}
 
-	Describe("LoadOrderBook", func() {
-		It("success response", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/order_book?buying_asset_code=DEMO&buying_asset_issuer=GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE&buying_asset_type=credit_alphanum4&selling_asset_code=&selling_asset_issuer=&selling_asset_type=native",
-			).ReturnString(200, orderBookResponse)
+	// connection error
+	hmock.On(
+		"GET",
+		"https://localhost/accounts/GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK/offers",
+	).ReturnError("http.Client error")
 
-			orderBook, err := client.LoadOrderBook(Asset{Type: "native"}, Asset{"credit_alphanum4", "DEMO", "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"})
-			Expect(err).To(BeNil())
-			Expect(orderBook.Selling.Type).To(Equal("native"))
-			Expect(orderBook.Buying.Type).To(Equal("credit_alphanum4"))
-			Expect(orderBook.Buying.Code).To(Equal("DEMO"))
-			Expect(orderBook.Buying.Issuer).To(Equal("GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"))
+	_, err = client.LoadAccountOffers("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK")
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "http.Client error")
+		_, ok := err.(*Error)
+		assert.Equal(t, ok, false)
+	}
 
-			Expect(len(orderBook.Bids)).To(Equal(20))
-			Expect(orderBook.Bids[0].Price).To(Equal("0.0024937"))
-			Expect(orderBook.Bids[0].Amount).To(Equal("0.4363975"))
-			Expect(orderBook.Bids[0].PriceR.N).To(Equal(int32(24937)))
-			Expect(orderBook.Bids[0].PriceR.D).To(Equal(int32(10000000)))
+	// overridden location
+	hmock.On(
+		"GET",
+		"https://localhost/beepboop",
+	).ReturnString(200, accountOffersResponse)
 
-			Expect(len(orderBook.Asks)).To(Equal(20))
-			Expect(orderBook.Asks[0].Price).To(Equal("0.0025093"))
-			Expect(orderBook.Asks[0].Amount).To(Equal("1248.9663104"))
-			Expect(orderBook.Asks[0].PriceR.N).To(Equal(int32(2017413)))
-			Expect(orderBook.Asks[0].PriceR.D).To(Equal(int32(803984111)))
-		})
+	offers, err = client.LoadAccountOffers("GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK", At("https://localhost/beepboop"))
+	if assert.NoError(t, err) {
+		assert.Equal(t, len(offers.Embedded.Records), 2)
+		assert.Equal(t, offers.Embedded.Records[0].ID, int64(161))
+		assert.Equal(t, offers.Embedded.Records[0].Seller, "GC2BQYBXFOVPRDH35D5HT2AFVCDGXJM5YVTAF5THFSAISYOWAJQKRESK")
+		assert.Equal(t, offers.Embedded.Records[0].Price, "450000.0000000")
+		assert.Equal(t, offers.Embedded.Records[0].Buying.Type, "native")
+		assert.Equal(t, offers.Embedded.Records[0].Selling.Type, "credit_alphanum4")
+		assert.Equal(t, offers.Embedded.Records[0].Selling.Code, "XBT")
+		assert.Equal(t, offers.Embedded.Records[0].Selling.Issuer, "GDI73WJ4SX7LOG3XZDJC3KCK6ED6E5NBYK2JUBQSPBCNNWEG3ZN7T75U")
+	}
 
-		It("success response with limit", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/order_book?buying_asset_code=DEMO&buying_asset_issuer=GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE&buying_asset_type=credit_alphanum4&limit=20&selling_asset_code=&selling_asset_issuer=&selling_asset_type=native",
-			).ReturnString(200, orderBookResponse)
+}
 
-			orderBook, err := client.LoadOrderBook(Asset{Type: "native"}, Asset{"credit_alphanum4", "DEMO", "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"}, Limit(20))
-			Expect(err).To(BeNil())
-			Expect(orderBook.Selling.Type).To(Equal("native"))
-			Expect(orderBook.Buying.Type).To(Equal("credit_alphanum4"))
-			Expect(orderBook.Buying.Code).To(Equal("DEMO"))
-			Expect(orderBook.Buying.Issuer).To(Equal("GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"))
+func TestLoadTransaction(t *testing.T) {
+	hmock := httptest.NewClient()
+	client := &Client{
+		URL:  "https://localhost",
+		HTTP: hmock,
+	}
 
-			Expect(len(orderBook.Bids)).To(Equal(20))
-			Expect(orderBook.Bids[0].Price).To(Equal("0.0024937"))
-			Expect(orderBook.Bids[0].Amount).To(Equal("0.4363975"))
-			Expect(orderBook.Bids[0].PriceR.N).To(Equal(int32(24937)))
-			Expect(orderBook.Bids[0].PriceR.D).To(Equal(int32(10000000)))
+	// happy path
+	hmock.On(
+		"GET",
+		"https://localhost/transactions/a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312",
+	).ReturnString(200, transactionResponse)
 
-			Expect(len(orderBook.Asks)).To(Equal(20))
-			Expect(orderBook.Asks[0].Price).To(Equal("0.0025093"))
-			Expect(orderBook.Asks[0].Amount).To(Equal("1248.9663104"))
-			Expect(orderBook.Asks[0].PriceR.N).To(Equal(int32(2017413)))
-			Expect(orderBook.Asks[0].PriceR.D).To(Equal(int32(803984111)))
-		})
+	transaction, err := client.LoadTransaction("a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312")
+	if assert.NoError(t, err) {
+		assert.Equal(t, transaction.ID, "a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312")
+		assert.Equal(t, transaction.Hash, "a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312")
+		assert.Equal(t, transaction.Ledger, int32(17425656))
+		assert.Equal(t, transaction.Account, "GBQ352ACDO6DEGI42SOI4DCB654N7B7DANO4RSBGA5CZLM4475CQNID4")
+		assert.Equal(t, transaction.FeePaid, int32(100))
+		assert.Equal(t, transaction.ResultXdr, "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=")
+	}
 
-		It("failure response", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/order_book?buying_asset_code=DEMO&buying_asset_issuer=GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE&buying_asset_type=credit_alphanum4&limit=20&selling_asset_code=&selling_asset_issuer=&selling_asset_type=native",
-			).ReturnString(404, notFoundResponse)
+}
 
-			_, err := client.LoadOrderBook(Asset{Type: "native"}, Asset{"credit_alphanum4", "DEMO", "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"}, Limit(20))
-			Expect(err).NotTo(BeNil())
-			Expect(err.Error()).To(HavePrefix("Horizon error"))
-			horizonError, ok := err.(*Error)
-			Expect(ok).To(BeTrue())
-			Expect(horizonError.Problem.Title).To(Equal("Resource Missing"))
-		})
+func TestLoadOrderBook(t *testing.T) {
+	hmock := httptest.NewClient()
+	client := &Client{
+		URL:  "https://localhost",
+		HTTP: hmock,
+	}
 
-		It("connection error", func() {
-			hmock.On(
-				"GET",
-				"https://localhost/order_book?buying_asset_code=DEMO&buying_asset_issuer=GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE&buying_asset_type=credit_alphanum4&limit=20&selling_asset_code=&selling_asset_issuer=&selling_asset_type=native",
-			).ReturnError("http.Client error")
+	// happy path
+	hmock.On(
+		"GET",
+		"https://localhost/order_book?buying_asset_code=DEMO&buying_asset_issuer=GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE&buying_asset_type=credit_alphanum4&selling_asset_code=&selling_asset_issuer=&selling_asset_type=native",
+	).ReturnString(200, orderBookResponse)
 
-			_, err := client.LoadOrderBook(Asset{Type: "native"}, Asset{"credit_alphanum4", "DEMO", "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"}, Limit(20))
-			Expect(err).NotTo(BeNil())
-			Expect(err.Error()).To(ContainSubstring("http.Client error"))
-			_, ok := err.(*Error)
-			Expect(ok).To(BeFalse())
-		})
-	})
+	orderBook, err := client.LoadOrderBook(Asset{Type: "native"}, Asset{"credit_alphanum4", "DEMO", "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"})
+	if assert.NoError(t, err) {
+		assert.Equal(t, orderBook.Selling.Type, "native")
+		assert.Equal(t, orderBook.Buying.Type, "credit_alphanum4")
+		assert.Equal(t, orderBook.Buying.Code, "DEMO")
+		assert.Equal(t, orderBook.Buying.Issuer, "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE")
 
-	Describe("SubmitTransaction", func() {
-		var tx = "AAAAADSMMRmQGDH6EJzkgi/7PoKhphMHyNGQgDp2tlS/dhGXAAAAZAAT3TUAAAAwAAAAAAAAAAAAAAABAAAAAAAAAAMAAAABSU5SAAAAAAA0jDEZkBgx+hCc5IIv+z6CoaYTB8jRkIA6drZUv3YRlwAAAAFVU0QAAAAAADSMMRmQGDH6EJzkgi/7PoKhphMHyNGQgDp2tlS/dhGXAAAAAAX14QAAAAAKAAAAAQAAAAAAAAAAAAAAAAAAAAG/dhGXAAAAQLuStfImg0OeeGAQmvLkJSZ1MPSkCzCYNbGqX5oYNuuOqZ5SmWhEsC7uOD9ha4V7KengiwNlc0oMNqBVo22S7gk="
+		assert.Equal(t, len(orderBook.Bids), 20)
+		assert.Equal(t, orderBook.Bids[0].Price, "0.0024937")
+		assert.Equal(t, orderBook.Bids[0].Amount, "0.4363975")
+		assert.Equal(t, orderBook.Bids[0].PriceR.N, int32(24937))
+		assert.Equal(t, orderBook.Bids[0].PriceR.D, int32(10000000))
 
-		It("success response", func() {
-			hmock.
-				On("POST", "https://localhost/transactions").
-				ReturnString(200, submitResponse)
+		assert.Equal(t, len(orderBook.Asks), 20)
+		assert.Equal(t, orderBook.Asks[0].Price, "0.0025093")
+		assert.Equal(t, orderBook.Asks[0].Amount, "1248.9663104")
+		assert.Equal(t, orderBook.Asks[0].PriceR.N, int32(2017413))
+		assert.Equal(t, orderBook.Asks[0].PriceR.D, int32(803984111))
+	}
 
-			account, err := client.SubmitTransaction(tx)
-			Expect(err).To(BeNil())
-			Expect(account.Ledger).To(Equal(int32(3128812)))
-		})
+	// happy path with limit
+	hmock.On(
+		"GET",
+		"https://localhost/order_book?buying_asset_code=DEMO&buying_asset_issuer=GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE&buying_asset_type=credit_alphanum4&limit=20&selling_asset_code=&selling_asset_issuer=&selling_asset_type=native",
+	).ReturnString(200, orderBookResponse)
 
-		It("failure response", func() {
-			hmock.
-				On("POST", "https://localhost/transactions").
-				ReturnString(400, transactionFailure)
+	orderBook, err = client.LoadOrderBook(Asset{Type: "native"}, Asset{"credit_alphanum4", "DEMO", "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"}, Limit(20))
+	if assert.NoError(t, err) {
+		assert.Equal(t, orderBook.Selling.Type, "native")
+		assert.Equal(t, orderBook.Buying.Type, "credit_alphanum4")
+		assert.Equal(t, orderBook.Buying.Code, "DEMO")
+		assert.Equal(t, orderBook.Buying.Issuer, "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE")
 
-			_, err := client.SubmitTransaction(tx)
-			Expect(err).NotTo(BeNil())
-			Expect(err.Error()).To(ContainSubstring("Horizon error"))
-			horizonError, ok := errors.Cause(err).(*Error)
-			Expect(ok).To(BeTrue())
-			Expect(horizonError.Problem.Title).To(Equal("Transaction Failed"))
-		})
+		assert.Equal(t, len(orderBook.Bids), 20)
+		assert.Equal(t, orderBook.Bids[0].Price, "0.0024937")
+		assert.Equal(t, orderBook.Bids[0].Amount, "0.4363975")
+		assert.Equal(t, orderBook.Bids[0].PriceR.N, int32(24937))
+		assert.Equal(t, orderBook.Bids[0].PriceR.D, int32(10000000))
 
-		It("connection error", func() {
-			hmock.
-				On("POST", "https://localhost/transactions").
-				ReturnError("http.Client error")
+		assert.Equal(t, len(orderBook.Asks), 20)
+		assert.Equal(t, orderBook.Asks[0].Price, "0.0025093")
+		assert.Equal(t, orderBook.Asks[0].Amount, "1248.9663104")
+		assert.Equal(t, orderBook.Asks[0].PriceR.N, int32(2017413))
+		assert.Equal(t, orderBook.Asks[0].PriceR.D, int32(803984111))
+	}
 
-			_, err := client.SubmitTransaction(tx)
-			Expect(err).NotTo(BeNil())
-			Expect(err.Error()).To(ContainSubstring("http.Client error"))
-			_, ok := err.(*Error)
-			Expect(ok).To(BeFalse())
-		})
-	})
-})
+	// failure response
+	hmock.On(
+		"GET",
+		"https://localhost/order_book?buying_asset_code=DEMO&buying_asset_issuer=GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE&buying_asset_type=credit_alphanum4&limit=20&selling_asset_code=&selling_asset_issuer=&selling_asset_type=native",
+	).ReturnString(404, notFoundResponse)
+
+	_, err = client.LoadOrderBook(Asset{Type: "native"}, Asset{"credit_alphanum4", "DEMO", "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"}, Limit(20))
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "Horizon error")
+		horizonError, ok := err.(*Error)
+		assert.Equal(t, ok, true)
+		assert.Equal(t, horizonError.Problem.Title, "Resource Missing")
+	}
+
+	// connection error
+	hmock.On(
+		"GET",
+		"https://localhost/order_book?buying_asset_code=DEMO&buying_asset_issuer=GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE&buying_asset_type=credit_alphanum4&limit=20&selling_asset_code=&selling_asset_issuer=&selling_asset_type=native",
+	).ReturnError("http.Client error")
+
+	_, err = client.LoadOrderBook(Asset{Type: "native"}, Asset{"credit_alphanum4", "DEMO", "GBAMBOOZDWZPVV52RCLJQYMQNXOBLOXWNQAY2IF2FREV2WL46DBCH3BE"}, Limit(20))
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "http.Client error")
+		_, ok := err.(*Error)
+		assert.Equal(t, ok, false)
+	}
+
+}
+
+func TestSubmitTransaction(t *testing.T) {
+	hmock := httptest.NewClient()
+	client := &Client{
+		URL:  "https://localhost",
+		HTTP: hmock,
+	}
+	var tx = "AAAAADSMMRmQGDH6EJzkgi/7PoKhphMHyNGQgDp2tlS/dhGXAAAAZAAT3TUAAAAwAAAAAAAAAAAAAAABAAAAAAAAAAMAAAABSU5SAAAAAAA0jDEZkBgx+hCc5IIv+z6CoaYTB8jRkIA6drZUv3YRlwAAAAFVU0QAAAAAADSMMRmQGDH6EJzkgi/7PoKhphMHyNGQgDp2tlS/dhGXAAAAAAX14QAAAAAKAAAAAQAAAAAAAAAAAAAAAAAAAAG/dhGXAAAAQLuStfImg0OeeGAQmvLkJSZ1MPSkCzCYNbGqX5oYNuuOqZ5SmWhEsC7uOD9ha4V7KengiwNlc0oMNqBVo22S7gk="
+
+	// happy path
+	hmock.
+		On("POST", "https://localhost/transactions").
+		ReturnString(200, submitResponse)
+
+	account, err := client.SubmitTransaction(tx)
+	if assert.NoError(t, err) {
+		assert.Equal(t, account.Ledger, int32(3128812))
+	}
+
+	// failure response
+	hmock.
+		On("POST", "https://localhost/transactions").
+		ReturnString(400, transactionFailure)
+
+	_, err = client.SubmitTransaction(tx)
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "Horizon error")
+		horizonError, ok := errors.Cause(err).(*Error)
+		assert.Equal(t, ok, true)
+		assert.Equal(t, horizonError.Problem.Title, "Transaction Failed")
+	}
+
+	// connection error
+	hmock.
+		On("POST", "https://localhost/transactions").
+		ReturnError("http.Client error")
+
+	_, err = client.SubmitTransaction(tx)
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "http.Client error")
+		_, ok := err.(*Error)
+		assert.Equal(t, ok, false)
+	}
+}
+
+var accountMergePayment = `{
+    "_links": {
+      "self": {
+        "href": "https://localhost/operations/43989725060534273"
+      },
+      "transaction": {
+        "href": "https://localhost/transactions/081e3937a98c0ae0ca43400039fb0b5b814ad776cd90abafe9c1919c4fed6745"
+      },
+      "effects": {
+        "href": "https://localhost/operations/43989725060534273/effects"
+      },
+      "succeeds": {
+        "href": "https://localhost/effects?order=desc&cursor=43989725060534273"
+      },
+      "precedes": {
+        "href": "https://localhost/effects?order=asc&cursor=43989725060534273"
+      }
+    },
+    "id": "43989725060534273",
+    "paging_token": "43989725060534273",
+    "source_account": "GANHAS5OMPLKD6VYU4LK7MBHSHB2Q37ZHAYWOBJRUXGDHMPJF3XNT45Y",
+    "type": "account_merge",
+    "type_i": 8,
+    "created_at": "2018-07-27T21:00:12Z",
+    "transaction_hash": "081e3937a98c0ae0ca43400039fb0b5b814ad776cd90abafe9c1919c4fed6745",
+    "account": "GANHAS5OMPLKD6VYU4LK7MBHSHB2Q37ZHAYWOBJRUXGDHMPJF3XNT45Y",
+    "into": "GBO7LQUWCC7M237TU2PAXVPOLLYNHYCYYFCLVMX3RBJCML4WA742X3UB"
+}`
+
+var accountMergeEffectsResponse = `{
+  "_links": {
+    "self": {
+      "href": "https://horizon-testnet.stellar.org/operations/43989725060534273/effects?cursor=&limit=10&order=asc"
+    },
+    "next": {
+      "href": "https://horizon-testnet.stellar.org/operations/43989725060534273/effects?cursor=43989725060534273-3&limit=10&order=asc"
+    },
+    "prev": {
+      "href": "https://horizon-testnet.stellar.org/operations/43989725060534273/effects?cursor=43989725060534273-1&limit=10&order=desc"
+    }
+  },
+  "_embedded": {
+    "records": [
+      {
+        "_links": {
+          "operation": {
+            "href": "https://horizon-testnet.stellar.org/operations/43989725060534273"
+          },
+          "succeeds": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=desc&cursor=43989725060534273-1"
+          },
+          "precedes": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=asc&cursor=43989725060534273-1"
+          }
+        },
+        "id": "0043989725060534273-0000000001",
+        "paging_token": "43989725060534273-1",
+        "account": "GANHAS5OMPLKD6VYU4LK7MBHSHB2Q37ZHAYWOBJRUXGDHMPJF3XNT45Y",
+        "type": "account_debited",
+        "type_i": 3,
+        "created_at": "2018-07-27T21:00:12Z",
+        "asset_type": "native",
+        "amount": "9999.9999900"
+      },
+      {
+        "_links": {
+          "operation": {
+            "href": "https://horizon-testnet.stellar.org/operations/43989725060534273"
+          },
+          "succeeds": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=desc&cursor=43989725060534273-2"
+          },
+          "precedes": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=asc&cursor=43989725060534273-2"
+          }
+        },
+        "id": "0043989725060534273-0000000002",
+        "paging_token": "43989725060534273-2",
+        "account": "GBO7LQUWCC7M237TU2PAXVPOLLYNHYCYYFCLVMX3RBJCML4WA742X3UB",
+        "type": "account_credited",
+        "type_i": 2,
+        "created_at": "2018-07-27T21:00:12Z",
+        "asset_type": "native",
+        "amount": "9999.9999900"
+      },
+      {
+        "_links": {
+          "operation": {
+            "href": "https://horizon-testnet.stellar.org/operations/43989725060534273"
+          },
+          "succeeds": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=desc&cursor=43989725060534273-3"
+          },
+          "precedes": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=asc&cursor=43989725060534273-3"
+          }
+        },
+        "id": "0043989725060534273-0000000003",
+        "paging_token": "43989725060534273-3",
+        "account": "GANHAS5OMPLKD6VYU4LK7MBHSHB2Q37ZHAYWOBJRUXGDHMPJF3XNT45Y",
+        "type": "account_removed",
+        "type_i": 1,
+        "created_at": "2018-07-27T21:00:12Z"
+      }
+    ]
+  }
+}`
+
+var accountMergeEffectsResponseIncomplete = `{
+  "_links": {
+    "self": {
+      "href": "https://horizon-testnet.stellar.org/operations/43989725060534273/effects?cursor=&limit=10&order=asc"
+    },
+    "next": {
+      "href": "https://horizon-testnet.stellar.org/operations/43989725060534273/effects?cursor=43989725060534273-3&limit=10&order=asc"
+    },
+    "prev": {
+      "href": "https://horizon-testnet.stellar.org/operations/43989725060534273/effects?cursor=43989725060534273-1&limit=10&order=desc"
+    }
+  },
+  "_embedded": {
+    "records": [
+      {
+        "_links": {
+          "operation": {
+            "href": "https://horizon-testnet.stellar.org/operations/43989725060534273"
+          },
+          "succeeds": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=desc&cursor=43989725060534273-1"
+          },
+          "precedes": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=asc&cursor=43989725060534273-1"
+          }
+        },
+        "id": "0043989725060534273-0000000001",
+        "paging_token": "43989725060534273-1",
+        "account": "GANHAS5OMPLKD6VYU4LK7MBHSHB2Q37ZHAYWOBJRUXGDHMPJF3XNT45Y",
+        "type": "account_debited",
+        "type_i": 3,
+        "created_at": "2018-07-27T21:00:12Z",
+        "asset_type": "native",
+        "amount": "9999.9999900"
+      },
+      {
+        "_links": {
+          "operation": {
+            "href": "https://horizon-testnet.stellar.org/operations/43989725060534273"
+          },
+          "succeeds": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=desc&cursor=43989725060534273-3"
+          },
+          "precedes": {
+            "href": "https://horizon-testnet.stellar.org/effects?order=asc&cursor=43989725060534273-3"
+          }
+        },
+        "id": "0043989725060534273-0000000003",
+        "paging_token": "43989725060534273-3",
+        "account": "GANHAS5OMPLKD6VYU4LK7MBHSHB2Q37ZHAYWOBJRUXGDHMPJF3XNT45Y",
+        "type": "account_removed",
+        "type_i": 1,
+        "created_at": "2018-07-27T21:00:12Z"
+      }
+    ]
+  }
+}`
 
 var accountResponse = `{
   "_links": {
@@ -441,6 +700,51 @@ var accountOffersResponse = `{
       }
     ]
   }
+}`
+
+var transactionResponse = `{
+  "_links": {
+    "self": {
+      "href": "https://horizon.stellar.org/transactions/a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312"
+    },
+    "account": {
+      "href": "https://horizon.stellar.org/accounts/GBQ352ACDO6DEGI42SOI4DCB654N7B7DANO4RSBGA5CZLM4475CQNID4"
+    },
+    "ledger": {
+      "href": "https://horizon.stellar.org/ledgers/17425656"
+    },
+    "operations": {
+      "href": "https://horizon.stellar.org/transactions/a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312/operations{?cursor,limit,order}",
+      "templated": true
+    },
+    "effects": {
+      "href": "https://horizon.stellar.org/transactions/a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312/effects{?cursor,limit,order}",
+      "templated": true
+    },
+    "precedes": {
+      "href": "https://horizon.stellar.org/transactions?order=asc&cursor=74842622631374848"
+    },
+    "succeeds": {
+      "href": "https://horizon.stellar.org/transactions?order=desc&cursor=74842622631374848"
+    }
+  },
+  "id": "a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312",
+  "paging_token": "74842622631374848",
+  "hash": "a4ca51d09610154409890763e2c8ecbaa36688c957dea1df0578bdbc1f65d312",
+  "ledger": 17425656,
+  "created_at": "2018-04-19T00:16:25Z",
+  "source_account": "GBQ352ACDO6DEGI42SOI4DCB654N7B7DANO4RSBGA5CZLM4475CQNID4",
+  "source_account_sequence": "74842446537687041",
+  "fee_paid": 100,
+  "operation_count": 1,
+  "envelope_xdr": "AAAAAGG+6AIbvDIZHNScjgxB93jfh+MDXcjIJgdFlbOc/0UGAAAAZAEJ5M8AAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAWItna6Yfm4mu3aBouY6Jkq/sVMZZmYKp+Ybebu74C4YAAAAAAJiWgAAAAAAAAAABnP9FBgAAAEB/ufrWJGD1YeVvoxoku9U6CWQTUIO9SGf7NnbZY50Tn7+pNOtNslZy0bYlAabSgoCfJ2ZXRmDMue9v9nrFsLEA",
+  "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=",
+  "result_meta_xdr": "AAAAAAAAAAEAAAADAAAAAAEJ5PgAAAAAAAAAAFiLZ2umH5uJrt2gaLmOiZKv7FTGWZmCqfmG3m7u+AuGAAAAAACYloABCeT4AAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAwEJ5PgAAAAAAAAAAGG+6AIbvDIZHNScjgxB93jfh+MDXcjIJgdFlbOc/0UGAAAAAAIWDlwBCeTPAAAAAQAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAQEJ5PgAAAAAAAAAAGG+6AIbvDIZHNScjgxB93jfh+MDXcjIJgdFlbOc/0UGAAAAAAF9d9wBCeTPAAAAAQAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA",
+  "fee_meta_xdr": "AAAAAgAAAAMBCeT0AAAAAAAAAABhvugCG7wyGRzUnI4MQfd434fjA13IyCYHRZWznP9FBgAAAAACFg7AAQnkzwAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAEBCeT4AAAAAAAAAABhvugCG7wyGRzUnI4MQfd434fjA13IyCYHRZWznP9FBgAAAAACFg5cAQnkzwAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA==",
+  "memo_type": "none",
+  "signatures": [
+    "f7n61iRg9WHlb6MaJLvVOglkE1CDvUhn+zZ22WOdE5+/qTTrTbJWctG2JQGm0oKAnydmV0ZgzLnvb/Z6xbCxAA=="
+  ]
 }`
 
 var orderBookResponse = `{
@@ -812,4 +1116,12 @@ var transactionFailure = `{
     },
     "result_xdr": "AAAAAAAAAAD////4AAAAAA=="
   }
+}`
+
+var internalServerError = `{
+  "type":     "https://www.stellar.org/docs/horizon/problems/server_error",
+  "title":    "Internal Server Error",
+  "status":   500,
+  "details":  "Horizon unavailible",
+  "instance": "d3465740-ec3a-4a0b-9d4a-c9ea734ce58a"
 }`

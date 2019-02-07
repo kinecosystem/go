@@ -1,18 +1,19 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"net/http"
 	"net/url"
 	"testing"
 
+	"github.com/go-chi/chi"
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 	"github.com/kinecosystem/go/services/horizon/internal/toid"
 	"github.com/kinecosystem/go/support/render/problem"
 	"github.com/kinecosystem/go/xdr"
-	"github.com/zenazn/goji/web"
 )
 
 func TestGetAccountID(t *testing.T) {
@@ -178,6 +179,54 @@ func TestGetInt64(t *testing.T) {
 	tt.Assert.Equal(int64(math.MinInt64), result)
 }
 
+func TestAmount(t *testing.T) {
+	tt := test.Start(t)
+	defer tt.Finish()
+	action := makeTestAction()
+
+	result := action.GetAmount("minus_one")
+	tt.Assert.NoError(action.Err)
+	tt.Assert.Equal(xdr.Int64(-100000), result)
+
+	result = action.GetAmount("zero")
+	tt.Assert.NoError(action.Err)
+	tt.Assert.Equal(xdr.Int64(0), result)
+
+	result = action.GetAmount("two")
+	tt.Assert.NoError(action.Err)
+	tt.Assert.Equal(xdr.Int64(200000), result)
+
+	result = action.GetAmount("twenty")
+	tt.Assert.NoError(action.Err)
+	tt.Assert.Equal(xdr.Int64(2000000), result)
+}
+
+func TestPositiveAmount(t *testing.T) {
+	tt := test.Start(t)
+	defer tt.Finish()
+	action := makeTestAction()
+
+	result := action.GetPositiveAmount("minus_one")
+	tt.Assert.Error(action.Err)
+	tt.Assert.Equal(xdr.Int64(0), result)
+	action.Err = nil
+
+	result = action.GetPositiveAmount("zero")
+	tt.Assert.Error(action.Err)
+	tt.Assert.Equal(xdr.Int64(0), result)
+	action.Err = nil
+
+	result = action.GetPositiveAmount("two")
+	tt.Assert.NoError(action.Err)
+	tt.Assert.Equal(xdr.Int64(200000), result)
+	action.Err = nil
+
+	result = action.GetPositiveAmount("twenty")
+	tt.Assert.NoError(action.Err)
+	tt.Assert.Equal(xdr.Int64(2000000), result)
+	action.Err = nil
+}
+
 func TestGetLimit(t *testing.T) {
 	tt := test.Start(t)
 	defer tt.Finish()
@@ -230,7 +279,7 @@ func TestGetPageQuery(t *testing.T) {
 	// happy path
 	pq := action.GetPageQuery()
 	tt.Assert.NoError(action.Err)
-	tt.Assert.Equal("hello", pq.Cursor)
+	tt.Assert.Equal("123456", pq.Cursor)
 	tt.Assert.Equal(uint64(2), pq.Limit)
 	tt.Assert.Equal("asc", pq.Order)
 
@@ -241,7 +290,7 @@ func TestGetPageQuery(t *testing.T) {
 	_ = action.GetPageQuery()
 	tt.Assert.Error(action.Err)
 
-	// regression: https://github.com/stellar/go/services/horizon/internal/issues/372
+	// regression: https://github.com/kinecosystem/go/services/horizon/internal/issues/372
 	// (limit of 0 turns into 10)
 	makeAction("/?limit=0", nil)
 	_ = action.GetPageQuery()
@@ -253,7 +302,7 @@ func TestGetString(t *testing.T) {
 	defer tt.Finish()
 	action := makeTestAction()
 
-	tt.Assert.Equal("hello", action.GetString("cursor"))
+	tt.Assert.Equal("123456", action.GetString("cursor"))
 	action.R.Form = url.Values{
 		"cursor": {"goodbye"},
 	}
@@ -268,18 +317,39 @@ func TestPath(t *testing.T) {
 	tt.Assert.Equal("/foo-bar/blah", action.Path())
 }
 
+func TestGetURLParam(t *testing.T) {
+	tt := test.Start(t)
+	defer tt.Finish()
+	action := makeTestAction()
+
+	val, ok := action.GetURLParam("two")
+	tt.Assert.Equal("2", val)
+	tt.Assert.Equal(true, ok)
+
+	// valid empty string
+	val, ok = action.GetURLParam("blank")
+	tt.Assert.Equal("", val)
+	tt.Assert.Equal(true, ok)
+
+	// url param not found
+	val, ok = action.GetURLParam("foobarcursor")
+	tt.Assert.Equal("", val)
+	tt.Assert.Equal(false, ok)
+}
+
 func makeTestAction() *Base {
-	return makeAction("/foo-bar/blah?limit=2&cursor=hello", testURLParams())
+	return makeAction("/foo-bar/blah?limit=2&cursor=123456", testURLParams())
 }
 
 func makeAction(path string, body map[string]string) *Base {
+	rctx := chi.NewRouteContext()
+	for k, v := range body {
+		rctx.URLParams.Add(k, v)
+	}
+
 	r, _ := http.NewRequest("GET", path, nil)
+	r = r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, rctx))
 	action := &Base{
-		Ctx: test.Context(),
-		GojiCtx: web.C{
-			URLParams: body,
-			Env:       map[interface{}]interface{}{},
-		},
 		R: r,
 	}
 	return action
@@ -288,8 +358,10 @@ func makeAction(path string, body map[string]string) *Base {
 func testURLParams() map[string]string {
 	return map[string]string{
 		"blank":                "",
+		"minus_one":            "-1",
 		"zero":                 "0",
 		"two":                  "2",
+		"twenty":               "20",
 		"32min":                fmt.Sprint(math.MinInt32),
 		"32max":                fmt.Sprint(math.MaxInt32),
 		"64min":                fmt.Sprint(math.MinInt64),

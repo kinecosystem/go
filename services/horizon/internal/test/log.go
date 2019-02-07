@@ -2,13 +2,13 @@ package test
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/kinecosystem/go/services/horizon/internal/log"
+	"github.com/kinecosystem/go/support/log"
 )
 
 var testLogger *log.Entry
 
 func init() {
-	testLogger, _ = log.New()
+	testLogger = log.New()
 	testLogger.Entry.Logger.Formatter.(*logrus.TextFormatter).DisableColors = true
 	testLogger.Entry.Logger.Level = logrus.DebugLevel
 }

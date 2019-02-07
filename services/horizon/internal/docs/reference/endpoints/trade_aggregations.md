@@ -2,7 +2,9 @@
 title: Trade Aggregations
 ---
 
-Trade Aggregations are catered specifically for developers of trading clients. They facilitate efficient gathering of historical trade data. This is done by dividing a given time range into segments and aggregate statistics, for a given asset pair (`base`, `counter`) over each of these segments.
+Trade Aggregations are catered specifically for developers of trading clients. They facilitate efficient gathering of historical trade data. This is done by dividing a given time range into segments and aggregating statistics, for a given asset pair (`base`, `counter`) over each of these segments.
+The duration of the segments is specified with the `resolution` parameter. The start and end of the time range are given by `startTime` and `endTime` respectively, which are both rounded to the nearest multiple of `resolution` since epoch. 
+The individual segments are also aligned with multiples of `resolution` since epoch. If you want to change this alignment, the segments can be offset by specifying the `offset` parameter.
 
 
 ## Request
@@ -17,7 +19,8 @@ GET /trade_aggregations?base_asset_type={base_asset_type}&base_asset_code={base_
 | ---- | ----- | ----------- | ------- |
 | `start_time` | long | lower time boundary represented as millis since epoch| 1512689100000 |
 | `end_time` | long | upper time boundary represented as millis since epoch| 1512775500000|
-| `resolution` | long | segment duration as millis since epoch. *Supported values are 5 minutes (300000), 15 minutes (900000), 1 hour (3600000), 1 day (86400000) and 1 week (604800000).*| 300000|
+| `resolution` | long | segment duration as millis since epoch. *Supported values are 1 minute (60000), 5 minutes (300000), 15 minutes (900000), 1 hour (3600000), 1 day (86400000) and 1 week (604800000).*| 300000|
+| `offset` | long | segments can be offset using this parameter. Expressed in milliseconds. Can only be used if the resolution is greater than 1 hour. *Value must be in whole hours, less than the provided resolution, and less than 24 hours.*| 3600000 (1 hour)|
 | `base_asset_type` | string | Type of base asset | `native` |
 | `base_asset_code` | string | Code of base asset, not required if type is `native` | `USD` |
 | `base_asset_issuer` | string | Issuer of base asset, not required if type is `native` | 'GA2HGBJIJKI6O4XEM7CZWY5PS6GKSXL6D34ERAJYQSPYA6X6AI7HYW36' |
@@ -49,7 +52,7 @@ Note
     },
     "next": {
       "href": "https://horizon.stellar.org/trade_aggregations?base_asset_type=native\u0026counter_asset_code=SLT\u0026counter_asset_issuer=GCKA6K5PCQ6PNF5RQBF7PQDJWRHO6UOGFMRLK3DYHDOI244V47XKQ4GP\u0026counter_asset_type=credit_alphanum4\u0026end_time=1517532526000\u0026limit=200\u0026order=asc\u0026resolution=3600000\u0026start_time=1517529600000"
-    },
+    }
   },
   "_embedded": {
     "records": [

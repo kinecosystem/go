@@ -8,23 +8,26 @@ directly reflected in the [ledger](https://www.stellar.org/developers/learn/conc
 
 ## Effect types
 
-We can distinguish 4 effect groups:
+We can distinguish 6 effect groups:
 - Account effects
 - Signer effects
 - Trustline effects
 - Trading effects
+- Data effects
+- Misc effects
 
 ### Account effects
 
 | Type                        | Operation                                             |
 | --- | --- |
-| Account Created             | create_account                                        |
-| Account Removed             | merge_account                                         |
-| Account Credited            | create_account, payment, path_payment, merge_account  |
-| Account Debited             | create_account, payment, path_payment, merge_account  |
-| Account Thresholds Updated  | set_options                                           |
-| Account Home Domain Updated | set_options                                           |
-| Account Flags Updated       | set_options                                           |
+| Account Created                       | create_account                                        |
+| Account Removed                       | merge_account                                         |
+| Account Credited                      | create_account, payment, path_payment, merge_account  |
+| Account Debited                       | create_account, payment, path_payment, merge_account  |
+| Account Thresholds Updated            | set_options                                           |
+| Account Home Domain Updated           | set_options                                           |
+| Account Flags Updated                 | set_options                                           |
+| Account Inflation Destination Updated | set_options                                           |
 
 ### Signer effects
 
@@ -53,6 +56,19 @@ We can distinguish 4 effect groups:
 | Offer Updated | manage_offer, create_passive_offer, path_payment |
 | Trade         | manage_offer, create_passive_offer, path_payment |
 
+### Data effects
+
+| Type          | Operation                                        |
+| --- | --- |
+| Data Created | manage_data |
+| Data Removed | manage_data |
+| Data Updated | manage_data |
+
+### Misc effects
+
+| Type          | Operation                                        |
+| --- | --- |
+| Sequence Bumped | bump_sequence |
 
 ## Attributes
 

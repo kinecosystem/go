@@ -1,8 +1,9 @@
 package horizon
 
 import (
+	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
+	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
 	"github.com/kinecosystem/go/support/render/hal"
 )
 
@@ -14,14 +15,16 @@ type RootAction struct {
 
 // JSON renders the json response for RootAction
 func (action *RootAction) JSON() {
-	var res resource.Root
-	res.Populate(
-		action.Ctx,
+	var res horizon.Root
+	resourceadapter.PopulateRoot(
+		action.R.Context(),
+		&res,
 		ledger.CurrentState(),
 		action.App.horizonVersion,
 		action.App.coreVersion,
 		action.App.networkPassphrase,
 		action.App.protocolVersion,
+		action.App.config.FriendbotURL,
 	)
 
 	hal.Render(action.W, res)

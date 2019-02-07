@@ -17,9 +17,24 @@ func (ac Account) IsAuthRevocable() bool {
 	return (ac.Flags & xdr.AccountFlagsAuthRevocableFlag) != 0
 }
 
+// IsAuthImmutable returns true if the account has the "AUTH_IMMUTABLE" option
+// turned on.
+func (ac Account) IsAuthImmutable() bool {
+	return (ac.Flags & xdr.AccountFlagsAuthImmutableFlag) != 0
+}
+
+
 // AccountByAddress loads a row from `accounts`, by address
-func (q *Q) AccountByAddress(dest interface{}, addy string) error {
-	sql := selectAccount.Limit(1).Where("accountid = ?", addy)
+func (q *Q) AccountByAddress(dest interface{}, addy string, protocolVersion int32) error {
+	var selectQuery sq.SelectBuilder
+
+	if protocolVersion >= 10 {
+		selectQuery = selectAccount
+	} else {
+		selectQuery = selectAccountPreV10
+	}
+
+	sql := selectQuery.Limit(1).Where("accountid = ?", addy)
 
 	return q.Get(dest, sql)
 }
@@ -60,6 +75,21 @@ func (sp *SequenceProvider) Get(addys []string) (map[string]uint64, error) {
 }
 
 var selectAccount = sq.Select(
+	"a.accountid",
+	"a.balance",
+	"a.seqnum",
+	"a.numsubentries",
+	"a.inflationdest",
+	"a.homedomain",
+	"a.thresholds",
+	"a.flags",
+	// Liabilities can be NULL so can error without `coalesce`:
+	// `Invalid value for xdr.Int64`
+	"coalesce(a.buyingliabilities, 0) as buyingliabilities",
+	"coalesce(a.sellingliabilities, 0) as sellingliabilities",
+).From("accounts a")
+
+var selectAccountPreV10 = sq.Select(
 	"a.accountid",
 	"a.balance",
 	"a.seqnum",

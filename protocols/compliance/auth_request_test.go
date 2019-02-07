@@ -95,7 +95,7 @@ func TestValidateError(t *testing.T) {
 		Signature: "test",
 	}
 
-	assert.EqualError(t, authRequest.Validate(), "DataJSON: non zero value required;")
+	assert.EqualError(t, authRequest.Validate(), "DataJSON: non zero value required")
 
 	authData := &AuthData{
 		Sender:         "bartekstellar.org",
@@ -104,7 +104,7 @@ func TestValidateError(t *testing.T) {
 		AttachmentJSON: "abc",
 	}
 
-	assert.EqualError(t, authData.Validate(), "Sender: bartekstellar.org does not validate as stellar_address;;Tx: &^% does not validate as base64;AttachmentJSON: abc does not validate as json;")
+	assert.EqualError(t, authData.Validate(), "sender: bartekstellar.org does not validate as stellar_address;tx: &^% does not validate as base64;attachment: abc does not validate as json")
 }
 
 func TestData(t *testing.T) {

@@ -1,67 +1,80 @@
 package sequence
 
 import (
+	"context"
 	"testing"
 	"time"
 
-	. "github.com/smartystreets/goconvey/convey"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestQueue(t *testing.T) {
+type QueueTestSuite struct {
+	suite.Suite
+	ctx   context.Context
+	queue *Queue
+}
+
+func (suite *QueueTestSuite) SetupTest() {
+	suite.ctx = test.Context()
+	suite.queue = NewQueue()
+}
+
+//Push adds the provided channel on to the priority queue
+func (suite *QueueTestSuite) TestQueue_Push() {
 	ctx := test.Context()
 	_ = ctx
-	Convey("Queue", t, func() {
-		queue := NewQueue()
 
-		Convey("Push adds the provided channel on to the priority queue", func() {
-			So(queue.Size(), ShouldEqual, 0)
+	assert.Equal(suite.T(), 0, suite.queue.Size())
 
-			queue.Push(2)
-			So(queue.Size(), ShouldEqual, 1)
-			_, s := queue.head()
-			So(s, ShouldEqual, 2)
+	suite.queue.Push(2)
+	assert.Equal(suite.T(), 1, suite.queue.Size())
+	_, s := suite.queue.head()
+	assert.Equal(suite.T(), uint64(2), s)
 
-			queue.Push(1)
-			So(queue.Size(), ShouldEqual, 2)
-			_, s = queue.head()
-			So(s, ShouldEqual, 1)
-		})
+	suite.queue.Push(1)
+	assert.Equal(suite.T(), 2, suite.queue.Size())
+	_, s = suite.queue.head()
+	assert.Equal(suite.T(), uint64(1), s)
+}
 
-		Convey("Update removes sequences that are submittable or in the past", func() {
-			results := []<-chan error{
-				queue.Push(1),
-				queue.Push(2),
-				queue.Push(3),
-				queue.Push(4),
-			}
+// Tests the update method
+func (suite *QueueTestSuite) TestQueue_Update() {
+	// Update removes sequences that are submittable or in the past
+	results := []<-chan error{
+		suite.queue.Push(1),
+		suite.queue.Push(2),
+		suite.queue.Push(3),
+		suite.queue.Push(4),
+	}
 
-			queue.Update(2)
+	suite.queue.Update(2)
 
-			// the update above signifies that 2 is the accounts current sequence,
-			// meaning that 3 is submittable, and so only 4 should still be queued
-			So(queue.Size(), ShouldEqual, 1)
-			_, s := queue.head()
-			So(s, ShouldEqual, 4)
+	// the update above signifies that 2 is the accounts current sequence,
+	// meaning that 3 is submittable, and so only 4 should still be queued
+	assert.Equal(suite.T(), 1, suite.queue.Size())
+	_, s := suite.queue.head()
+	assert.Equal(suite.T(), uint64(4), s)
 
-			queue.Update(4)
-			So(queue.Size(), ShouldEqual, 0)
+	suite.queue.Update(4)
+	assert.Equal(suite.T(), 0, suite.queue.Size())
 
-			So(<-results[0], ShouldEqual, ErrBadSequence)
-			So(<-results[1], ShouldEqual, ErrBadSequence)
-			So(<-results[2], ShouldEqual, nil)
-			So(<-results[3], ShouldEqual, ErrBadSequence)
+	assert.Equal(suite.T(), ErrBadSequence, <-results[0])
+	assert.Equal(suite.T(), ErrBadSequence, <-results[1])
+	assert.Equal(suite.T(), nil, <-results[2])
+	assert.Equal(suite.T(), ErrBadSequence, <-results[3])
 
-		})
+	// Update clears the queue if the head has not been released within the time limit
+	suite.queue.timeout = 1 * time.Millisecond
+	result := suite.queue.Push(2)
+	<-time.After(10 * time.Millisecond)
+	suite.queue.Update(0)
 
-		Convey("Update clears the queue if the head has not been released within the time limit", func() {
-			queue.timeout = 1 * time.Millisecond
-			result := queue.Push(2)
-			<-time.After(10 * time.Millisecond)
-			queue.Update(0)
+	assert.Equal(suite.T(), 0, suite.queue.Size())
+	assert.Equal(suite.T(), ErrBadSequence, <-result)
+}
 
-			So(queue.Size(), ShouldEqual, 0)
-			So(<-result, ShouldEqual, ErrBadSequence)
-		})
-	})
+func TestQueueTestSuite(t *testing.T) {
+	suite.Run(t, new(QueueTestSuite))
 }

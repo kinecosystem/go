@@ -1,13 +1,13 @@
 package friendbot
 
 import (
+	"context"
 	"errors"
 	"sync"
 
 	. "github.com/kinecosystem/go/build"
 	"github.com/kinecosystem/go/keypair"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub"
-	"golang.org/x/net/context"
 )
 
 // Bot represents the friendbot subsystem.

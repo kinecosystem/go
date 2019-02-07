@@ -16,7 +16,7 @@ func TestOffersByAddress(t *testing.T) {
 
 	load := func(addy, cursor, order string, limit uint64) bool {
 		offers = []Offer{}
-		pq, err := db2.NewPageQuery(cursor, order, limit)
+		pq, err := db2.NewPageQuery(cursor, true, order, limit)
 		if !tt.Assert.NoError(err) {
 			return false
 		}

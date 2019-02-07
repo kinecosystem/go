@@ -5,10 +5,10 @@ package test
 
 import (
 	"bytes"
+	"context"
 
 	"github.com/sirupsen/logrus"
 	"github.com/kinecosystem/go/support/log"
-	"golang.org/x/net/context"
 )
 
 // ContextWithLogBuffer returns a context and a buffer into which the new, bound

@@ -3,8 +3,8 @@ package horizon
 import (
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/log"
 	"github.com/kinecosystem/go/support/db"
+	"github.com/kinecosystem/go/support/log"
 )
 
 func initHorizonDb(app *App) {
@@ -13,6 +13,9 @@ func initHorizonDb(app *App) {
 	if err != nil {
 		log.Panic(err)
 	}
+
+	// MaxIdleConns should be equal to MaxOpenConns. In case of high variance
+	// in number of requests closing and opening connections may slow down Horizon.
 	session.DB.SetMaxIdleConns(app.config.HorizonDBMaxIdleConnections)
 	session.DB.SetMaxOpenConns(app.config.HorizonDBMaxOpenConnections)
 
@@ -26,6 +29,8 @@ func initCoreDb(app *App) {
 		log.Panic(err)
 	}
 
+	// MaxIdleConns should be equal to MaxOpenConns. In case of high variance
+	// in number of requests closing and opening connections may slow down Horizon.
 	session.DB.SetMaxIdleConns(app.config.CoreDBMaxIdleConnections)
 	session.DB.SetMaxOpenConns(app.config.CoreDBMaxOpenConnections)
 	app.coreQ = &core.Q{session}

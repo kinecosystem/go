@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kinecosystem/go/services/horizon/internal/resource"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
+	"github.com/kinecosystem/go/protocols/horizon"
 )
 
 func TestRootAction(t *testing.T) {
@@ -27,7 +27,7 @@ func TestRootAction(t *testing.T) {
 
 	w := ht.Get("/")
 	if ht.Assert.Equal(200, w.Code) {
-		var actual resource.Root
+		var actual horizon.Root
 		err := json.Unmarshal(w.Body.Bytes(), &actual)
 		ht.Require.NoError(err)
 		ht.Assert.Equal("test-horizon", actual.HorizonVersion)

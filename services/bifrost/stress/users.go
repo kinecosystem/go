@@ -1,6 +1,7 @@
 package stress
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -16,7 +17,6 @@ import (
 	"github.com/kinecosystem/go/keypair"
 	"github.com/kinecosystem/go/services/bifrost/common"
 	"github.com/kinecosystem/go/services/bifrost/server"
-	"golang.org/x/net/context"
 )
 
 func (u *Users) Start(accounts chan<- server.GenerateAddressResponse) {

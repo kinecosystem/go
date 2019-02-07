@@ -1,29 +1,23 @@
 package httpx
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
-	"golang.org/x/net/context"
-
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClientContext(t *testing.T) {
+	// returns the default client
+	assert.Equal(t, defaultClient, ClientFromContext(context.Background()))
 
-	Convey("ClientFromContext works", t, func() {
-		// returns the default client
-		So(ClientFromContext(context.Background()), ShouldEqual, defaultClient)
+	// returns a set client
+	c := &http.Client{}
+	ctx := ClientContext(context.Background(), c)
+	assert.Equal(t, c, ClientFromContext(ctx))
 
-		// returns a set client
-		c := &http.Client{}
-		ctx := ClientContext(context.Background(), c)
-		So(ClientFromContext(ctx), ShouldEqual, c)
-	})
-
-	Convey("ClientContext panics if nil is used", t, func() {
-		So(func() {
-			ClientContext(context.Background(), nil)
-		}, ShouldPanic)
+	assert.Panics(t, func() {
+		ClientContext(context.Background(), nil)
 	})
 }

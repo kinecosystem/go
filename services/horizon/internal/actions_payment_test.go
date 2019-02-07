@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/resource/operations"
+	"github.com/kinecosystem/go/protocols/horizon/operations"
 )
 
 func TestPaymentActions(t *testing.T) {
@@ -46,6 +46,11 @@ func TestPaymentActions(t *testing.T) {
 	w = ht.Get("/transactions/1d2a4be72470658f68db50eef29ea0af3f985ce18b5c218f03461d40c47dc292/payments")
 	if ht.Assert.Equal(200, w.Code) {
 		ht.Assert.PageOf(1, w.Body)
+
+		// test for existence of source_amount in path payment details
+		var records []map[string]interface{}
+		ht.UnmarshalPage(w.Body, &records)
+		ht.Assert.Equal("10.0000000", records[0]["source_amount"])
 	}
 
 	// Regression: negative cursor

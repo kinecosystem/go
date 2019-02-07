@@ -13,39 +13,6 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 )
 
-// Test subscription gets updates, and sse.Tick() doesnt trigger channel.
-func TestSSEPubsub(t *testing.T) {
-	ht := StartHTTPTest(t, "base")
-	defer ht.Finish()
-
-	ht.App.ticks.Stop()
-
-	subscription := sse.Subscribe("a")
-	defer sse.Unsubscribe(subscription, "a")
-
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func(subscription chan interface{}, wg *sync.WaitGroup) {
-		defer wg.Done()
-		select {
-		case <-subscription:
-			return
-		case <-time.After(2 * time.Second):
-			t.Fatal("subscription did not trigger")
-		}
-	}(subscription, &wg)
-	sse.Publish("a", true)
-	wg.Wait()
-
-	sse.Tick()
-	select {
-	case <-subscription:
-		t.Fatal("subscription shouldn't trigger after tick")
-	case <-time.After(2 * time.Second): // no-op. Success!
-	}
-
-}
-
 // Test 2 subscriptions to different topics. Make sure that one topic doesnt
 // raise both channels.
 func TestSSEPubsubMultipleChannels(t *testing.T) {
@@ -220,5 +187,6 @@ func sys(tt *test.T) *ingest.System {
 		tt.CoreSession(),
 		tt.HorizonSession(),
 		"HORIZON",
+		ingest.Config{},
 	)
 }
