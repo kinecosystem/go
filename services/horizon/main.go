@@ -178,7 +178,7 @@ func init() {
 	rootCmd.PersistentFlags().String(
 		"cursor-name",
 		"HORIZON",
-		"Override the cursor name used in stellar-core",
+		"Set the cursor name used in stellar-core",
 	)
 
 	rootCmd.PersistentFlags().String(
