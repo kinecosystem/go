@@ -126,13 +126,17 @@ func (base *Base) Execute(action interface{}) {
 
 			select {
 			case <-pumped:
-				//no-op, continue onto the next iteration
+				// No-op, continue onto the next iteration.
+				continue
 			case <-ctx.Done():
+				// Close stream and exit.
+				stream.Done()
+				return
 			case <-base.appCtx.Done():
+				// Close stream and exit.
+				stream.Done()
+				return
 			}
-
-			stream.Done()
-			return
 		}
 	case render.MimeRaw:
 		action, ok := action.(Raw)
