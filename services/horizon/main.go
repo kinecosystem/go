@@ -317,6 +317,7 @@ func initConfig() {
 		Ingest:                      viper.GetBool("ingest"),
 		HistoryRetentionCount:       uint(viper.GetInt("history-retention-count")),
 		StaleThreshold:              uint(viper.GetInt("history-stale-threshold")),
+		CursorName:                  viper.GetString("cursor-name"),
 		SkipCursorUpdate:            viper.GetBool("skip-cursor-update"),
 		EnableAssetStats:            viper.GetBool("enable-asset-stats"),
 	}
