@@ -117,8 +117,9 @@ func getJSON(val interface{}) string {
 // Pubsub for SSE requests, so they will run SSE.action only upon relevant data changes.
 var ssePubsub = pubsub.New(pubsubCapacity)
 
-// Subscribe to topic by SSE connection usually with an id (account, ledger, tx)
-// Once a change in database happens, Publish is used by ingestor so channel is notified.
+// Subscribe to topic by SSE connection, usually with an ID (account, ledger, tx).
+// Once a change occurs in Horizon database happens, Publish() is called by ingestor so the
+// subscription channel is notified.
 func Subscribe(topic string) chan interface{} {
 	topicChan := ssePubsub.Sub(topic)
 	log.WithFields(log.F{"topic": topic, "channel": topicChan}).Debug("Subscribed to topic")
@@ -126,12 +127,12 @@ func Subscribe(topic string) chan interface{} {
 }
 
 // Unsubscribe to a topic, for example when SSE connection is closed.
-func Unsubscribe(channel chan interface{}, topic string) {
+func Unsubscribe(notification chan interface{}, topic string) {
 	log.WithField("topic", topic).Debug("Unsubscribed from topic")
-	ssePubsub.Unsub(channel, topic)
+	ssePubsub.Unsub(notification, topic)
 }
 
-// Publish publishes to channel.
+// Publish publishes to a PubSub subscription notification channel.
 //
 // NOTE there is good reason to usually publish in a non-blocking manner i.e. skipping publishing
 // and dropping sending the notification to the channel. The reason is in case channel queue is full,

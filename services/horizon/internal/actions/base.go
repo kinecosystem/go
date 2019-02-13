@@ -58,7 +58,7 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
-		var pumped chan interface{}
+		var notification chan interface{}
 
 		action, ok := action.(SSE)
 		if !ok {
@@ -69,8 +69,8 @@ func (base *Base) Execute(action interface{}) {
 		// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
 		topic := action.GetTopic()
 		if topic != "" {
-			pumped = sse.Subscribe(topic)
-			defer sse.Unsubscribe(pumped, topic)
+			notification = sse.Subscribe(topic)
+			defer sse.Unsubscribe(notification, topic)
 		}
 
 		stream := sse.NewStream(ctx, base.W)
@@ -125,7 +125,7 @@ func (base *Base) Execute(action interface{}) {
 			}
 
 			select {
-			case <-pumped:
+			case <-notification:
 				// No-op, continue onto the next iteration.
 				continue
 			case <-ctx.Done():
