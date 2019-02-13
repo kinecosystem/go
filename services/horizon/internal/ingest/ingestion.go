@@ -182,20 +182,22 @@ func (ingest *Ingestion) UpdateAccountIDs(tables []TableName) error {
 	return nil
 }
 
-// Return a channel which emits a message when ingections were committed to the database
-func (ingest *Ingestion) getCommitChannel() chan interface{} {
+// subscribeToDBCommit subscribes to updates for ingestions that were committed to the database,
+// and returns a notification channel that notifies when a commit happened.
+func (ingest *Ingestion) subscribeToDBCommit() chan interface{} {
 	return commitPubsub.SubOnce(pubsubCommitTopic)
 }
 
-// Listen until the insert action committed to the DB and then publish to sse subscriptors and
-// then publish the topic that was ingested.
-func (ingest *Ingestion) waitAndPublish(committed chan interface{}, topic string) {
+// publishOnDBCommit listens until the insert action was committed to the database,
+// then publishes a notification to SSE subscriptors, and also to the topic that was ingested.
+func (ingest *Ingestion) publishOnDBCommit(committed chan interface{}, topic string) {
 	l := log.WithFields(ilog.F{"topic": topic, "channel": committed})
 	l.Debug("Waiting for topic")
 	select {
 	case <-committed:
 		sse.Publish(topic, false)
 	case <-time.After(10 * time.Second):
+		// Timeout after a while
 		l.Errorf("Failed to get publish approval, releasing channel")
 		sse.Publish(topic, false)
 	}
@@ -209,12 +211,12 @@ func (ingest *Ingestion) Ledger(
 	ops int,
 ) {
 
-	// Wait for data to be committed to database, then notify subscribes.
-	go ingest.waitAndPublish(ingest.getCommitChannel(), "ledger")
-	go ingest.waitAndPublish(ingest.getCommitChannel(), strconv.FormatInt(id, 10))
+	// Wait for data to be committed to database, then notify subscribers.
+	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), "ledger")
+	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), strconv.FormatInt(id, 10))
 
 	if txs > 0 {
-		go ingest.waitAndPublish(ingest.getCommitChannel(), "transactions")
+		go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), "transactions")
 	}
 
 	ingest.builders[LedgersTableName].Values(
@@ -264,7 +266,7 @@ func (ingest *Ingestion) Operation(
 func (ingest *Ingestion) OperationParticipants(op int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
 		// Wait for data to be committed to database, then notify subscribes.
-		go ingest.waitAndPublish(ingest.getCommitChannel(), aid.Address())
+		go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), aid.Address())
 
 		ingest.builders[OperationParticipantsTableName].Values(op, Address(aid.Address()))
 	}
@@ -297,7 +299,7 @@ func (ingest *Ingestion) Trade(
 	ledgerClosedAt int64,
 ) error {
 	// Wait for data to be committed to database, then notify subscribes.
-	go ingest.waitAndPublish(ingest.getCommitChannel(), "order_book")
+	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), "order_book")
 
 	q := history.Q{Session: ingest.DB}
 
@@ -359,7 +361,7 @@ func (ingest *Ingestion) Transaction(
 	signatures := tx.Base64Signatures()
 
 	// Wait for data to be committed to database, then notify subscribes.
-	go ingest.waitAndPublish(ingest.getCommitChannel(), tx.TransactionHash)
+	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), tx.TransactionHash)
 
 	ingest.builders[TransactionsTableName].Values(
 		id,
@@ -389,7 +391,7 @@ func (ingest *Ingestion) Transaction(
 func (ingest *Ingestion) TransactionParticipants(tx int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
 		// Wait for data to be committed to database, then notify subscribes.
-		go ingest.waitAndPublish(ingest.getCommitChannel(), aid.Address())
+		go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), aid.Address())
 		ingest.builders[TransactionParticipantsTableName].Values(tx, Address(aid.Address()))
 	}
 }
@@ -506,7 +508,7 @@ func (ingest *Ingestion) commit() error {
 	if err != nil {
 		return err
 	}
-	// Update subscribers that commit is done to the DB.
+	// Update subscribers that a database commit occured.
 	commitPubsub.TryPub(pubsubStubValue, pubsubCommitTopic)
 	return nil
 }
