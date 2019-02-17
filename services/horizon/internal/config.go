@@ -14,13 +14,7 @@ type Config struct {
 	DatabaseURL            string
 	StellarCoreDatabaseURL string
 	StellarCoreURL         string
-<<<<<<< HEAD
-	Port                   int
-=======
 	Port                   uint
-	MaxDBConnections       int
-	SSEUpdateFrequency     time.Duration
->>>>>>> horizon-v0.16.0
 	ConnectionTimeout      time.Duration
 	RateLimit              *throttled.RateQuota
 	RateLimitRedisKey      string

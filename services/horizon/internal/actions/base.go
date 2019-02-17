@@ -60,25 +60,20 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
-<<<<<<< HEAD
 		var notification chan interface{}
 
-		action, ok := action.(SSE)
-		if !ok {
-=======
-		switch action.(type) {
-		case SSE, SingleObjectStreamer:
+		switch ac := action.(type) {
+		case SSE:
+			// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
+			// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
+			topic := ac.GetTopic()
+			if topic != "" {
+				notification = sse.Subscribe(topic)
+				defer sse.Unsubscribe(notification, topic)
+			}
+		case SingleObjectStreamer:
 		default:
->>>>>>> horizon-v0.16.0
 			goto NotAcceptable
-		}
-
-		// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
-		// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
-		topic := action.GetTopic()
-		if topic != "" {
-			notification = sse.Subscribe(topic)
-			defer sse.Unsubscribe(notification, topic)
 		}
 
 		stream := sse.NewStream(ctx, base.W)
@@ -162,14 +157,11 @@ func (base *Base) Execute(action interface{}) {
 				// No-op, continue onto the next iteration.
 				continue
 			case <-ctx.Done():
-				// Close stream and exit.
-				stream.Done()
-				return
 			case <-base.appCtx.Done():
-				// Close stream and exit.
-				stream.Done()
-				return
 			}
+
+			stream.Done()
+			return
 		}
 	case render.MimeRaw:
 		action, ok := action.(Raw)

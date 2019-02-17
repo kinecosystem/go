@@ -38,6 +38,20 @@ func (action *AccountShowAction) JSON() {
 	)
 }
 
+// SSE is a method for actions.SSE
+func (action *AccountShowAction) SSE(stream sse.Stream) {
+
+	action.Do(
+		action.loadParams,
+		action.loadRecord,
+		action.loadResource,
+		func() {
+			stream.SetLimit(10)
+			stream.Send(sse.Event{Data: action.Resource})
+		},
+	)
+}
+
 func (action *AccountShowAction) LoadEvent() sse.Event {
 	action.Do(action.loadParams, action.loadRecord, action.loadResource)
 	return sse.Event{Data: action.Resource}

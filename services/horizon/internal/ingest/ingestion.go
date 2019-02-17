@@ -216,7 +216,7 @@ func (ingest *Ingestion) Ledger(
 	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), "ledger")
 	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), strconv.FormatInt(id, 10))
 
-	if txs > 0 {
+	if successTxsCount > 0 || failedTxsCount > 0 {
 		go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), "transactions")
 	}
 
