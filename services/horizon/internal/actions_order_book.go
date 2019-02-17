@@ -3,23 +3,13 @@ package horizon
 import (
 	"net/http"
 
-<<<<<<< HEAD
+	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
+	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
+	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
 	"github.com/kinecosystem/go/xdr"
-	"github.com/kinecosystem/go/protocols/horizon"
-	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
-	"github.com/kinecosystem/go/support/render/hal"
-=======
-	"github.com/stellar/go/protocols/horizon"
-	"github.com/stellar/go/services/horizon/internal/db2/core"
-	"github.com/stellar/go/services/horizon/internal/render/sse"
-	"github.com/stellar/go/services/horizon/internal/resourceadapter"
-	"github.com/stellar/go/support/render/hal"
-	"github.com/stellar/go/support/render/problem"
-	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.16.0
 )
 
 // OrderBookShowAction renders a account summary found by its address.

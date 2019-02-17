@@ -4,21 +4,12 @@ import (
 	"context"
 	"fmt"
 
-<<<<<<< HEAD
 	"github.com/kinecosystem/go/amount"
+	. "github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/httpx"
-	"github.com/kinecosystem/go/xdr"
-	. "github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/support/render/hal"
-=======
-	"github.com/stellar/go/amount"
-	. "github.com/stellar/go/protocols/horizon"
-	"github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/services/horizon/internal/httpx"
-	"github.com/stellar/go/support/render/hal"
-	"github.com/stellar/go/xdr"
->>>>>>> horizon-v0.16.0
+	"github.com/kinecosystem/go/xdr"
 )
 
 func PopulateLedger(ctx context.Context, dest *Ledger, row history.Ledger) {

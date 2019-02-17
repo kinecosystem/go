@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/support/strutils"
+	"github.com/kinecosystem/go/support/errors"
+	"github.com/kinecosystem/go/support/strutils"
 )
 
 // ConfigOption is a complete description of the configuration of a command line option

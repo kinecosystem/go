@@ -3,12 +3,8 @@ package history
 import (
 	"testing"
 
-<<<<<<< HEAD
+	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
-=======
-	"github.com/stellar/go/services/horizon/internal/db2"
-	"github.com/stellar/go/services/horizon/internal/test"
->>>>>>> horizon-v0.16.0
 )
 
 func TestOperationQueries(t *testing.T) {
