@@ -249,6 +249,18 @@ func (c *Cursor) SuccessfulTransactionCount() (ret int) {
 	return
 }
 
+// FailedTransactionCount returns the count of transactions in the current
+// ledger that failed.
+func (c *Cursor) FailedTransactionCount() (ret int) {
+	for i := range c.data.Transactions {
+		if !c.data.Transactions[i].IsSuccessful() {
+			ret++
+		}
+	}
+	return
+}
+
+
 // TransactionID returns the current tranaction's id, as used by the history
 // system.
 func (c *Cursor) TransactionID() int64 {

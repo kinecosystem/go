@@ -10,6 +10,26 @@ import (
 
 // This file contains helpers for working with xdr.Asset structs
 
+func MustNewNativeAsset() Asset {
+	a := Asset{}
+	err := a.SetNative()
+	if err != nil {
+		panic(err)
+	}
+	return a
+}
+
+func MustNewCreditAsset(code string, issuer string) Asset {
+	a := Asset{}
+	accountID := AccountId{}
+	accountID.SetAddress(issuer)
+	err := a.SetCredit(code, accountID)
+	if err != nil {
+		panic(err)
+	}
+	return a
+}
+
 // SetCredit overwrites `a` with a credit asset using `code` and `issuer`.  The
 // asset type (CreditAlphanum4 or CreditAlphanum12) is chosen automatically
 // based upon the length of `code`.

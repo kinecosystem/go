@@ -21,18 +21,18 @@ close_ledger
 payment :usd_gateway, :scott,  ["USD", :usd_gateway, 500]
 payment :eur_gateway, :bartek, ["EUR", :eur_gateway, 500]
 
+# Offers below should be applied in separate ledgers. Transactions withing a single
+# ledger are applied in a random order, this makes synthetic offer IDs in `/trades`
+# endpoint to be different when tests are regenerated.
 close_ledger
-
 offer :bartek, {buy:["USD", :usd_gateway], with:["EUR", :eur_gateway]}, 100, 1.0
-offer :bartek, {buy:["USD", :usd_gateway], with:["EUR", :eur_gateway]}, 100, 0.9
-offer :bartek, {buy:["USD", :usd_gateway], with:["EUR", :eur_gateway]}, 100, 0.8
-
 close_ledger
-
+offer :bartek, {buy:["USD", :usd_gateway], with:["EUR", :eur_gateway]}, 100, 0.9
+close_ledger
+offer :bartek, {buy:["USD", :usd_gateway], with:["EUR", :eur_gateway]}, 100, 0.8
+close_ledger
 # should be fully consumed in two trades
 offer :scott, {sell:["USD", :usd_gateway], for:["EUR", :eur_gateway]}, 150, 0.9
-
 close_ledger
-
 # should be partially consumed in two trades
 offer :scott, {sell:["USD", :usd_gateway], for:["EUR", :eur_gateway]}, 151, 0.8

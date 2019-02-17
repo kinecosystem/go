@@ -15,9 +15,15 @@ func (lb *LedgerBundle) Load(db *db.Session) error {
 	err := q.LedgerHeaderBySequence(&lb.Header, lb.Sequence)
 	if err != nil {
 		// Remove when Horizon is able to handle gaps in stellar-core DB.
+<<<<<<< HEAD
 		// More info: https://github.com/kinecosystem/go/issues/335
+=======
+		// More info:
+		// * https://github.com/stellar/go/issues/335
+		// * https://www.stellar.org/developers/software/known-issues.html#gaps-detected
+>>>>>>> horizon-v0.16.0
 		if err == sql.ErrNoRows {
-			return errors.New("Gap detected in stellar-core database. Please recreate Horizon DB.")
+			return errors.New("Gap detected in stellar-core database. More information: https://www.stellar.org/developers/software/known-issues.html#gaps-detected")
 		}
 		return errors.Wrap(err, "failed to load header")
 	}

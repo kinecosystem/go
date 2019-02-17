@@ -32,21 +32,22 @@ import (
 
 // App represents the root of the state of a horizon instance.
 type App struct {
-	config          Config
-	web             *Web
-	historyQ        *history.Q
-	coreQ           *core.Q
-	ctx             context.Context
-	cancel          func()
-	redis           *redis.Pool
-	coreVersion     string
-	horizonVersion  string
-	protocolVersion int32
-	submitter       *txsub.System
-	paths           paths.Finder
-	ingester        *ingest.System
-	reaper          *reap.System
-	ticks           *time.Ticker
+	config                       Config
+	web                          *Web
+	historyQ                     *history.Q
+	coreQ                        *core.Q
+	ctx                          context.Context
+	cancel                       func()
+	redis                        *redis.Pool
+	coreVersion                  string
+	horizonVersion               string
+	currentProtocolVersion       int32
+	coreSupportedProtocolVersion int32
+	submitter                    *txsub.System
+	paths                        paths.Finder
+	ingester                     *ingest.System
+	reaper                       *reap.System
+	ticks                        *time.Ticker
 
 	// metrics
 	metrics                  metrics.Registry
@@ -280,7 +281,9 @@ func (a *App) UpdateStellarCoreInfo() {
 	}
 
 	a.coreVersion = resp.Info.Build
-	a.protocolVersion = int32(resp.Info.ProtocolVersion)
+
+	a.currentProtocolVersion = int32(resp.Info.Ledger.Version)
+	a.coreSupportedProtocolVersion = int32(resp.Info.ProtocolVersion)
 }
 
 // UpdateMetrics triggers a refresh of several metrics gauges, such as open

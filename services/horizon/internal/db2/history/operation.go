@@ -34,8 +34,9 @@ func (r *Operation) UnmarshalDetails(dest interface{}) error {
 // filters.  See `OperationsQ` for the available filters.
 func (q *Q) Operations() *OperationsQ {
 	return &OperationsQ{
-		parent: q,
-		sql:    selectOperation,
+		parent:  q,
+		sql:     selectOperation,
+		opIdCol: "hop.id",
 	}
 }
 
@@ -60,6 +61,9 @@ func (q *OperationsQ) ForAccount(aid string) *OperationsQ {
 		"history_operation_participants hopp ON "+
 			"hopp.history_operation_id = hop.id",
 	).Where("hopp.history_account_id = ?", account.ID)
+
+	// in order to use history_operation_participants.hist_op_p_id index
+	q.opIdCol = "hopp.history_operation_id"
 
 	return q
 }
@@ -124,7 +128,7 @@ func (q *OperationsQ) Page(page db2.PageQuery) *OperationsQ {
 		return q
 	}
 
-	q.sql, q.Err = page.ApplyTo(q.sql, "hop.id")
+	q.sql, q.Err = page.ApplyTo(q.sql, q.opIdCol)
 	return q
 }
 

@@ -23,7 +23,7 @@ func TestOfferActions_Index(t *testing.T) {
 		ht.Assert.NoError(err)
 		recordTime, err := time.Parse("2006-01-02T15:04:05Z", records[2]["last_modified_time"].(string))
 		ht.Assert.True(recordTime.After(t2018))
-		ht.Assert.EqualValues(5, records[2]["last_modified_ledger"])
+		ht.Assert.EqualValues(8, records[2]["last_modified_ledger"])
 	}
 }
 
@@ -32,7 +32,7 @@ func TestOfferActions_IndexNoLedgerData(t *testing.T) {
 	defer ht.Finish()
 
 	// Remove ledger data
-	_, err := ht.App.HistoryQ().ExecRaw("DELETE FROM history_ledgers WHERE sequence=?", 5)
+	_, err := ht.App.HistoryQ().ExecRaw("DELETE FROM history_ledgers WHERE sequence=?", 8)
 	ht.Assert.NoError(err)
 
 	w := ht.Get(

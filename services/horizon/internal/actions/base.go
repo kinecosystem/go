@@ -1,8 +1,11 @@
 package actions
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/json"
 	"net/http"
 
 	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
@@ -45,7 +48,6 @@ func (base *Base) Execute(action interface{}) {
 	switch contentType {
 	case render.MimeHal, render.MimeJSON:
 		action, ok := action.(JSON)
-
 		if !ok {
 			goto NotAcceptable
 		}
@@ -58,10 +60,16 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
+<<<<<<< HEAD
 		var notification chan interface{}
 
 		action, ok := action.(SSE)
 		if !ok {
+=======
+		switch action.(type) {
+		case SSE, SingleObjectStreamer:
+		default:
+>>>>>>> horizon-v0.16.0
 			goto NotAcceptable
 		}
 
@@ -75,6 +83,7 @@ func (base *Base) Execute(action interface{}) {
 
 		stream := sse.NewStream(ctx, base.W)
 
+		var oldHash [32]byte
 		for {
 			// Rate limit the request if it's a call to stream since it queries the DB every second. See
 			// https://github.com/kinecosystem/go/issues/715 for more details.
@@ -93,12 +102,36 @@ func (base *Base) Execute(action interface{}) {
 				}
 			}
 
-			action.SSE(stream)
+			switch ac := action.(type) {
+			case SSE:
+				ac.SSE(stream)
 
+			case SingleObjectStreamer:
+				newEvent := ac.LoadEvent()
+				if base.Err != nil {
+					break
+				}
+				resource, err := json.Marshal(newEvent.Data)
+				if err != nil {
+					log.Ctx(ctx).Error(errors.Wrap(err, "unable to marshal next action resource"))
+					stream.Err(errors.New("Unexpected stream error"))
+					return
+				}
+
+				nextHash := sha256.Sum256(resource)
+				if bytes.Equal(nextHash[:], oldHash[:]) {
+					break
+				}
+
+				oldHash = nextHash
+				stream.SetLimit(10)
+				stream.Send(newEvent)
+			}
+			// TODO: better error handling. We should probably handle the error immediately in the error case above
+			// instead of breaking out from the switch statement.
 			if base.Err != nil {
-				// In the case that we haven't yet sent an event, is also means we
-				// haven't sent the preamble, meaning we should simply return the normal HTTP
-				// error.
+				// If we haven't sent an event, we should simply return the normal HTTP
+				// error because it means that we haven't sent the preamble.
 				if stream.SentCount() == 0 {
 					problem.Render(ctx, base.W, base.Err)
 					return
@@ -140,7 +173,6 @@ func (base *Base) Execute(action interface{}) {
 		}
 	case render.MimeRaw:
 		action, ok := action.(Raw)
-
 		if !ok {
 			goto NotAcceptable
 		}

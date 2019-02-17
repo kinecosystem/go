@@ -3,10 +3,18 @@ package ingest
 import (
 	"testing"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 	"github.com/kinecosystem/go/xdr"
+=======
+	protocolEffects "github.com/stellar/go/protocols/horizon/effects"
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/test"
+	"github.com/stellar/go/xdr"
+>>>>>>> horizon-v0.16.0
 )
 
 func Test_ingestSignerEffects(t *testing.T) {
@@ -74,6 +82,13 @@ func Test_ingestOperationEffects(t *testing.T) {
 		tt.Assert.Equal(history.EffectTrade, effects[3].Type)
 	}
 
+	err = q.Effects().ForOperation(81604382721).Page(pq).Select(&effects)
+	tt.Require.NoError(err)
+
+	var ad protocolEffects.AccountDebited
+	err = effects[1].UnmarshalDetails(&ad)
+	tt.Require.NoError(err)
+	tt.Assert.Equal("100.0000000", ad.Amount)
 }
 
 func Test_ingestBumpSeq(t *testing.T) {

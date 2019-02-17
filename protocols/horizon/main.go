@@ -150,21 +150,24 @@ type Ledger struct {
 		Payments     hal.Link `json:"payments"`
 		Effects      hal.Link `json:"effects"`
 	} `json:"_links"`
-	ID               string    `json:"id"`
-	PT               string    `json:"paging_token"`
-	Hash             string    `json:"hash"`
-	PrevHash         string    `json:"prev_hash,omitempty"`
-	Sequence         int32     `json:"sequence"`
-	TransactionCount int32     `json:"transaction_count"`
-	OperationCount   int32     `json:"operation_count"`
-	ClosedAt         time.Time `json:"closed_at"`
-	TotalCoins       string    `json:"total_coins"`
-	FeePool          string    `json:"fee_pool"`
-	BaseFee          int32     `json:"base_fee_in_stroops"`
-	BaseReserve      int32     `json:"base_reserve_in_stroops"`
-	MaxTxSetSize     int32     `json:"max_tx_set_size"`
-	ProtocolVersion  int32     `json:"protocol_version"`
-	HeaderXDR        string    `json:"header_xdr"`
+	ID       string `json:"id"`
+	PT       string `json:"paging_token"`
+	Hash     string `json:"hash"`
+	PrevHash string `json:"prev_hash,omitempty"`
+	Sequence int32  `json:"sequence"`
+	// Deprecated - remove in: horizon-v0.17.0
+	TransactionCount           int32     `json:"transaction_count"`
+	SuccessfulTransactionCount int32     `json:"successful_transaction_count"`
+	FailedTransactionCount     *int32    `json:"failed_transaction_count"`
+	OperationCount             int32     `json:"operation_count"`
+	ClosedAt                   time.Time `json:"closed_at"`
+	TotalCoins                 string    `json:"total_coins"`
+	FeePool                    string    `json:"fee_pool"`
+	BaseFee                    int32     `json:"base_fee_in_stroops"`
+	BaseReserve                int32     `json:"base_reserve_in_stroops"`
+	MaxTxSetSize               int32     `json:"max_tx_set_size"`
+	ProtocolVersion            int32     `json:"protocol_version"`
+	HeaderXDR                  string    `json:"header_xdr"`
 }
 
 func (this Ledger) PagingToken() string {
@@ -250,11 +253,15 @@ type Root struct {
 	HistoryElderSequence int32  `json:"history_elder_ledger"`
 	CoreSequence         int32  `json:"core_latest_ledger"`
 	NetworkPassphrase    string `json:"network_passphrase"`
-	ProtocolVersion      int32  `json:"protocol_version"`
+	// Deprecated - remove in: horizon-v0.17.0
+	ProtocolVersion              int32 `json:"protocol_version"`
+	CurrentProtocolVersion       int32 `json:"current_protocol_version"`
+	CoreSupportedProtocolVersion int32 `json:"core_supported_protocol_version"`
 }
 
 // Signer represents one of an account's signers.
 type Signer struct {
+	// Deprecated - remove in: horizon-v0.17.0
 	PublicKey string `json:"public_key"`
 	Weight    int32  `json:"weight"`
 	Key       string `json:"key"`

@@ -19,6 +19,7 @@ func TestPopulateRoot(t *testing.T) {
 		"cVersion",
 		"passphrase",
 		100,
+		101,
 		urlMustParse(t, "https://friendbot.example.com"))
 
 	assert.Equal(t, int32(1), res.CoreSequence)
@@ -38,6 +39,7 @@ func TestPopulateRoot(t *testing.T) {
 		"cVersion",
 		"passphrase",
 		100,
+		101,
 		nil)
 
 	assert.Equal(t, int32(1), res.CoreSequence)

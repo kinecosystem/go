@@ -6,6 +6,28 @@ file.  This project adheres to [Semantic Versioning](http://semver.org/).
 As this project is pre 1.0, breaking changes may happen for minor version
 bumps.  A breaking change will get clearly notified in this log.
 
+## v0.16.0 - 2019-02-04
+
+### Upgrate notes
+
+* Ledger > Admins need to reingest old ledgers because we introduced `successful_transaction_count` and `failed_transaction_count`.
+
+### Deprecations
+
+* Root > `protocol_version` will be deprecated in v0.17.0. It is relaced by `current_protocol_version` and `core_supported_protocol_version`.
+* Ledger > `transaction_count` will be deprecated in v0.17.0.
+* Signer > `public_key` will be deprecated in v0.17.0.
+
+### Changes
+
+* Improved `horizon db migrate` script. It will now either success or show a detailed message regarding why it failed.
+* Fixed effects ingestion of circular payments.
+* Improved account query performances for payments and operations.
+* Added `successful_transaction_count` and `failed_transaction_count` to `ledger` resource.
+* Fixed the wrong protocol version displayed in `root` resource by adding `current_protocol_version` and `core_supported_protocol_version`.
+* Improved streaming for single objects. It won't send an event back if the current event is the same as the last event sent.
+* Fixed ingesting effects of empty trades. Empty trades will be ignored during ingestion.
+
 ## v0.15.4 - 2019-01-17
 
 * Fixed multiple issues in transaction submission subsystem.
