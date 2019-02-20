@@ -179,7 +179,7 @@ func (sys *System) submitOnce(ctx context.Context, env string) SubmissionResult 
 	return sr
 }
 
-// setTickInProgress sets `tickInProgress` to `true` if it's not
+// setTickInProgress sets `tickInProgress` to `true` if it's
 // `false`. Returns `true` if `tickInProgress` has been switched
 // to `true` inside this method and `Tick()` should continue.
 func (sys *System) setTickInProgress(ctx context.Context) bool {

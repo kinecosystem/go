@@ -3,13 +3,13 @@ package horizon
 import (
 	"net/http"
 
+	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
+	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
+	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
 	"github.com/kinecosystem/go/xdr"
-	"github.com/kinecosystem/go/protocols/horizon"
-	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
-	"github.com/kinecosystem/go/support/render/hal"
 )
 
 // OrderBookShowAction renders a account summary found by its address.
@@ -83,6 +83,11 @@ func (action *OrderBookShowAction) SSE(stream sse.Stream) {
 		})
 	})
 
+}
+
+func (action *OrderBookShowAction) LoadEvent() sse.Event {
+	action.Do(action.LoadQuery, action.LoadRecord, action.LoadResource)
+	return sse.Event{Data: action.Resource}
 }
 
 // GetTopic is a method for actions.SSE

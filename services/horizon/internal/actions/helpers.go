@@ -194,29 +194,25 @@ func (base *Base) GetLimit(name string, def uint64, max uint64) uint64 {
 // GetPageQuery is a helper that returns a new db.PageQuery struct initialized
 // using the results from a call to GetPagingParams()
 func (base *Base) GetPageQuery(opts ...Opt) db2.PageQuery {
-	disableCursorValidation := false
-
-	for opt := range opts {
-		switch Opt(opt) {
-		case DisableCursorValidation:
-			disableCursorValidation = true
-		}
-	}
-
 	if base.Err != nil {
 		return db2.PageQuery{}
+	}
+
+	disableCursorValidation := false
+	for _, opt := range opts {
+		if opt == DisableCursorValidation {
+			disableCursorValidation = true
+		}
 	}
 
 	cursor := base.GetCursor(ParamCursor)
 	order := base.GetString(ParamOrder)
 	limit := base.GetLimit(ParamLimit, db2.DefaultPageSize, db2.MaxPageSize)
-
 	if base.Err != nil {
 		return db2.PageQuery{}
 	}
 
 	r, err := db2.NewPageQuery(cursor, !disableCursorValidation, order, limit)
-
 	if err != nil {
 		if invalidFieldError, ok := err.(*db2.InvalidFieldError); ok {
 			base.SetInvalidField(invalidFieldError.Name, err)
@@ -236,8 +232,8 @@ func (base *Base) GetAddress(name string, opts ...Opt) (result string) {
 	}
 
 	requiredParam := false
-	for opt := range opts {
-		switch Opt(opt) {
+	for _, opt := range opts {
+		switch opt {
 		case RequiredParam:
 			requiredParam = true
 		}

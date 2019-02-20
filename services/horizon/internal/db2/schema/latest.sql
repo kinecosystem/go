@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.6
--- Dumped by pg_dump version 9.6.6
+-- Dumped from database version 9.6.1
+-- Dumped by pg_dump version 9.6.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -105,7 +105,7 @@ CREATE TABLE asset_stats (
     amount character varying NOT NULL,
     num_accounts integer NOT NULL,
     flags smallint NOT NULL,
-    toml character varying(64) NOT NULL
+    toml character varying(255) NOT NULL
 );
 
 
@@ -206,7 +206,9 @@ CREATE TABLE history_ledgers (
     base_reserve integer NOT NULL,
     max_tx_set_size integer NOT NULL,
     protocol_version integer DEFAULT 0 NOT NULL,
-    ledger_header text
+    ledger_header text,
+    successful_transaction_count integer,
+    failed_transaction_count integer
 );
 
 
@@ -367,20 +369,22 @@ ALTER TABLE ONLY history_transaction_participants ALTER COLUMN id SET DEFAULT ne
 -- Data for Name: gorp_migrations; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO gorp_migrations VALUES ('1_initial_schema.sql', '2018-10-03 15:44:05.416502-07');
-INSERT INTO gorp_migrations VALUES ('2_index_participants_by_toid.sql', '2018-10-03 15:44:05.431815-07');
-INSERT INTO gorp_migrations VALUES ('3_use_sequence_in_history_accounts.sql', '2018-10-03 15:44:05.438632-07');
-INSERT INTO gorp_migrations VALUES ('4_add_protocol_version.sql', '2018-10-03 15:44:05.477444-07');
-INSERT INTO gorp_migrations VALUES ('5_create_trades_table.sql', '2018-10-03 15:44:05.503326-07');
-INSERT INTO gorp_migrations VALUES ('6_create_assets_table.sql', '2018-10-03 15:44:05.526011-07');
-INSERT INTO gorp_migrations VALUES ('7_modify_trades_table.sql', '2018-10-03 15:44:05.55837-07');
-INSERT INTO gorp_migrations VALUES ('8_add_aggregators.sql', '2018-10-03 15:44:05.564786-07');
-INSERT INTO gorp_migrations VALUES ('8_create_asset_stats_table.sql', '2018-10-03 15:44:05.580696-07');
-INSERT INTO gorp_migrations VALUES ('9_add_header_xdr.sql', '2018-10-03 15:44:05.587113-07');
-INSERT INTO gorp_migrations VALUES ('10_add_trades_price.sql', '2018-10-03 15:44:05.590289-07');
-INSERT INTO gorp_migrations VALUES ('11_add_trades_account_index.sql', '2018-10-03 15:44:05.599825-07');
-INSERT INTO gorp_migrations VALUES ('12_asset_stats_amount_string.sql', '2018-10-03 15:44:05.619644-07');
-INSERT INTO gorp_migrations VALUES ('13_trade_offer_ids.sql', '2018-10-03 15:44:05.637197-07');
+INSERT INTO gorp_migrations VALUES ('1_initial_schema.sql', '2019-01-31 18:27:26.713477+01');
+INSERT INTO gorp_migrations VALUES ('2_index_participants_by_toid.sql', '2019-01-31 18:27:26.726446+01');
+INSERT INTO gorp_migrations VALUES ('3_use_sequence_in_history_accounts.sql', '2019-01-31 18:27:26.730946+01');
+INSERT INTO gorp_migrations VALUES ('4_add_protocol_version.sql', '2019-01-31 18:27:26.741471+01');
+INSERT INTO gorp_migrations VALUES ('5_create_trades_table.sql', '2019-01-31 18:27:26.755266+01');
+INSERT INTO gorp_migrations VALUES ('6_create_assets_table.sql', '2019-01-31 18:27:26.761602+01');
+INSERT INTO gorp_migrations VALUES ('7_modify_trades_table.sql', '2019-01-31 18:27:26.775197+01');
+INSERT INTO gorp_migrations VALUES ('8_create_asset_stats_table.sql', '2019-01-31 18:27:26.782053+01');
+INSERT INTO gorp_migrations VALUES ('8_add_aggregators.sql', '2019-01-31 18:27:26.784662+01');
+INSERT INTO gorp_migrations VALUES ('9_add_header_xdr.sql', '2019-01-31 18:27:26.787483+01');
+INSERT INTO gorp_migrations VALUES ('10_add_trades_price.sql', '2019-01-31 18:27:26.790524+01');
+INSERT INTO gorp_migrations VALUES ('11_add_trades_account_index.sql', '2019-01-31 18:27:26.795202+01');
+INSERT INTO gorp_migrations VALUES ('12_asset_stats_amount_string.sql', '2019-01-31 18:27:26.801587+01');
+INSERT INTO gorp_migrations VALUES ('13_trade_offer_ids.sql', '2019-01-31 18:27:26.809634+01');
+INSERT INTO gorp_migrations VALUES ('14_fix_asset_toml_field.sql', '2019-01-31 18:27:26.811268+01');
+INSERT INTO gorp_migrations VALUES ('15_ledger_failed_txs.sql', '2019-01-31 18:27:26.81283+01');
 
 
 --

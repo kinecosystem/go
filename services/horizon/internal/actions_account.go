@@ -52,6 +52,11 @@ func (action *AccountShowAction) SSE(stream sse.Stream) {
 	)
 }
 
+func (action *AccountShowAction) LoadEvent() sse.Event {
+	action.Do(action.loadParams, action.loadRecord, action.loadResource)
+	return sse.Event{Data: action.Resource}
+}
+
 // GetTopic is a method for actions.SSE
 func (action *AccountShowAction) GetTopic() string {
 	return action.GetString("id")
@@ -63,7 +68,7 @@ func (action *AccountShowAction) loadParams() {
 
 func (action *AccountShowAction) loadRecord() {
 	app := AppFromContext(action.R.Context())
-	protocolVersion := app.protocolVersion
+	protocolVersion := app.coreSupportedProtocolVersion
 
 	action.Err = action.CoreQ().
 		AccountByAddress(&action.CoreRecord, action.Address, protocolVersion)

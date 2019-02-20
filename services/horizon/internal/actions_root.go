@@ -23,7 +23,8 @@ func (action *RootAction) JSON() {
 		action.App.horizonVersion,
 		action.App.coreVersion,
 		action.App.config.NetworkPassphrase,
-		action.App.protocolVersion,
+		action.App.currentProtocolVersion,
+		action.App.coreSupportedProtocolVersion,
 		action.App.config.FriendbotURL,
 	)
 

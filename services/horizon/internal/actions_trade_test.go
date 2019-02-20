@@ -34,7 +34,7 @@ func TestTradeActions_Index(t *testing.T) {
 		// 	ensure created_at is populated correctly
 		l := history.Ledger{}
 		hq := history.Q{Session: ht.HorizonSession()}
-		ht.Require.NoError(hq.LedgerBySequence(&l, 6))
+		ht.Require.NoError(hq.LedgerBySequence(&l, 9))
 
 		ht.Assert.WithinDuration(l.ClosedAt, records[0].LedgerCloseTime, 1*time.Second)
 	}
@@ -376,7 +376,6 @@ func TestTradeActions_AggregationOrdering(t *testing.T) {
 	}
 }
 
-
 func assertOfferType(ht *HTTPT, offerId string, idType OfferIDType) {
 	offerIdInt64, _ := strconv.ParseInt(offerId, 10, 64)
 	_, offerType := DecodeOfferID(offerIdInt64)
@@ -395,8 +394,8 @@ func TestTradeActions_SyntheticOfferIds(t *testing.T) {
 			ht.UnmarshalPage(w.Body, &records)
 			assertOfferType(ht, records[0].CounterOfferID, TOIDType)
 			assertOfferType(ht, records[1].CounterOfferID, TOIDType)
-			assertOfferType(ht, records[2].CounterOfferID, CoreOfferIDType)
-			assertOfferType(ht, records[3].CounterOfferID, CoreOfferIDType)
+			assertOfferType(ht, records[2].BaseOfferID, CoreOfferIDType)
+			assertOfferType(ht, records[3].BaseOfferID, CoreOfferIDType)
 		}
 	}
 }

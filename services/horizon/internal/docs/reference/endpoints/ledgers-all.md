@@ -80,6 +80,8 @@ This endpoint responds with a list of ledgers.  See [ledger resource](../resourc
         "hash": "e8e10918f9c000c73119abe54cf089f59f9015cc93c49ccf00b5e8b9afb6e6b1",
         "sequence": 1,
         "transaction_count": 0,
+        "successful_transaction_count": 0,
+        "failed_transaction_count": 0,
         "operation_count": 0,
         "closed_at": "1970-01-01T00:00:00Z",
         "total_coins": "100000000000.0000000",
@@ -112,6 +114,8 @@ This endpoint responds with a list of ledgers.  See [ledger resource](../resourc
         "prev_hash": "e8e10918f9c000c73119abe54cf089f59f9015cc93c49ccf00b5e8b9afb6e6b1",
         "sequence": 2,
         "transaction_count": 0,
+        "successful_transaction_count": 0,
+        "failed_transaction_count": 0,
         "operation_count": 0,
         "closed_at": "2015-07-16T23:49:00Z",
         "total_coins": "100000000000.0000000",
@@ -163,12 +167,14 @@ This endpoint responds with a list of ledgers.  See [ledger resource](../resourc
   "prev_hash": "4b0b8bace3b2438b2404776ce57643966855487ba6384724a3c664c7aa4cd9e4",
   "sequence": 69859,
   "transaction_count": 0,
+  "successful_transaction_count": 0,
+  "failed_transaction_count": 0,
   "operation_count": 0,
   "closed_at": "2015-07-20T15:51:52Z",
   "total_coins": "100000000000.0000000",
   "fee_pool": "0.0025600",
   "base_fee_in_stroops": 100,
-  "base_reserve_in_stroops": "100000000,
+  "base_reserve_in_stroops": "100000000",
   "max_tx_set_size": 50
 }
 ```

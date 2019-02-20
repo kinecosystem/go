@@ -185,17 +185,18 @@ func (is *Session) ingestEffects() {
 
 	case xdr.OperationTypePathPayment:
 		op := opbody.MustPathPaymentOp()
-		result := is.Cursor.OperationResult().MustPathPaymentResult().MustSuccess()
+		resultSuccess := is.Cursor.OperationResult().MustPathPaymentResult().MustSuccess()
 
 		dets := map[string]interface{}{"amount": amount.String(op.DestAmount)}
 		is.assetDetails(dets, op.DestAsset, "")
 		effects.Add(op.Destination, history.EffectAccountCredited, dets)
 
-		dets = map[string]interface{}{"amount": amount.String(result.Last.Amount)}
+		result := is.Cursor.OperationResult().MustPathPaymentResult()
+		dets = map[string]interface{}{"amount": amount.String(result.SendAmount())}
 		is.assetDetails(dets, op.SendAsset, "")
 		effects.Add(source, history.EffectAccountDebited, dets)
 
-		is.ingestTradeEffects(effects, source, result.Offers)
+		is.ingestTradeEffects(effects, source, resultSuccess.Offers)
 	case xdr.OperationTypeManageOffer:
 		result := is.Cursor.OperationResult().MustManageOfferResult().MustSuccess()
 		is.ingestTradeEffects(effects, source, result.OffersClaimed)
@@ -391,6 +392,7 @@ func (is *Session) ingestLedger() {
 		is.Cursor.LedgerID(),
 		is.Cursor.Ledger(),
 		is.Cursor.SuccessfulTransactionCount(),
+		is.Cursor.FailedTransactionCount(),
 		is.Cursor.SuccessfulLedgerOperationCount(),
 	)
 
@@ -598,6 +600,10 @@ func (is *Session) ingestTradeEffects(effects *EffectIngestion, buyer xdr.Accoun
 	}
 
 	for _, claim := range claims {
+		if claim.AmountSold == 0 && claim.AmountBought == 0 {
+			continue
+		}
+
 		seller := claim.SellerId
 		bd, sd := is.tradeDetails(buyer, seller, claim)
 		effects.Add(buyer, history.EffectTrade, bd)

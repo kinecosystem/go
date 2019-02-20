@@ -8,32 +8,31 @@ import (
 	"github.com/throttled/throttled"
 )
 
-// Config is the configuration for horizon.  It get's populated by the
+// Config is the configuration for horizon.  It gets populated by the
 // app's main function and is provided to NewApp.
 type Config struct {
 	DatabaseURL            string
 	StellarCoreDatabaseURL string
 	StellarCoreURL         string
-	Port                   int
+	Port                   uint
 	ConnectionTimeout      time.Duration
 	RateLimit              *throttled.RateQuota
 	RateLimitRedisKey      string
 	RedisURL               string
-	NetworkPassphrase      string
 	FriendbotURL           *url.URL
 	LogLevel               logrus.Level
 	LogFile                string
-	SentryDSN              string
-	LogglyTag              string
-	LogglyToken            string
-	// Maximum length of the path returned by `/paths` endpoint.
-	MaxPathLength uint
+	// MaxPathLength is the maximum length of the path returned by `/paths` endpoint.
+	MaxPathLength     uint
+	NetworkPassphrase string
+	SentryDSN         string
+	LogglyToken       string
+	LogglyTag         string
 	// TLSCert is a path to a certificate file to use for horizon's TLS config
 	TLSCert string
 	// TLSKey is the path to a private key file to use for horizon's TLS config
 	TLSKey string
-	// Ingest is a boolean that indicates whether or not this horizon instance
-	// should run the data ingestion subsystem.
+	// Ingest toggles whether this horizon instance should run the data ingestion subsystem.
 	Ingest bool
 	// CursorName is the cursor used for ingesting from stellar-core.
 	// Setting multiple cursors in different Horizon instances allows multiple

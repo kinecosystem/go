@@ -5,7 +5,7 @@ services:
 - postgres
 - redis-server
 addons:
-  postgresql: '9.4'
+  postgresql: '10'
   ssh_known_hosts:
   - bitbucket.org
 go:
@@ -14,12 +14,18 @@ go:
 - '1.11'
 - tip
 go_import_path: github.com/stellar/go
+before_install:
+- |
+  if [ "$TRAVIS_TAG" != "" ]; then
+    # Negate the result so process exits with 1 if anything found
+    echo "Searching for deprecated values in Horizon..."
+    ! egrep -irn -A 1 --include=*.go "Deprecated.+-.+remove.+in:.+$TRAVIS_TAG" ./services/horizon/ ./protocols/horizon/
+  fi
 install:
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 script:
 - ./govet.sh
 - dep ensure -v && ./support/scripts/run_tests
-
 before_deploy:
 - go run ./support/scripts/build_release_artifacts/main.go
 - ./support/scripts/push_snapshots_tag.sh

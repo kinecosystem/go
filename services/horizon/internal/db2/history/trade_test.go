@@ -38,12 +38,21 @@ func TestTradeQueries(t *testing.T) {
 	tt.Require.NoError(err)
 
 	// test for asset pairs
-	err = q.TradesForAssetPair(2, 3).Select(&trades)
+	lumen, err := q.GetAssetID(xdr.MustNewNativeAsset())
+	tt.Require.NoError(err)
+	assetUSD, err := q.GetAssetID(xdr.MustNewCreditAsset("USD", "GB2QIYT2IAUFMRXKLSLLPRECC6OCOGJMADSPTRK7TGNT2SFR2YGWDARD"))
+	tt.Require.NoError(err)
+	assetEUR, err := q.GetAssetID(xdr.MustNewCreditAsset("EUR", "GAXMF43TGZHW3QN3REOUA2U5PW5BTARXGGYJ3JIFHW3YT6QRKRL3CPPU"))
 	tt.Require.NoError(err)
 
+	err = q.TradesForAssetPair(assetUSD, assetEUR).Select(&trades)
+	tt.Require.NoError(err)
 	tt.Assert.Len(trades, 0)
 
-	err = q.TradesForAssetPair(1, 4).Select(&trades)
+	assetUSD, err = q.GetAssetID(xdr.MustNewCreditAsset("USD", "GAXMF43TGZHW3QN3REOUA2U5PW5BTARXGGYJ3JIFHW3YT6QRKRL3CPPU"))
+	tt.Require.NoError(err)
+
+	err = q.TradesForAssetPair(lumen, assetUSD).Select(&trades)
 	tt.Require.NoError(err)
 	tt.Assert.Len(trades, 1)
 
@@ -52,7 +61,7 @@ func TestTradeQueries(t *testing.T) {
 	tt.Assert.Equal(true, trades[0].BaseIsSeller)
 
 	// reverse assets
-	err = q.TradesForAssetPair(4, 1).Select(&trades)
+	err = q.TradesForAssetPair(assetUSD, lumen).Select(&trades)
 	tt.Require.NoError(err)
 	tt.Assert.Len(trades, 1)
 

@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/kinecosystem/go/amount"
+	. "github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/httpx"
-	"github.com/kinecosystem/go/xdr"
-	. "github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/support/render/hal"
+	"github.com/kinecosystem/go/xdr"
 )
 
 func PopulateLedger(ctx context.Context, dest *Ledger, row history.Ledger) {
@@ -19,6 +19,12 @@ func PopulateLedger(ctx context.Context, dest *Ledger, row history.Ledger) {
 	dest.PrevHash = row.PreviousLedgerHash.String
 	dest.Sequence = row.Sequence
 	dest.TransactionCount = row.TransactionCount
+	// Default to `transaction_count`
+	dest.SuccessfulTransactionCount = row.TransactionCount
+	if row.SuccessfulTransactionCount != nil {
+		dest.SuccessfulTransactionCount = *row.SuccessfulTransactionCount
+	}
+	dest.FailedTransactionCount = row.FailedTransactionCount
 	dest.OperationCount = row.OperationCount
 	dest.ClosedAt = row.ClosedAt
 	dest.TotalCoins = amount.String(xdr.Int64(row.TotalCoins))

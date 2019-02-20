@@ -29,14 +29,38 @@ func TestLedgerActions_Show(t *testing.T) {
 	ht := StartHTTPTest(t, "base")
 	defer ht.Finish()
 
-	w := ht.Get("/ledgers/1")
+	w := ht.Get("/ledgers/2")
 	ht.Assert.Equal(200, w.Code)
 
 	var result horizon.Ledger
 	err := json.Unmarshal(w.Body.Bytes(), &result)
 	if ht.Assert.NoError(err) {
-		ht.Assert.Equal(int32(1), result.Sequence)
+		ht.Assert.Equal(int32(2), result.Sequence)
 		ht.Assert.NotEmpty(result.HeaderXDR)
+		ht.Assert.Equal(int32(3), result.TransactionCount)
+		ht.Assert.Equal(int32(3), result.SuccessfulTransactionCount)
+		ht.Assert.Equal(int32(0), *result.FailedTransactionCount)
+	}
+
+	// There's no way to test previous versions of ingestion right now
+	// so let's manually update the state to look like version 14 of ingesiton
+	// only the latest gap is considered for determining the elder ledger
+	_, err = ht.HorizonDB.Exec(`
+		UPDATE history_ledgers SET successful_transaction_count = NULL, failed_transaction_count = NULL WHERE sequence = 2
+	`)
+	ht.Require.NoError(err, "failed to update history_ledgers")
+
+	w = ht.Get("/ledgers/2")
+	ht.Assert.Equal(200, w.Code)
+
+	result = horizon.Ledger{}
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	if ht.Assert.NoError(err) {
+		ht.Assert.Equal(int32(2), result.Sequence)
+		ht.Assert.NotEmpty(result.HeaderXDR)
+		ht.Assert.Equal(int32(3), result.TransactionCount)
+		ht.Assert.Equal(int32(3), result.SuccessfulTransactionCount)
+		ht.Assert.Nil(result.FailedTransactionCount)
 	}
 
 	// ledger higher than history

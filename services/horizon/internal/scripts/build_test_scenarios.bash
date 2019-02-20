@@ -32,6 +32,7 @@ for i in $PACKAGES; do
 
   # import the core data into horizon
   $GOTOP/bin/horizon db init
+  $GOTOP/bin/horizon db init-asset-stats
   $GOTOP/bin/horizon db rebase
 
   # write horizon data to sql file
