@@ -514,6 +514,7 @@ func (ingest *Ingestion) commit() error {
 		return err
 	}
 	// Update subscribers that a database commit occured.
+	log.Debug("Publishing to DB commit PubSub channel")
 	commitPubsub.TryPub(pubsubStubValue, pubsubCommitTopic)
 	return nil
 }
