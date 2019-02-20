@@ -13,16 +13,9 @@ func initHorizonDb(app *App) {
 		log.Panic(err)
 	}
 
-	// MaxIdleConns should be equal to MaxOpenConns. In case of high variance
-	// in number of requests closing and opening connections may slow down Horizon.
-<<<<<<< HEAD
 	session.DB.SetMaxIdleConns(app.config.HorizonDBMaxIdleConnections)
 	session.DB.SetMaxOpenConns(app.config.HorizonDBMaxOpenConnections)
 
-=======
-	session.DB.SetMaxIdleConns(app.config.MaxDBConnections)
-	session.DB.SetMaxOpenConns(app.config.MaxDBConnections)
->>>>>>> stellar/master
 	app.historyQ = &history.Q{session}
 }
 
