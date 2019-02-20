@@ -1,6 +1,6 @@
 package actions
 
-import "github.com/kinecosystem/go/services/horizon/internal/render/sse"
+import "github.com/stellar/go/services/horizon/internal/render/sse"
 
 // JSONer implementors can respond to a request whose response type was negotiated
 // to be MimeHal or MimeJSON.

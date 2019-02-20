@@ -6,16 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"net/http"
-<<<<<<< HEAD
-
-	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
-	"github.com/kinecosystem/go/services/horizon/internal/render"
-	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
-	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/support/log"
-	"github.com/kinecosystem/go/support/render/problem"
-=======
 	"time"
 
 	horizonContext "github.com/stellar/go/services/horizon/internal/context"
@@ -25,7 +15,6 @@ import (
 	"github.com/stellar/go/services/horizon/internal/render/sse"
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/support/render/problem"
->>>>>>> stellar/master
 )
 
 // Base is a helper struct you can use as part of a custom action via

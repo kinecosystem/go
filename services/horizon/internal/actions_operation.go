@@ -4,16 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2"
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	"github.com/kinecosystem/go/services/horizon/internal/render/problem"
-	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
-	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
-	"github.com/kinecosystem/go/services/horizon/internal/toid"
-	"github.com/kinecosystem/go/support/render/hal"
-=======
 	"github.com/stellar/go/services/horizon/internal/actions"
 	"github.com/stellar/go/services/horizon/internal/db2"
 	"github.com/stellar/go/services/horizon/internal/db2/history"
@@ -23,7 +13,6 @@ import (
 	"github.com/stellar/go/services/horizon/internal/resourceadapter"
 	"github.com/stellar/go/services/horizon/internal/toid"
 	"github.com/stellar/go/support/render/hal"
->>>>>>> stellar/master
 )
 
 // This file contains the actions:

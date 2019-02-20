@@ -4,14 +4,6 @@ import (
 	"fmt"
 	"regexp"
 
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/services/horizon/internal/db2"
-	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
-	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
-	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
-	"github.com/kinecosystem/go/support/errors"
-	"github.com/kinecosystem/go/support/render/hal"
-=======
 	"github.com/stellar/go/services/horizon/internal/actions"
 	"github.com/stellar/go/services/horizon/internal/db2"
 	"github.com/stellar/go/services/horizon/internal/db2/history"
@@ -19,7 +11,6 @@ import (
 	"github.com/stellar/go/services/horizon/internal/resourceadapter"
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/support/render/hal"
->>>>>>> stellar/master
 )
 
 // This file contains the actions:
@@ -78,18 +69,13 @@ func (action *EffectIndexAction) SSE(stream *sse.Stream) error {
 			for _, record := range records {
 				ledger, found := action.Ledgers.Records[record.LedgerSequence()]
 				if !found {
-<<<<<<< HEAD
-					msg := fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence())
-					stream.Err(errors.New(msg))
-=======
 					action.Err = errors.New(fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence()))
->>>>>>> stellar/master
 					return
 				}
 
 				res, err := resourceadapter.NewEffect(action.R.Context(), record, ledger)
 				if err != nil {
-					stream.Err(action.Err)
+					action.Err = err
 					return
 				}
 
@@ -135,7 +121,7 @@ func (action *EffectIndexAction) loadLedgers() {
 func (action *EffectIndexAction) loadParams() {
 	action.ValidateCursor()
 	action.PagingParams = action.GetPageQuery()
-	action.AccountFilter = action.GetString("account_id")
+	action.AccountFilter = action.GetAddress("account_id")
 	action.LedgerFilter = action.GetInt32("ledger_id")
 	action.TransactionFilter = action.GetString("tx_id")
 	action.OperationFilter = action.GetInt64("op_id")

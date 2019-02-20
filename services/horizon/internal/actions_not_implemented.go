@@ -1,14 +1,9 @@
 package horizon
 
 import (
-<<<<<<< HEAD
-	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
-	"github.com/kinecosystem/go/support/render/problem"
-=======
 	"github.com/stellar/go/services/horizon/internal/actions"
 	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
 	"github.com/stellar/go/support/render/problem"
->>>>>>> stellar/master
 )
 
 // Interface verification

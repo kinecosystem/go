@@ -2,14 +2,9 @@ package effects
 
 import (
 	"time"
-<<<<<<< HEAD
-	"github.com/kinecosystem/go/protocols/horizon/base"
-	"github.com/kinecosystem/go/support/render/hal"
-=======
 
 	"github.com/stellar/go/protocols/horizon/base"
 	"github.com/stellar/go/support/render/hal"
->>>>>>> stellar/master
 )
 
 // Base provides the common structure for any effect resource effect.
