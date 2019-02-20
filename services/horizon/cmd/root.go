@@ -6,14 +6,14 @@ import (
 	stdLog "log"
 	"os"
 
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	horizon "github.com/kinecosystem/go/services/horizon/internal"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/schema"
 	apkg "github.com/kinecosystem/go/support/app"
 	support "github.com/kinecosystem/go/support/config"
 	"github.com/kinecosystem/go/support/log"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/throttled/throttled"
 )
 
@@ -94,19 +94,36 @@ var configOpts = []*support.ConfigOption{
 		Usage:       "tcp port to listen on for http requests",
 	},
 	&support.ConfigOption{
-		Name:        "max-db-connections",
-		ConfigKey:   &config.MaxDBConnections,
+		Name:        "horizon-db-max-open-connections",
+		EnvVar:      "HORIZON_DB_MAX_OPEN_CONNECTIONS",
+		ConfigKey:   &config.HorizonDBMaxOpenConnections,
 		OptType:     types.Int,
-		FlagDefault: 20,
-		Usage:       "max db connections (per DB), may need to be increased when responses are slow but DB CPU is normal",
+		FlagDefault: 12,
+		Usage:       "max horizon database open connections (per database), may need to be increased when responses are slow but DB CPU is normal",
 	},
 	&support.ConfigOption{
-		Name:           "sse-update-frequency",
-		ConfigKey:      &config.SSEUpdateFrequency,
-		OptType:        types.Int,
-		FlagDefault:    5,
-		CustomSetValue: support.SetDuration,
-		Usage:          "defines how often streams should check if there's a new ledger (in seconds), may need to increase in case of big number of streams",
+		Name:        "horizon-db-max-idle-connections",
+		EnvVar:      "HORIZON_DB_MAX_IDLE_CONNECTIONS",
+		ConfigKey:   &config.HorizonDBMaxIdleConnections,
+		OptType:     types.Int,
+		FlagDefault: 4,
+		Usage:       "max horizon database idle connections (per database), may need to be increased when responses are slow but DB CPU is normal. must be equal or lower than max open connections",
+	},
+	&support.ConfigOption{
+		Name:        "core-db-max-open-connections",
+		EnvVar:      "CORE_DB_MAX_OPEN_CONNECTIONS",
+		ConfigKey:   &config.CoreDBMaxOpenConnections,
+		OptType:     types.Int,
+		FlagDefault: 12,
+		Usage:       "max core database open connections (per database), may need to be increased when responses are slow but DB CPU is normal",
+	},
+	&support.ConfigOption{
+		Name:        "core-db-max-idle-connections",
+		EnvVar:      "CORE_DB_MAX_IDLE_CONNECTIONS",
+		ConfigKey:   &config.CoreDBMaxIdleConnections,
+		OptType:     types.Int,
+		FlagDefault: 4,
+		Usage:       "max core database idle connections (per database), may need to be increased when responses are slow but DB CPU is normal. must be equal or lower than max open connections",
 	},
 	&support.ConfigOption{
 		Name:           "connection-timeout",
@@ -224,6 +241,14 @@ var configOpts = []*support.ConfigOption{
 		OptType:     types.Bool,
 		FlagDefault: false,
 		Usage:       "causes this horizon process to ingest data from stellar-core into horizon's db",
+	},
+	&support.ConfigOption{
+		Name:        "cursor-name",
+		EnvVar:      "CURSOR_NAME",
+		ConfigKey:   &config.CursorName,
+		OptType:     types.String,
+		FlagDefault: "HORIZON",
+		Usage:       "ingestor cursor used by horizon to ingest from stellar core. must be unique for each horizon instance ingesting from that core instance.",
 	},
 	&support.ConfigOption{
 		Name:        "history-retention-count",
