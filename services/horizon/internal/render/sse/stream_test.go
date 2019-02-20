@@ -16,11 +16,17 @@ type StreamTestSuite struct {
 	suite.Suite
 	ctx    context.Context
 	w      *httptest.ResponseRecorder
-	stream Stream
+	stream *Stream
 }
 
 // Helper method to check that the preamble has been sent and all HTTP response headers are correctly set.
 func (suite *StreamTestSuite) checkHeadersAndPreamble() {
+	if suite.stream.SentCount() == 0 {
+		assert.Equal(suite.T(), "application/problem+json; charset=utf-8", suite.w.Header().Get("Content-Type"))
+		assert.Equal(suite.T(), 500, suite.w.Code)
+		return
+	}
+
 	assert.Equal(suite.T(), "text/event-stream; charset=utf-8", suite.w.Header().Get("Content-Type"))
 	assert.Equal(suite.T(), "no-cache", suite.w.Header().Get("Cache-Control"))
 	assert.Equal(suite.T(), "keep-alive", suite.w.Header().Get("Connection"))
@@ -50,10 +56,18 @@ func (suite *StreamTestSuite) TestStream_Send() {
 // Tests that Stream can send error events.
 func (suite *StreamTestSuite) TestStream_Err() {
 	err := errors.New("example error")
+	// If we encounter an error before sending any event, we should just
+	// return the error without the hello message.
 	suite.stream.Err(err)
-	// Even if no events have been sent, Err should still send the preamble before the error event.
 	suite.checkHeadersAndPreamble()
-	assert.Contains(suite.T(), suite.w.Body.String(), "event: err\ndata: example error\n\n")
+
+	// Reset the stream to test the scenario where an event has been sent.
+	suite.w = httptest.NewRecorder()
+	suite.stream = NewStream(suite.ctx, suite.w)
+	suite.stream.sent++
+	suite.stream.Err(err)
+	suite.checkHeadersAndPreamble()
+	assert.Contains(suite.T(), suite.w.Body.String(), "event: err\ndata: Unexpected stream error\n\n")
 	assert.True(suite.T(), suite.stream.IsDone())
 }
 

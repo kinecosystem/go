@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/spf13/cobra"
@@ -9,8 +9,7 @@ var serveCmd = &cobra.Command{
 	Short: "run horizon server",
 	Long:  "serve initializes then starts the horizon HTTP server",
 	Run: func(cmd *cobra.Command, args []string) {
-		initApp(cmd, args)
-		app.Serve()
+		initApp().Serve()
 	},
 }
 

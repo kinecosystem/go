@@ -15,6 +15,9 @@ import (
 //
 // AssetsAction: pages of assets
 
+// Interface verification
+var _ actions.JSONer = (*AssetsAction)(nil)
+
 // AssetsAction renders a page of Assets
 type AssetsAction struct {
 	Action
@@ -28,15 +31,14 @@ type AssetsAction struct {
 const maxAssetCodeLength = 12
 
 // JSON is a method for actions.JSON
-func (action *AssetsAction) JSON() {
+func (action *AssetsAction) JSON() error {
 	action.Do(
 		action.loadParams,
 		action.loadRecords,
 		action.loadPage,
-		func() {
-			hal.Render(action.W, action.Page)
-		},
+		func() { hal.Render(action.W, action.Page) },
 	)
+	return action.Err
 }
 
 func (action *AssetsAction) loadParams() {

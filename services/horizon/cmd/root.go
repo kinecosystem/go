@@ -1,34 +1,43 @@
-package main
+package cmd
 
-<<<<<<< HEAD
 import (
+	"fmt"
 	"go/types"
 	stdLog "log"
 	"os"
 
-	horizon "github.com/kinecosystem/go/services/horizon/internal"
-	"github.com/kinecosystem/go/services/horizon/internal/db2/schema"
-	apkg "github.com/kinecosystem/go/support/app"
-	support "github.com/kinecosystem/go/support/config"
-	"github.com/kinecosystem/go/support/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	horizon "github.com/stellar/go/services/horizon/internal"
+	"github.com/stellar/go/services/horizon/internal/db2/schema"
+	apkg "github.com/stellar/go/support/app"
+	support "github.com/stellar/go/support/config"
+	"github.com/stellar/go/support/log"
 	"github.com/throttled/throttled"
 )
 
-var app *horizon.App
 var config horizon.Config
 
-var rootCmd *cobra.Command
+var rootCmd = &cobra.Command{
+	Use:   "horizon [db|serve|version]",
+	Short: "client-facing api server for the stellar network",
+	Long:  "client-facing api server for the stellar network. It acts as the interface between Stellar Core and applications that want to access the Stellar network. It allows you to submit transactions to the network, check the status of accounts, subscribe to event streams and more.",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			cmd.Usage()
+			os.Exit(1)
+		}
+	},
+}
 
 // validateBothOrNeither ensures that both options are provided, if either is provided
 func validateBothOrNeither(option1, option2 string) {
 	arg1, arg2 := viper.GetString(option1), viper.GetString(option2)
-	switch {
-	case arg1 != "" && arg2 == "":
+	if arg1 != "" && arg2 == "" {
 		stdLog.Fatalf("Invalid config: %s = %s, but corresponding option %s is not configured", option1, arg1, option2)
-	case arg1 == "" && arg2 != "":
+	}
+	if arg1 == "" && arg2 != "" {
 		stdLog.Fatalf("Invalid config: %s = %s, but corresponding option %s is not configured", option2, arg2, option1)
 	}
 }
@@ -39,13 +48,13 @@ func checkMigrations() {
 	if len(migrationsToApplyUp) > 0 {
 		stdLog.Printf(`There are %v migrations to apply in the "up" direction.`, len(migrationsToApplyUp))
 		stdLog.Printf("The necessary migrations are: %v", migrationsToApplyUp)
-		stdLog.Printf("A database migration is required to run this version (%v) of Horizon. Run \"horizon db migrate up\" to update your DB. Consult the Changelog (https://github.com/stellar/horizon/blob/master/CHANGELOG.md) for more information.", apkg.Version())
+		stdLog.Printf("A database migration is required to run this version (%v) of Horizon. Run \"horizon db migrate up\" to update your DB. Consult the Changelog (https://github.com/stellar/go/blob/master/services/horizon/CHANGELOG.md) for more information.", apkg.Version())
 		os.Exit(1)
 	}
 
 	nMigrationsDown := schema.GetNumMigrationsDown(viper.GetString("db-url"))
 	if nMigrationsDown > 0 {
-		stdLog.Printf("A database migration DOWN to an earlier version of the schema is required to run this version (%v) of Horizon. Consult the Changelog (https://github.com/stellar/horizon/blob/master/CHANGELOG.md) for more information.", apkg.Version())
+		stdLog.Printf("A database migration DOWN to an earlier version of the schema is required to run this version (%v) of Horizon. Consult the Changelog (https://github.com/stellar/go/blob/master/services/horizon/CHANGELOG.md) for more information.", apkg.Version())
 		stdLog.Printf("In order to migrate the database DOWN, using the HIGHEST version number of Horizon you have installed (not this binary), run \"horizon db migrate down %v\".", nMigrationsDown)
 		os.Exit(1)
 	}
@@ -85,32 +94,19 @@ var configOpts = []*support.ConfigOption{
 		Usage:       "tcp port to listen on for http requests",
 	},
 	&support.ConfigOption{
-		Name:        "horizon-db-max-open-connections",
-		ConfigKey:   &config.HorizonDBMaxOpenConnections,
+		Name:        "max-db-connections",
+		ConfigKey:   &config.MaxDBConnections,
 		OptType:     types.Int,
-		FlagDefault: 12,
-		Usage:       "max horizon database open connections (per database), may need to be increased when responses are slow but DB CPU is normal",
+		FlagDefault: 20,
+		Usage:       "max db connections (per DB), may need to be increased when responses are slow but DB CPU is normal",
 	},
 	&support.ConfigOption{
-		Name:        "horizon-db-max-idle-connections",
-		ConfigKey:   &config.HorizonDBMaxIdleConnections,
-		OptType:     types.Int,
-		FlagDefault: 4,
-		Usage:       "max horizon database idle connections (per database), may need to be increased when responses are slow but DB CPU is normal. must be equal or lower than max open connections",
-	},
-	&support.ConfigOption{
-		Name:        "core-db-max-open-connections",
-		ConfigKey:   &config.CoreDBMaxOpenConnections,
-		OptType:     types.Int,
-		FlagDefault: 12,
-		Usage:       "max core database open connections (per database), may need to be increased when responses are slow but DB CPU is normal",
-	},
-	&support.ConfigOption{
-		Name:        "core-db-max-idle-connections",
-		ConfigKey:   &config.CoreDBMaxIdleConnections,
-		OptType:     types.Int,
-		FlagDefault: 4,
-		Usage:       "max core database idle connections (per database), may need to be increased when responses are slow but DB CPU is normal. must be equal or lower than max open connections",
+		Name:           "sse-update-frequency",
+		ConfigKey:      &config.SSEUpdateFrequency,
+		OptType:        types.Int,
+		FlagDefault:    5,
+		CustomSetValue: support.SetDuration,
+		Usage:          "defines how often streams should check if there's a new ledger (in seconds), may need to increase in case of big number of streams",
 	},
 	&support.ConfigOption{
 		Name:           "connection-timeout",
@@ -230,13 +226,6 @@ var configOpts = []*support.ConfigOption{
 		Usage:       "causes this horizon process to ingest data from stellar-core into horizon's db",
 	},
 	&support.ConfigOption{
-		Name:        "cursor-name",
-		ConfigKey:   &config.CursorName,
-		OptType:     types.String,
-		FlagDefault: "HORIZON",
-		Usage:       "ingestor cursor used by horizon to ingest from stellar core. must be unique for each horizon instance ingesting from that core instance.",
-	},
-	&support.ConfigOption{
 		Name:        "history-retention-count",
 		ConfigKey:   &config.HistoryRetentionCount,
 		OptType:     types.Uint,
@@ -265,10 +254,54 @@ var configOpts = []*support.ConfigOption{
 		Usage:       "enables asset stats during the ingestion and expose `/assets` endpoint, Enabling it has a negative impact on CPU",
 	},
 }
-=======
-import "github.com/stellar/go/services/horizon/cmd"
->>>>>>> stellar/master
 
-func main() {
-	cmd.Execute()
+func init() {
+	for _, co := range configOpts {
+		err := co.Init(rootCmd)
+		if err != nil {
+			stdLog.Fatal(err.Error())
+		}
+	}
+
+	viper.BindPFlags(rootCmd.PersistentFlags())
+}
+
+func initApp() *horizon.App {
+	initConfig()
+	return horizon.NewApp(config)
+}
+
+func initConfig() {
+	// Verify required options and load the config struct
+	for _, co := range configOpts {
+		co.Require()
+		co.SetValue()
+	}
+
+	// Migrations should be checked as early as possible
+	checkMigrations()
+
+	// Validate options that should be provided together
+	validateBothOrNeither("tls-cert", "tls-key")
+	validateBothOrNeither("rate-limit-redis-key", "redis-url")
+
+	// Configure log file
+	if config.LogFile != "" {
+		logFile, err := os.OpenFile(config.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err == nil {
+			log.DefaultLogger.Logger.Out = logFile
+		} else {
+			stdLog.Fatalf("Failed to open file to log: %s", err)
+		}
+	}
+
+	// Configure log level
+	log.DefaultLogger.Level = config.LogLevel
+}
+
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

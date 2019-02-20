@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+<<<<<<< HEAD
 	"github.com/rcrowley/go-metrics"
 	"github.com/kinecosystem/go/clients/stellarcore"
 	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
@@ -25,9 +26,25 @@ import (
 	"github.com/kinecosystem/go/support/app"
 	"github.com/kinecosystem/go/support/db"
 	"github.com/kinecosystem/go/support/log"
+=======
+	metrics "github.com/rcrowley/go-metrics"
+	"github.com/stellar/go/clients/stellarcore"
+	horizonContext "github.com/stellar/go/services/horizon/internal/context"
+	"github.com/stellar/go/services/horizon/internal/db2/core"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/ingest"
+	"github.com/stellar/go/services/horizon/internal/ledger"
+	"github.com/stellar/go/services/horizon/internal/operationfeestats"
+	"github.com/stellar/go/services/horizon/internal/paths"
+	"github.com/stellar/go/services/horizon/internal/reap"
+	"github.com/stellar/go/services/horizon/internal/txsub"
+	"github.com/stellar/go/support/app"
+	"github.com/stellar/go/support/db"
+	"github.com/stellar/go/support/log"
+>>>>>>> stellar/master
 	"github.com/throttled/throttled"
 	"golang.org/x/net/http2"
-	"gopkg.in/tylerb/graceful.v1"
+	graceful "gopkg.in/tylerb/graceful.v1"
 )
 
 // App represents the root of the state of a horizon instance.
@@ -60,19 +77,20 @@ type App struct {
 }
 
 // NewApp constructs an new App instance from the provided config.
-func NewApp(config Config) (*App, error) {
+func NewApp(config Config) *App {
+	a := &App{
+		config:         config,
+		horizonVersion: app.Version(),
+		ticks:          time.NewTicker(1 * time.Second),
+	}
 
-	result := &App{config: config}
-	result.horizonVersion = app.Version()
-	result.ticks = time.NewTicker(1 * time.Second)
-	result.init()
-	return result, nil
+	a.init()
+	return a
 }
 
 // Serve starts the horizon web server, binding it to a socket, setting up
 // the shutdown signals.
 func (a *App) Serve() {
-
 	http.Handle("/", a.web.router)
 
 	addr := fmt.Sprintf(":%d", a.config.Port)
@@ -166,32 +184,31 @@ func (a *App) IsHistoryStale() bool {
 // UpdateLedgerState triggers a refresh of several metrics gauges, such as open
 // db connections and ledger state
 func (a *App) UpdateLedgerState() {
-	var err error
 	var next ledger.State
 
-	err = a.CoreQ().LatestLedger(&next.CoreLatest)
+	logErr := func(err error, msg string) {
+		log.WithStack(err).WithField("err", err.Error()).Error(msg)
+	}
+
+	err := a.CoreQ().LatestLedger(&next.CoreLatest)
 	if err != nil {
-		goto Failed
+		logErr(err, "failed to load the latest known ledger state from core DB")
+		return
 	}
 
 	err = a.HistoryQ().LatestLedger(&next.HistoryLatest)
 	if err != nil {
-		goto Failed
+		logErr(err, "failed to load the latest known ledger state from history DB")
+		return
 	}
 
 	err = a.HistoryQ().ElderLedger(&next.HistoryElder)
 	if err != nil {
-		goto Failed
+		logErr(err, "failed to load the oldest known ledger state from history DB")
+		return
 	}
 
 	ledger.SetState(next)
-	return
-
-Failed:
-	log.WithStack(err).
-		WithField("err", err.Error()).
-		Error("failed to load ledger state")
-
 }
 
 // UpdateOperationFeeStatsState triggers a refresh of several operation fee metrics
@@ -247,15 +264,12 @@ Failed:
 
 }
 
-// UpdateStellarCoreInfo updates the value of coreVersion and networkPassphrase
-// from the Stellar core API.
+// UpdateStellarCoreInfo updates the value of coreVersion,
+// currentProtocolVersion, and coreSupportedProtocolVersion from the Stellar
+// core API.
 func (a *App) UpdateStellarCoreInfo() {
 	if a.config.StellarCoreURL == "" {
 		return
-	}
-
-	fail := func(err error) {
-		log.Warnf("could not load stellar-core info: %s", err)
 	}
 
 	core := &stellarcore.Client{
@@ -263,9 +277,8 @@ func (a *App) UpdateStellarCoreInfo() {
 	}
 
 	resp, err := core.Info(context.Background())
-
 	if err != nil {
-		fail(err)
+		log.Warnf("could not load stellar-core info: %s", err)
 		return
 	}
 
@@ -281,7 +294,6 @@ func (a *App) UpdateStellarCoreInfo() {
 	}
 
 	a.coreVersion = resp.Info.Build
-
 	a.currentProtocolVersion = int32(resp.Info.Ledger.Version)
 	a.coreSupportedProtocolVersion = int32(resp.Info.ProtocolVersion)
 }
@@ -368,16 +380,6 @@ func AppFromContext(ctx context.Context) *App {
 		return nil
 	}
 
-	val := ctx.Value(&horizonContext.AppContextKey)
-	if val == nil {
-		return nil
-	}
-
-	result, ok := val.(*App)
-
-	if ok {
-		return result
-	}
-
-	return nil
+	val, _ := ctx.Value(&horizonContext.AppContextKey).(*App)
+	return val
 }

@@ -7,6 +7,11 @@ import (
 	"github.com/kinecosystem/go/support/render/hal"
 )
 
+// Interface verifications
+var _ actions.JSONer = (*DataShowAction)(nil)
+var _ actions.RawDataResponder = (*DataShowAction)(nil)
+var _ actions.EventStreamer = (*DataShowAction)(nil)
+
 // DataShowAction renders a account summary found by its address.
 type DataShowAction struct {
 	Action
@@ -16,21 +21,21 @@ type DataShowAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *DataShowAction) JSON() {
+func (action *DataShowAction) JSON() error {
 	action.Do(
 		action.loadParams,
 		action.loadRecord,
 		func() {
-
 			hal.Render(action.W, map[string]string{
 				"value": action.Data.Value,
 			})
 		},
 	)
+	return action.Err
 }
 
 // Raw is a method for actions.Raw
-func (action *DataShowAction) Raw() {
+func (action *DataShowAction) Raw() error {
 	action.Do(
 		action.loadParams,
 		action.loadRecord,
@@ -44,10 +49,11 @@ func (action *DataShowAction) Raw() {
 			action.W.Write(raw)
 		},
 	)
+	return action.Err
 }
 
 // SSE is a method for actions.SSE
-func (action *DataShowAction) SSE(stream sse.Stream) {
+func (action *DataShowAction) SSE(stream *sse.Stream) error {
 	action.Do(
 		action.loadParams,
 		action.loadRecord,
@@ -55,6 +61,7 @@ func (action *DataShowAction) SSE(stream sse.Stream) {
 			stream.Send(sse.Event{Data: action.Data.Value})
 		},
 	)
+	return action.Err
 }
 
 // GetTopic is a method for actions.SSE
@@ -71,9 +78,5 @@ func (action *DataShowAction) loadParams() {
 }
 
 func (action *DataShowAction) loadRecord() {
-	action.Err = action.CoreQ().
-		AccountDataByKey(&action.Data, action.Address, action.Key)
-	if action.Err != nil {
-		return
-	}
+	action.Err = action.CoreQ().AccountDataByKey(&action.Data, action.Address, action.Key)
 }

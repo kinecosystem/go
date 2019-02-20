@@ -1,9 +1,18 @@
 package horizon
 
 import (
+<<<<<<< HEAD
 	"github.com/rcrowley/go-metrics"
 	"github.com/kinecosystem/go/support/render/hal"
+=======
+	metrics "github.com/rcrowley/go-metrics"
+	"github.com/stellar/go/services/horizon/internal/actions"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> stellar/master
 )
+
+// Interface verification
+var _ actions.JSONer = (*MetricsAction)(nil)
 
 // MetricsAction collects and renders a snapshot from the metrics system that
 // will inlude any previously registered metrics.
@@ -13,20 +22,20 @@ type MetricsAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *MetricsAction) JSON() {
+func (action *MetricsAction) JSON() error {
 	action.LoadSnapshot()
 	action.Snapshot["_links"] = map[string]interface{}{
 		"self": hal.NewLink("/metrics"),
 	}
 
 	hal.Render(action.W, action.Snapshot)
+	return action.Err
 }
 
 // LoadSnapshot populates action.Snapshot
 //
 // Original code copied from github.com/rcrowley/go-metrics MarshalJSON
 func (action *MetricsAction) LoadSnapshot() {
-
 	action.Snapshot = make(map[string]interface{})
 
 	action.App.metrics.Each(func(name string, i interface{}) {
@@ -84,5 +93,4 @@ func (action *MetricsAction) LoadSnapshot() {
 		}
 		action.Snapshot[name] = values
 	})
-
 }

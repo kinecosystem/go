@@ -203,9 +203,9 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"latest.sql": latestSql,
-	"migrations/01_init.sql": migrations01_initSql,
-	"migrations/02_auth_data.sql": migrations02_auth_dataSql,
+	"latest.sql":                    latestSql,
+	"migrations/01_init.sql":        migrations01_initSql,
+	"migrations/02_auth_data.sql":   migrations02_auth_dataSql,
 	"migrations/03_table_names.sql": migrations03_table_namesSql,
 }
 
@@ -248,11 +248,12 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"latest.sql": &bintree{latestSql, map[string]*bintree{}},
 	"migrations": &bintree{nil, map[string]*bintree{
-		"01_init.sql": &bintree{migrations01_initSql, map[string]*bintree{}},
-		"02_auth_data.sql": &bintree{migrations02_auth_dataSql, map[string]*bintree{}},
+		"01_init.sql":        &bintree{migrations01_initSql, map[string]*bintree{}},
+		"02_auth_data.sql":   &bintree{migrations02_auth_dataSql, map[string]*bintree{}},
 		"03_table_names.sql": &bintree{migrations03_table_namesSql, map[string]*bintree{}},
 	}},
 }}
@@ -303,4 +304,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

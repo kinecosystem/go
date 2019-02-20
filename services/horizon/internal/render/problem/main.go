@@ -4,15 +4,20 @@ import (
 	"context"
 	"net/http"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/support/context/requestid"
 	"github.com/kinecosystem/go/support/render/problem"
+=======
+	"github.com/stellar/go/services/horizon/internal/hchi"
+	"github.com/stellar/go/support/render/problem"
+>>>>>>> stellar/master
 )
 
 // Inflate expands a problem with contextal information, including setting basic info.
 // At present it adds the request's id as the problem's Instance, if available.
 func Inflate(ctx context.Context, p *problem.P) {
 	problem.Inflate(p)
-	p.Instance = requestid.FromContext(ctx)
+	p.Instance = hchi.RequestID(ctx)
 }
 
 // Well-known and reused problems below:

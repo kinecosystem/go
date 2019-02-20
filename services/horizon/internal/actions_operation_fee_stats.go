@@ -3,13 +3,21 @@ package horizon
 import (
 	"fmt"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/operationfeestats"
 	"github.com/kinecosystem/go/support/render/hal"
+=======
+	"github.com/stellar/go/services/horizon/internal/actions"
+	"github.com/stellar/go/services/horizon/internal/operationfeestats"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> stellar/master
 )
 
 // This file contains the actions:
 //
 // OperationFeeStatsAction: stats representing current state of network fees
+
+var _ actions.JSONer = (*OperationFeeStatsAction)(nil)
 
 // OperationFeeStatsAction renders a few useful statistics that describe the
 // current state of operation fees on the network.
@@ -22,7 +30,7 @@ type OperationFeeStatsAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *OperationFeeStatsAction) JSON() {
+func (action *OperationFeeStatsAction) JSON() error {
 	action.Do(
 		action.loadRecords,
 		func() {
@@ -34,11 +42,11 @@ func (action *OperationFeeStatsAction) JSON() {
 			})
 		},
 	)
+	return action.Err
 }
 
 func (action *OperationFeeStatsAction) loadRecords() {
 	cur := operationfeestats.CurrentState()
-
 	action.Min = cur.Min
 	action.Mode = cur.Mode
 	action.LastBaseFee = cur.LastBaseFee

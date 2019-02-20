@@ -82,8 +82,8 @@ The list of trades. `base` and `counter` in the records will match the asset pai
         "counter_asset_issuer": "GCKA6K5PCQ6PNF5RQBF7PQDJWRHO6UOGFMRLK3DYHDOI244V47XKQ4GP",
         "base_is_seller": true,
         "price": {
-          "N": 10,
-          "D": 61
+          "n": 10,
+          "d": 61
         }
       },
       {
@@ -113,8 +113,8 @@ The list of trades. `base` and `counter` in the records will match the asset pai
         "counter_asset_issuer": "GCKA6K5PCQ6PNF5RQBF7PQDJWRHO6UOGFMRLK3DYHDOI244V47XKQ4GP",
         "base_is_seller": false,
         "price": {
-          "N": 2,
-          "D": 11
+          "n": 2,
+          "d": 11
         }
       }
     ]

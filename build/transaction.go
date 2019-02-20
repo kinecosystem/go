@@ -89,6 +89,19 @@ func (b *TransactionBuilder) Sign(signers ...string) (TransactionEnvelopeBuilder
 	return result, nil
 }
 
+// Envelope returns a new TransactionEnvelopeBuilder using this
+// builder's transaction as the basis and with the provided
+// mutators applied.
+func (b *TransactionBuilder) Envelope(muts ...TransactionEnvelopeMutator) (TransactionEnvelopeBuilder, error) {
+	var teb TransactionEnvelopeBuilder
+	err := teb.Mutate(b)
+	if err != nil {
+		return teb, err
+	}
+	err = teb.Mutate(muts...)
+	return teb, err
+}
+
 // ------------------------------------------------------------
 //
 //   Mutator implementations

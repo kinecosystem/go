@@ -32,11 +32,7 @@ func (co *ConfigOption) Init(cmd *cobra.Command) error {
 		co.EnvVar = strutils.KebabToConstantCase(co.Name)
 	}
 	// Initialise and bind the persistent flags
-	err := co.setFlag(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
+	return co.setFlag(cmd)
 }
 
 // Require checks that a required string configuration option is not empty, raising a user error if it is.

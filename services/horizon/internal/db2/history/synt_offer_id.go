@@ -32,7 +32,7 @@ func EncodeOfferId(id uint64, typ OfferIDType) int64 {
 
 // DecodeOfferID performs the reverse operation of EncodeOfferID
 func DecodeOfferID(encodedId int64) (uint64, OfferIDType) {
-	if encodedId<0 {
+	if encodedId < 0 {
 		panic("Negative offer ids can not be decoded")
 	}
 	return uint64(encodedId<<2) >> 2, OfferIDType(encodedId >> 62)

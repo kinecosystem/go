@@ -2,7 +2,6 @@ package horizon
 
 func initStellarCoreInfo(app *App) {
 	app.UpdateStellarCoreInfo()
-	return
 }
 
 func init() {

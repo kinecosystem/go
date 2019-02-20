@@ -4,6 +4,7 @@ import (
 	"strconv"
 	gTime "time"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
@@ -13,7 +14,23 @@ import (
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/time"
 	"github.com/kinecosystem/go/xdr"
+=======
+	"github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/services/horizon/internal/actions"
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/support/errors"
+	"github.com/stellar/go/support/render/hal"
+	"github.com/stellar/go/support/time"
+	"github.com/stellar/go/xdr"
+>>>>>>> stellar/master
 )
+
+// Interface verifications
+var _ actions.JSONer = (*TradeIndexAction)(nil)
+var _ actions.EventStreamer = (*TradeIndexAction)(nil)
 
 type TradeIndexAction struct {
 	Action
@@ -29,20 +46,19 @@ type TradeIndexAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *TradeIndexAction) JSON() {
+func (action *TradeIndexAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
 		action.loadRecords,
 		action.loadPage,
-		func() {
-			hal.Render(action.W, action.Page)
-		},
+		func() { hal.Render(action.W, action.Page) },
 	)
+	return action.Err
 }
 
 // SSE is a method for actions.SSE
-func (action *TradeIndexAction) SSE(stream sse.Stream) {
+func (action *TradeIndexAction) SSE(stream *sse.Stream) error {
 	action.Setup(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -55,13 +71,7 @@ func (action *TradeIndexAction) SSE(stream sse.Stream) {
 
 			for _, record := range records {
 				var res horizon.Trade
-				err := resourceadapter.PopulateTrade(action.R.Context(), &res, record)
-
-				if err != nil {
-					action.Err = err
-					return
-				}
-
+				resourceadapter.PopulateTrade(action.R.Context(), &res, record)
 				stream.Send(sse.Event{
 					ID:   res.PagingToken(),
 					Data: res,
@@ -69,6 +79,8 @@ func (action *TradeIndexAction) SSE(stream sse.Stream) {
 			}
 		},
 	)
+
+	return action.Err
 }
 
 // loadParams sets action.Query from the request params
@@ -126,13 +138,7 @@ func (action *TradeIndexAction) loadRecords() {
 func (action *TradeIndexAction) loadPage() {
 	for _, record := range action.Records {
 		var res horizon.Trade
-
-		action.Err = resourceadapter.PopulateTrade(action.R.Context(), &res, record)
-
-		if action.Err != nil {
-			return
-		}
-
+		resourceadapter.PopulateTrade(action.R.Context(), &res, record)
 		action.Page.Add(res)
 	}
 
@@ -142,6 +148,9 @@ func (action *TradeIndexAction) loadPage() {
 	action.Page.Order = action.PagingParams.Order
 	action.Page.PopulateLinks()
 }
+
+// Interface verification
+var _ actions.JSONer = (*TradeAggregateIndexAction)(nil)
 
 type TradeAggregateIndexAction struct {
 	Action
@@ -157,16 +166,15 @@ type TradeAggregateIndexAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *TradeAggregateIndexAction) JSON() {
+func (action *TradeAggregateIndexAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
 		action.loadRecords,
 		action.loadPage,
-		func() {
-			hal.Render(action.W, action.Page)
-		},
+		func() { hal.Render(action.W, action.Page) },
 	)
+	return action.Err
 }
 
 func (action *TradeAggregateIndexAction) loadParams() {
@@ -214,7 +222,6 @@ func (action *TradeAggregateIndexAction) loadRecords() {
 	//initialize the query builder with required params
 	tradeAggregationsQ, err := historyQ.GetTradeAggregationsQ(
 		baseAssetId, counterAssetId, action.ResolutionFilter, action.OffsetFilter, action.PagingParams)
-
 	if err != nil {
 		action.Err = err
 		return
@@ -247,7 +254,6 @@ func (action *TradeAggregateIndexAction) loadPage() {
 		var res horizon.TradeAggregation
 
 		action.Err = resourceadapter.PopulateTradeAggregation(action.R.Context(), &res, record)
-
 		if action.Err != nil {
 			return
 		}

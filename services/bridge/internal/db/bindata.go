@@ -224,11 +224,11 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"latest.sql": latestSql,
-	"migrations/01_init.sql": migrations01_initSql,
-	"migrations/02_payment_id.sql": migrations02_payment_idSql,
+	"latest.sql":                       latestSql,
+	"migrations/01_init.sql":           migrations01_initSql,
+	"migrations/02_payment_id.sql":     migrations02_payment_idSql,
 	"migrations/03_transaction_id.sql": migrations03_transaction_idSql,
-	"migrations/04_table_names.sql": migrations04_table_namesSql,
+	"migrations/04_table_names.sql":    migrations04_table_namesSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -270,13 +270,14 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"latest.sql": &bintree{latestSql, map[string]*bintree{}},
 	"migrations": &bintree{nil, map[string]*bintree{
-		"01_init.sql": &bintree{migrations01_initSql, map[string]*bintree{}},
-		"02_payment_id.sql": &bintree{migrations02_payment_idSql, map[string]*bintree{}},
+		"01_init.sql":           &bintree{migrations01_initSql, map[string]*bintree{}},
+		"02_payment_id.sql":     &bintree{migrations02_payment_idSql, map[string]*bintree{}},
 		"03_transaction_id.sql": &bintree{migrations03_transaction_idSql, map[string]*bintree{}},
-		"04_table_names.sql": &bintree{migrations04_table_namesSql, map[string]*bintree{}},
+		"04_table_names.sql":    &bintree{migrations04_table_namesSql, map[string]*bintree{}},
 	}},
 }}
 
@@ -326,4 +327,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

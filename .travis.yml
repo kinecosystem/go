@@ -21,10 +21,11 @@ before_install:
     echo "Searching for deprecated values in Horizon..."
     ! egrep -irn -A 1 --include=*.go "Deprecated.+-.+remove.+in:.+$TRAVIS_TAG" ./services/horizon/ ./protocols/horizon/
   fi
+- ./gofmt.sh
+- ./govet.sh
 install:
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 script:
-- ./govet.sh
 - dep ensure -v && ./support/scripts/run_tests
 before_deploy:
 - go run ./support/scripts/build_release_artifacts/main.go

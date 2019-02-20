@@ -3,6 +3,7 @@ package horizon
 import (
 	"net/http"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
@@ -12,12 +13,28 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/txsub"
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
+=======
+	"github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/services/horizon/internal/actions"
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/services/horizon/internal/txsub"
+	"github.com/stellar/go/support/render/hal"
+	"github.com/stellar/go/support/render/problem"
+>>>>>>> stellar/master
 )
 
 // This file contains the actions:
 //
 // TransactionIndexAction: pages of transactions
 // TransactionShowAction: single transaction by sequence, by hash or id
+
+// Interface verifications
+var _ actions.JSONer = (*TransactionIndexAction)(nil)
+var _ actions.EventStreamer = (*TransactionIndexAction)(nil)
 
 // TransactionIndexAction renders a page of ledger resources, identified by
 // a normal page query.
@@ -31,21 +48,20 @@ type TransactionIndexAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *TransactionIndexAction) JSON() {
+func (action *TransactionIndexAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
 		action.ValidateCursorWithinHistory,
 		action.loadRecords,
 		action.loadPage,
-		func() {
-			hal.Render(action.W, action.Page)
-		},
+		func() { hal.Render(action.W, action.Page) },
 	)
+	return action.Err
 }
 
 // SSE is a method for actions.SSE
-func (action *TransactionIndexAction) SSE(stream sse.Stream) {
+func (action *TransactionIndexAction) SSE(stream *sse.Stream) error {
 	action.Setup(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -64,6 +80,8 @@ func (action *TransactionIndexAction) SSE(stream sse.Stream) {
 			}
 		},
 	)
+
+	return action.Err
 }
 
 // GetTopic is a method for actions.SSE
@@ -112,6 +130,9 @@ func (action *TransactionIndexAction) loadPage() {
 	action.Page.PopulateLinks()
 }
 
+// Interface verification
+var _ actions.JSONer = (*TransactionShowAction)(nil)
+
 // TransactionShowAction renders a ledger found by its sequence number.
 type TransactionShowAction struct {
 	Action
@@ -133,7 +154,7 @@ func (action *TransactionShowAction) loadResource() {
 }
 
 // JSON is a method for actions.JSON
-func (action *TransactionShowAction) JSON() {
+func (action *TransactionShowAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -141,7 +162,11 @@ func (action *TransactionShowAction) JSON() {
 		action.loadResource,
 		func() { hal.Render(action.W, action.Resource) },
 	)
+	return action.Err
 }
+
+// Interface verification
+var _ actions.JSONer = (*TransactionCreateAction)(nil)
 
 // TransactionCreateAction submits a transaction to the stellar-core network
 // on behalf of the requesting client.
@@ -153,15 +178,14 @@ type TransactionCreateAction struct {
 }
 
 // JSON format action handler
-func (action *TransactionCreateAction) JSON() {
+func (action *TransactionCreateAction) JSON() error {
 	action.Do(
 		action.loadTX,
 		action.loadResult,
 		action.loadResource,
-
-		func() {
-			hal.Render(action.W, action.Resource)
-		})
+		func() { hal.Render(action.W, action.Resource) },
+	)
+	return action.Err
 }
 
 func (action *TransactionCreateAction) loadTX() {

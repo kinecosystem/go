@@ -236,9 +236,7 @@ func TestAssetsActions(t *testing.T) {
 			appConfig := NewTestConfig()
 			appConfig.EnableAssetStats = true
 
-			var err error
-			ht.App, err = NewApp(appConfig)
-			ht.Assert.Nil(err)
+			ht.App = NewApp(appConfig)
 			ht.RH = test.NewRequestHelper(ht.App.web.router)
 
 			w := ht.Get(kase.path)
@@ -268,9 +266,7 @@ func TestInvalidAssetCode(t *testing.T) {
 	appConfig := NewTestConfig()
 	appConfig.EnableAssetStats = true
 
-	var err error
-	ht.App, err = NewApp(appConfig)
-	ht.Assert.Nil(err)
+	ht.App = NewApp(appConfig)
 	ht.RH = test.NewRequestHelper(ht.App.web.router)
 
 	w := ht.Get("/assets?asset_code=ABCDEFGHIJKL")
@@ -288,9 +284,7 @@ func TestInvalidAssetIssuer(t *testing.T) {
 	appConfig := NewTestConfig()
 	appConfig.EnableAssetStats = true
 
-	var err error
-	ht.App, err = NewApp(appConfig)
-	ht.Assert.Nil(err)
+	ht.App = NewApp(appConfig)
 	ht.RH = test.NewRequestHelper(ht.App.web.router)
 
 	w := ht.Get("/assets?asset_issuer=GC23QF2HUE52AMXUFUH3AYJAXXGXXV2VHXYYR6EYXETPKDXZSAW67XO4")

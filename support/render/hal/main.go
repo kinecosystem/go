@@ -17,7 +17,6 @@ func RenderToString(data interface{}, pretty bool) ([]byte, error) {
 // Render write data to w, after marshalling to json
 func Render(w http.ResponseWriter, data interface{}) {
 	js, err := RenderToString(data, true)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

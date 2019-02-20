@@ -28,7 +28,7 @@ func (suite *RateLimitMiddlewareTestSuite) SetupTest() {
 		MaxRate:  throttled.PerHour(10),
 		MaxBurst: 9,
 	}
-	suite.app, _ = NewApp(suite.c)
+	suite.app = NewApp(suite.c)
 	suite.rh = NewRequestHelper(suite.app)
 }
 
@@ -123,7 +123,7 @@ func TestRateLimit_Redis(t *testing.T) {
 		MaxBurst: 9,
 	}
 	c.RedisURL = "redis://127.0.0.1:6379/"
-	app, _ := NewApp(c)
+	app := NewApp(c)
 	defer app.Close()
 	rh := NewRequestHelper(app)
 

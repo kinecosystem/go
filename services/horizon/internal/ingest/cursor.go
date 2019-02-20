@@ -260,7 +260,6 @@ func (c *Cursor) FailedTransactionCount() (ret int) {
 	return
 }
 
-
 // TransactionID returns the current tranaction's id, as used by the history
 // system.
 func (c *Cursor) TransactionID() int64 {

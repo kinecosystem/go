@@ -4,17 +4,31 @@ import (
 	"fmt"
 	"regexp"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
 	"github.com/kinecosystem/go/support/errors"
 	"github.com/kinecosystem/go/support/render/hal"
+=======
+	"github.com/stellar/go/services/horizon/internal/actions"
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/support/errors"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> stellar/master
 )
 
 // This file contains the actions:
 //
 // EffectIndexAction: pages of effects
+
+// Interface verifications
+var _ actions.JSONer = (*EffectIndexAction)(nil)
+var _ actions.EventStreamer = (*EffectIndexAction)(nil)
 
 // EffectIndexAction renders a page of effect resources, identified by
 // a normal page query and optionally filtered by an account, ledger,
@@ -33,7 +47,7 @@ type EffectIndexAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *EffectIndexAction) JSON() {
+func (action *EffectIndexAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -41,15 +55,13 @@ func (action *EffectIndexAction) JSON() {
 		action.loadRecords,
 		action.loadLedgers,
 		action.loadPage,
+		func() { hal.Render(action.W, action.Page) },
 	)
-
-	action.Do(func() {
-		hal.Render(action.W, action.Page)
-	})
+	return action.Err
 }
 
 // SSE is a method for actions.SSE
-func (action *EffectIndexAction) SSE(stream sse.Stream) {
+func (action *EffectIndexAction) SSE(stream *sse.Stream) error {
 	action.Setup(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -66,13 +78,16 @@ func (action *EffectIndexAction) SSE(stream sse.Stream) {
 			for _, record := range records {
 				ledger, found := action.Ledgers.Records[record.LedgerSequence()]
 				if !found {
+<<<<<<< HEAD
 					msg := fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence())
 					stream.Err(errors.New(msg))
+=======
+					action.Err = errors.New(fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence()))
+>>>>>>> stellar/master
 					return
 				}
 
 				res, err := resourceadapter.NewEffect(action.R.Context(), record, ledger)
-
 				if err != nil {
 					stream.Err(action.Err)
 					return
@@ -85,6 +100,8 @@ func (action *EffectIndexAction) SSE(stream sse.Stream) {
 			}
 		},
 	)
+
+	return action.Err
 }
 
 // GetTopic is a method for actions.SSE
@@ -145,7 +162,6 @@ func (action *EffectIndexAction) loadRecords() {
 // loadPage populates action.Page
 func (action *EffectIndexAction) loadPage() {
 	for _, record := range action.Records {
-
 		ledger, found := action.Ledgers.Records[record.LedgerSequence()]
 		if !found {
 			msg := fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence())
@@ -173,7 +189,6 @@ func (action *EffectIndexAction) loadPage() {
 // represents the the cursor directly after the last closed ledger
 func (action *EffectIndexAction) ValidateCursor() {
 	c := action.GetString("cursor")
-
 	if c == "" {
 		return
 	}
@@ -186,8 +201,5 @@ func (action *EffectIndexAction) ValidateCursor() {
 
 	if !ok {
 		action.SetInvalidField("cursor", errors.New("invalid format"))
-		return
 	}
-
-	return
 }

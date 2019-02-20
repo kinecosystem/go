@@ -1,9 +1,15 @@
 package horizon
 
 import (
+<<<<<<< HEAD
 	"github.com/getsentry/raven-go"
 	"github.com/kinecosystem/go/services/horizon/internal/logmetrics"
 	"github.com/kinecosystem/go/support/log"
+=======
+	raven "github.com/getsentry/raven-go"
+	"github.com/stellar/go/services/horizon/internal/logmetrics"
+	"github.com/stellar/go/support/log"
+>>>>>>> stellar/master
 )
 
 // initLog initialized the logging subsystem, attaching app.log and
@@ -21,7 +27,6 @@ func initSentry(app *App) {
 
 	log.WithField("dsn", app.config.SentryDSN).Info("Initializing sentry")
 	err := raven.SetDSN(app.config.SentryDSN)
-
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +34,6 @@ func initSentry(app *App) {
 
 // initLogglyLog attaches a loggly hook to our logging system.
 func initLogglyLog(app *App) {
-
 	if app.config.LogglyToken == "" {
 		return
 	}

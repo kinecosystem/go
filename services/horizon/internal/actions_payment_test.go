@@ -4,8 +4,13 @@ import (
 	"testing"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/protocols/horizon/operations"
+=======
+	"github.com/stellar/go/protocols/horizon/operations"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+>>>>>>> stellar/master
 )
 
 func TestPaymentActions(t *testing.T) {

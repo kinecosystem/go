@@ -5,8 +5,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/support/context/requestid"
 	"github.com/kinecosystem/go/support/render/problem"
+=======
+	"github.com/stellar/go/services/horizon/internal/hchi"
+	"github.com/stellar/go/support/render/problem"
+>>>>>>> stellar/master
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,7 +42,7 @@ func TestCommonProblems(t *testing.T) {
 
 func TestInflate(t *testing.T) {
 	// Sets Instance to the request id based on the context
-	ctx2 := requestid.Context(ctx, "2")
+	ctx2 := hchi.WithRequestID(ctx, "2")
 	p := problem.P{}
 
 	Inflate(ctx2, &p)

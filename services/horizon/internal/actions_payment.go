@@ -4,12 +4,25 @@ import (
 	"errors"
 	"fmt"
 
+<<<<<<< HEAD
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
 	"github.com/kinecosystem/go/support/render/hal"
+=======
+	"github.com/stellar/go/services/horizon/internal/actions"
+	"github.com/stellar/go/services/horizon/internal/db2"
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
+	"github.com/stellar/go/services/horizon/internal/resourceadapter"
+	"github.com/stellar/go/support/render/hal"
+>>>>>>> stellar/master
 )
+
+// Interface verifications
+var _ actions.JSONer = (*PaymentsIndexAction)(nil)
+var _ actions.EventStreamer = (*PaymentsIndexAction)(nil)
 
 // PaymentsIndexAction returns a paged slice of payments based upon the provided
 // filters
@@ -25,7 +38,7 @@ type PaymentsIndexAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *PaymentsIndexAction) JSON() {
+func (action *PaymentsIndexAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -33,14 +46,13 @@ func (action *PaymentsIndexAction) JSON() {
 		action.loadRecords,
 		action.loadLedgers,
 		action.loadPage,
+		func() { hal.Render(action.W, action.Page) },
 	)
-	action.Do(func() {
-		hal.Render(action.W, action.Page)
-	})
+	return action.Err
 }
 
 // SSE is a method for actions.SSE
-func (action *PaymentsIndexAction) SSE(stream sse.Stream) {
+func (action *PaymentsIndexAction) SSE(stream *sse.Stream) error {
 	action.Setup(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -56,13 +68,11 @@ func (action *PaymentsIndexAction) SSE(stream sse.Stream) {
 			for _, record := range records {
 				ledger, found := action.Ledgers.Records[record.LedgerSequence()]
 				if !found {
-					msg := fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence())
-					action.Err = errors.New(msg)
+					action.Err = errors.New(fmt.Sprintf("could not find ledger data for sequence %d", record.LedgerSequence()))
 					return
 				}
 
 				res, err := resourceadapter.NewOperation(action.R.Context(), record, ledger)
-
 				if err != nil {
 					action.Err = err
 					return
@@ -73,7 +83,10 @@ func (action *PaymentsIndexAction) SSE(stream sse.Stream) {
 					Data: res,
 				})
 			}
-		})
+		},
+	)
+
+	return action.Err
 }
 
 // GetTopic is a method for actions.SSE

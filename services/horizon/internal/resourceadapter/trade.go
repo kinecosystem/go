@@ -17,7 +17,7 @@ func PopulateTrade(
 	ctx context.Context,
 	dest *Trade,
 	row history.Trade,
-) (err error) {
+) {
 	dest.ID = row.PagingToken()
 	dest.PT = row.PagingToken()
 	dest.OfferID = fmt.Sprintf("%d", row.OfferID)
@@ -50,7 +50,6 @@ func PopulateTrade(
 	}
 
 	populateTradeLinks(ctx, dest, row.HistoryOperationID)
-	return
 }
 
 func populateTradeLinks(

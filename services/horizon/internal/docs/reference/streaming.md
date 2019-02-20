@@ -8,6 +8,7 @@ Certain endpoints in Horizon can be called in streaming mode using Server-Sent E
 You can read an example of using the streaming mode in the [Follow Received Payments](./tutorials/follow-received-payments.md) tutorial.
 
 Endpoints that currently support streaming:
+* [Account](./endpoints/accounts-single.md)
 * [Effects](./endpoints/effects-all.md)
 * [Ledgers](./endpoints/ledgers-all.md)
 * [Offers](./endpoints/offers-for-account.md)
