@@ -3,10 +3,10 @@ package resourceadapter
 import (
 	"context"
 
-	"github.com/stellar/go/amount"
-	"github.com/stellar/go/price"
-	. "github.com/stellar/go/protocols/horizon"
-	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/amount"
+	"github.com/kinecosystem/go/price"
+	. "github.com/kinecosystem/go/protocols/horizon"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 )
 
 // Populate fills out the details of a trade using a row from the history_trades

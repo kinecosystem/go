@@ -3,9 +3,9 @@ package horizon
 import (
 	"testing"
 
-	"github.com/stellar/go/protocols/horizon/effects"
-	"github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/services/horizon/internal/test"
+	"github.com/kinecosystem/go/protocols/horizon/effects"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/services/horizon/internal/test"
 )
 
 func TestEffectActions_Index(t *testing.T) {
@@ -20,7 +20,7 @@ func TestEffectActions_Index(t *testing.T) {
 			ht.Assert.PageOf(11, w.Body)
 		}
 
-		// test streaming, regression for https://github.com/stellar/go/services/horizon/internal/issues/147
+		// test streaming, regression for https://github.com/kinecosystem/go/services/horizon/internal/issues/147
 		w = ht.Get("/effects?limit=2", test.RequestHelperStreaming)
 		ht.Assert.Equal(200, w.Code)
 

@@ -2,8 +2,8 @@ package horizon
 
 import (
 	raven "github.com/getsentry/raven-go"
-	"github.com/stellar/go/services/horizon/internal/logmetrics"
-	"github.com/stellar/go/support/log"
+	"github.com/kinecosystem/go/services/horizon/internal/logmetrics"
+	"github.com/kinecosystem/go/support/log"
 )
 
 // initLog initialized the logging subsystem, attaching app.log and

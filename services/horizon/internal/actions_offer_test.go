@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stellar/go/services/horizon/internal/render/sse"
-	"github.com/stellar/go/services/horizon/internal/test"
+	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
+	"github.com/kinecosystem/go/services/horizon/internal/test"
 )
 
 func TestOfferActions_Index(t *testing.T) {

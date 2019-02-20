@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/stellar/go/services/horizon/internal/hchi"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/services/horizon/internal/hchi"
+	"github.com/kinecosystem/go/support/render/problem"
 )
 
 // Inflate expands a problem with contextal information, including setting basic info.

@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stellar/go/services/horizon/internal/hchi"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/services/horizon/internal/hchi"
+	"github.com/kinecosystem/go/support/render/problem"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,8 +1,8 @@
 package horizon
 
 import (
-	"github.com/stellar/go/services/horizon/internal/actions"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/services/horizon/internal/actions"
+	"github.com/kinecosystem/go/support/render/problem"
 )
 
 // Interface verification

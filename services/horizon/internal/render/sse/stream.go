@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/stellar/go/support/log"
-	"github.com/stellar/go/support/render/problem"
+	"github.com/kinecosystem/go/support/log"
+	"github.com/kinecosystem/go/support/render/problem"
 )
 
 var (

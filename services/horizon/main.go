@@ -266,7 +266,7 @@ var configOpts = []*support.ConfigOption{
 	},
 }
 =======
-import "github.com/stellar/go/services/horizon/cmd"
+import "github.com/kinecosystem/go/services/horizon/cmd"
 >>>>>>> stellar/master
 
 func main() {
