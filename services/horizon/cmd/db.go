@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/schema"
 	"github.com/kinecosystem/go/services/horizon/internal/ingest"
 	"github.com/kinecosystem/go/support/db"
 	hlog "github.com/kinecosystem/go/support/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var dbCmd = &cobra.Command{
@@ -259,12 +259,7 @@ func ingestSystem(ingestConfig ingest.Config) *ingest.System {
 		log.Fatal("network-passphrase is blank: reingestion requires manually setting passphrase")
 	}
 
-<<<<<<< HEAD:services/horizon/db.go
-	i := ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, config.CursorName, ingestConfig)
-	return i
-=======
-	return ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, ingestConfig)
->>>>>>> stellar/master:services/horizon/cmd/db.go
+	return ingest.New(passphrase, config.StellarCoreURL, cdb, hdb, config.CursorName, ingestConfig)
 }
 
 func reingest(i *ingest.System, args []string) (int, error) {
