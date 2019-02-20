@@ -79,7 +79,6 @@ func (action *OrderBookShowAction) JSON() error {
 	return action.Err
 }
 
-<<<<<<< HEAD
 // SSE is a method for actions.SSE
 func (action *OrderBookShowAction) SSE(stream sse.Stream) {
 	action.Do(action.LoadQuery, action.LoadRecord, action.LoadResource)
@@ -93,10 +92,7 @@ func (action *OrderBookShowAction) SSE(stream sse.Stream) {
 
 }
 
-func (action *OrderBookShowAction) LoadEvent() sse.Event {
-=======
 func (action *OrderBookShowAction) LoadEvent() (sse.Event, error) {
->>>>>>> stellar/master
 	action.Do(action.LoadQuery, action.LoadRecord, action.LoadResource)
 	return sse.Event{Data: action.Resource}, action.Err
 }

@@ -6,10 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
-	"github.com/kinecosystem/go/services/horizon/internal/ledger"
 	"github.com/kinecosystem/go/services/horizon/internal/render"
 	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
@@ -59,11 +57,10 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
-<<<<<<< HEAD
 		var notification chan interface{}
 
 		switch ac := action.(type) {
-		case SSE:
+		case EventStreamer:
 			// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
 			// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
 			topic := ac.GetTopic()
@@ -72,10 +69,6 @@ func (base *Base) Execute(action interface{}) {
 				defer sse.Unsubscribe(notification, topic)
 			}
 		case SingleObjectStreamer:
-=======
-		switch action.(type) {
-		case EventStreamer, SingleObjectStreamer:
->>>>>>> stellar/master
 		default:
 			goto NotAcceptable
 		}

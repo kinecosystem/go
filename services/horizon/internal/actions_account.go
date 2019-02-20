@@ -41,7 +41,6 @@ func (action *AccountShowAction) JSON() error {
 	return action.Err
 }
 
-<<<<<<< HEAD
 // SSE is a method for actions.SSE
 func (action *AccountShowAction) SSE(stream sse.Stream) {
 
@@ -56,10 +55,7 @@ func (action *AccountShowAction) SSE(stream sse.Stream) {
 	)
 }
 
-func (action *AccountShowAction) LoadEvent() sse.Event {
-=======
 func (action *AccountShowAction) LoadEvent() (sse.Event, error) {
->>>>>>> stellar/master
 	action.Do(action.loadParams, action.loadRecord, action.loadResource)
 	return sse.Event{Data: action.Resource}, action.Err
 }

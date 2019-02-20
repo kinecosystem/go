@@ -16,14 +16,9 @@ type RawDataResponder interface {
 
 // EventStreamer implementors can respond to a request whose response type was negotiated
 // to be MimeEventStream.
-<<<<<<< HEAD
-type SSE interface {
-	SSE(sse.Stream)
-	GetTopic() string
-=======
 type EventStreamer interface {
 	SSE(*sse.Stream) error
->>>>>>> stellar/master
+	GetTopic() string
 }
 
 // SingleObjectStreamer implementors can respond to a request whose response
