@@ -3,13 +3,12 @@ package resourceadapter
 import (
 	"context"
 
+	"github.com/kinecosystem/go/protocols/horizon/base"
+	"github.com/kinecosystem/go/protocols/horizon/effects"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/httpx"
 	"github.com/kinecosystem/go/support/render/hal"
-	"github.com/kinecosystem/go/protocols/horizon/base"
-	"github.com/kinecosystem/go/protocols/horizon/effects"
 )
-
 
 var EffectTypeNames = map[history.EffectType]string{
 	history.EffectAccountCreated:                     "account_created",
@@ -130,8 +129,6 @@ func NewEffect(
 
 	return
 }
-
-
 
 // Populate loads this resource from `row`
 func PopulateBaseEffect(ctx context.Context, this *effects.Base, row history.Effect, ledger history.Ledger) {

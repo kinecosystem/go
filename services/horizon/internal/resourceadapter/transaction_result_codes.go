@@ -3,9 +3,8 @@ package resourceadapter
 import (
 	"context"
 
-	"github.com/kinecosystem/go/services/horizon/internal/txsub"
 	. "github.com/kinecosystem/go/protocols/horizon"
-
+	"github.com/kinecosystem/go/services/horizon/internal/txsub"
 )
 
 // Populate fills out the details

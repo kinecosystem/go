@@ -2,10 +2,10 @@ package effects
 
 import (
 	"time"
+
 	"github.com/kinecosystem/go/protocols/horizon/base"
 	"github.com/kinecosystem/go/support/render/hal"
 )
-
 
 // Base provides the common structure for any effect resource effect.
 type Base struct {

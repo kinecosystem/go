@@ -3,9 +3,9 @@ package resourceadapter
 import (
 	"context"
 
+	. "github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/xdr"
-	. "github.com/kinecosystem/go/protocols/horizon"
 )
 
 func PopulateOrderBookSummary(

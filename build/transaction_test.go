@@ -111,14 +111,14 @@ var _ = Describe("Transaction Mutators:", func() {
 		})
 	})
 
-    Describe("Timebounds", func() {
-        BeforeEach(func() { mut = Timebounds{1521056118, 1521056298} })
-        It("succeeds", func() { Expect(err).NotTo(HaveOccurred()) })
-        It("sets an minimum and maximum timebound on the transaction", func() {
-            Expect(subject.TX.TimeBounds.MinTime).To(Equal(xdr.Uint64(1521056118)))
-            Expect(subject.TX.TimeBounds.MaxTime).To(Equal(xdr.Uint64(1521056298)))
-        })
-    })
+	Describe("Timebounds", func() {
+		BeforeEach(func() { mut = Timebounds{1521056118, 1521056298} })
+		It("succeeds", func() { Expect(err).NotTo(HaveOccurred()) })
+		It("sets an minimum and maximum timebound on the transaction", func() {
+			Expect(subject.TX.TimeBounds.MinTime).To(Equal(xdr.Uint64(1521056118)))
+			Expect(subject.TX.TimeBounds.MaxTime).To(Equal(xdr.Uint64(1521056298)))
+		})
+	})
 
 	Describe("AllowTrustBuilder", func() {
 		BeforeEach(func() { mut = AllowTrust() })

@@ -6,11 +6,25 @@ file.  This project adheres to [Semantic Versioning](http://semver.org/).
 As this project is pre 1.0, breaking changes may happen for minor version
 bumps.  A breaking change will get clearly notified in this log.
 
+## Unreleased
+
+### Breaking changes
+
+* horizon command now requires at least one argument. As a result, users will have to do `horizon serve` to launch horizon.
+
+### Changes
+
+* Fixed a bug causing slice bounds out of range at offer-by-account endpoint during streaming.
+
 ## v0.16.0 - 2019-02-04
 
-### Upgrate notes
+### Upgrade notes
 
 * Ledger > Admins need to reingest old ledgers because we introduced `successful_transaction_count` and `failed_transaction_count`.
+
+### Database migration notes
+
+Previous versions work fine with Horizon 0.16.0 schema so you can migrate (`horizon db migrate up`) database without stopping the Horizon process. To reingest ledgers run `horizon db reingest` using Horizon 0.16.0 binary.
 
 ### Deprecations
 

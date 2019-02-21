@@ -9,13 +9,10 @@ import (
 
 func initHorizonDb(app *App) {
 	session, err := db.Open("postgres", app.config.DatabaseURL)
-
 	if err != nil {
 		log.Panic(err)
 	}
 
-	// MaxIdleConns should be equal to MaxOpenConns. In case of high variance
-	// in number of requests closing and opening connections may slow down Horizon.
 	session.DB.SetMaxIdleConns(app.config.HorizonDBMaxIdleConnections)
 	session.DB.SetMaxOpenConns(app.config.HorizonDBMaxOpenConnections)
 
@@ -24,7 +21,6 @@ func initHorizonDb(app *App) {
 
 func initCoreDb(app *App) {
 	session, err := db.Open("postgres", app.config.StellarCoreDatabaseURL)
-
 	if err != nil {
 		log.Panic(err)
 	}

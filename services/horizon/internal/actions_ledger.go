@@ -1,20 +1,25 @@
 package horizon
 
 import (
+	"github.com/kinecosystem/go/protocols/horizon"
+	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
-	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
-	"github.com/kinecosystem/go/protocols/horizon"
-	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
+	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
+	"github.com/kinecosystem/go/support/render/hal"
 )
 
 // This file contains the actions:
 //
 // LedgerIndexAction: pages of ledgers
 // LedgerShowAction: single ledger by sequence
+
+// Interface verifications
+var _ actions.JSONer = (*LedgerIndexAction)(nil)
+var _ actions.EventStreamer = (*LedgerIndexAction)(nil)
 
 // LedgerIndexAction renders a page of ledger resources, identified by
 // a normal page query.
@@ -26,7 +31,7 @@ type LedgerIndexAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *LedgerIndexAction) JSON() {
+func (action *LedgerIndexAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -35,10 +40,11 @@ func (action *LedgerIndexAction) JSON() {
 		action.loadPage,
 		func() { hal.Render(action.W, action.Page) },
 	)
+	return action.Err
 }
 
 // SSE is a method for actions.SSE
-func (action *LedgerIndexAction) SSE(stream sse.Stream) {
+func (action *LedgerIndexAction) SSE(stream *sse.Stream) error {
 	action.Setup(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -49,7 +55,6 @@ func (action *LedgerIndexAction) SSE(stream sse.Stream) {
 		func() {
 			stream.SetLimit(int(action.PagingParams.Limit))
 			records := action.Records[stream.SentCount():]
-
 			for _, record := range records {
 				var res horizon.Ledger
 				resourceadapter.PopulateLedger(action.R.Context(), &res, record)
@@ -57,6 +62,8 @@ func (action *LedgerIndexAction) SSE(stream sse.Stream) {
 			}
 		},
 	)
+
+	return action.Err
 }
 
 // GetTopic is a method for actions.SSE
@@ -73,9 +80,7 @@ func (action *LedgerIndexAction) loadParams() {
 }
 
 func (action *LedgerIndexAction) loadRecords() {
-	action.Err = action.HistoryQ().Ledgers().
-		Page(action.PagingParams).
-		Select(&action.Records)
+	action.Err = action.HistoryQ().Ledgers().Page(action.PagingParams).Select(&action.Records)
 }
 
 func (action *LedgerIndexAction) loadPage() {
@@ -92,6 +97,9 @@ func (action *LedgerIndexAction) loadPage() {
 	action.Page.PopulateLinks()
 }
 
+// Interface verification
+var _ actions.JSONer = (*LedgerShowAction)(nil)
+
 // LedgerShowAction renders a ledger found by its sequence number.
 type LedgerShowAction struct {
 	Action
@@ -100,7 +108,7 @@ type LedgerShowAction struct {
 }
 
 // JSON is a method for actions.JSON
-func (action *LedgerShowAction) JSON() {
+func (action *LedgerShowAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -112,6 +120,7 @@ func (action *LedgerShowAction) JSON() {
 			hal.Render(action.W, res)
 		},
 	)
+	return action.Err
 }
 
 func (action *LedgerShowAction) loadParams() {
@@ -119,8 +128,7 @@ func (action *LedgerShowAction) loadParams() {
 }
 
 func (action *LedgerShowAction) loadRecord() {
-	action.Err = action.HistoryQ().
-		LedgerBySequence(&action.Record, action.Sequence)
+	action.Err = action.HistoryQ().LedgerBySequence(&action.Record, action.Sequence)
 }
 
 func (action *LedgerShowAction) verifyWithinHistory() {

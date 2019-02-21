@@ -3,9 +3,9 @@ package horizon
 import (
 	"testing"
 
+	"github.com/kinecosystem/go/protocols/horizon/effects"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
-	"github.com/kinecosystem/go/protocols/horizon/effects"
 )
 
 func TestEffectActions_Index(t *testing.T) {

@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub/sequence"
-	"github.com/kinecosystem/go/protocols/horizon"
 )
 
 func TestTransactionActions_Show(t *testing.T) {

@@ -1,12 +1,15 @@
 ---
-title: Administration
+title: Horizon Administration Guide
 ---
+## Horizon Administration Guide
 
 Horizon is responsible for providing an HTTP API to data in the Stellar network. It ingests and re-serves the data produced by the stellar network in a form that is easier to consume than the performance-oriented data representations used by stellar-core.
 
+This document describes how to administer a **production** Horizon instance. If you are just starting with Horizon and want to try it out, consider the [Quickstart Guide](quickstart.md) instead. For information about developing on the Horizon codebase, check out the [Development Guide](developing.md).
+
 ## Why run Horizon?
 
-The Stellar Development Foundation runs two Horizon servers, one for the public network and one for the test network, free for anyone's use at https://horizon.stellar.org and https://horizon-testnet.stellar.org.  These servers should be fine for development and small scale projects, but is not recommended that you use them for production services that need strong reliability.  By running Horizon within your own infrastructure provides a number of benefits:
+The Stellar Development Foundation runs two Horizon servers, one for the public network and one for the test network, free for anyone's use at https://horizon.stellar.org and https://horizon-testnet.stellar.org.  These servers should be fine for development and small scale projects, but it is not recommended that you use them for production services that need strong reliability.  By running Horizon within your own infrastructure provides a number of benefits:
 
   - Multiple instances can be run for redundancy and scalability.
   - Request rate limiting can be disabled.

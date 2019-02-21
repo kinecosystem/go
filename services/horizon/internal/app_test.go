@@ -15,8 +15,7 @@ func TestNewApp(t *testing.T) {
 	config.SentryDSN = "Not a url"
 
 	tt.Assert.Panics(func() {
-		app, _ := NewApp(config)
-		app.Close()
+		NewApp(config).Close()
 	})
 }
 

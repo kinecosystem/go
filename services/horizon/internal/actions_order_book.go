@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/kinecosystem/go/protocols/horizon"
+	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
@@ -11,6 +12,10 @@ import (
 	"github.com/kinecosystem/go/support/render/problem"
 	"github.com/kinecosystem/go/xdr"
 )
+
+// Interface verifications
+var _ actions.JSONer = (*OrderBookShowAction)(nil)
+var _ actions.SingleObjectStreamer = (*OrderBookShowAction)(nil)
 
 // OrderBookShowAction renders a account summary found by its address.
 type OrderBookShowAction struct {
@@ -64,12 +69,14 @@ func (action *OrderBookShowAction) LoadResource() {
 }
 
 // JSON is a method for actions.JSON
-func (action *OrderBookShowAction) JSON() {
-	action.Do(action.LoadQuery, action.LoadRecord, action.LoadResource)
-
-	action.Do(func() {
-		hal.Render(action.W, action.Resource)
-	})
+func (action *OrderBookShowAction) JSON() error {
+	action.Do(
+		action.LoadQuery,
+		action.LoadRecord,
+		action.LoadResource,
+		func() { hal.Render(action.W, action.Resource) },
+	)
+	return action.Err
 }
 
 // SSE is a method for actions.SSE
@@ -85,9 +92,9 @@ func (action *OrderBookShowAction) SSE(stream sse.Stream) {
 
 }
 
-func (action *OrderBookShowAction) LoadEvent() sse.Event {
+func (action *OrderBookShowAction) LoadEvent() (sse.Event, error) {
 	action.Do(action.LoadQuery, action.LoadRecord, action.LoadResource)
-	return sse.Event{Data: action.Resource}
+	return sse.Event{Data: action.Resource}, action.Err
 }
 
 // GetTopic is a method for actions.SSE

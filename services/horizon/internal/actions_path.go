@@ -8,6 +8,9 @@ import (
 	"github.com/kinecosystem/go/support/render/hal"
 )
 
+// Interface verification
+var _ actions.JSONer = (*PathIndexAction)(nil)
+
 // PathIndexAction provides path finding
 type PathIndexAction struct {
 	Action
@@ -17,16 +20,15 @@ type PathIndexAction struct {
 }
 
 // JSON implements actions.JSON
-func (action *PathIndexAction) JSON() {
+func (action *PathIndexAction) JSON() error {
 	action.Do(
 		action.loadQuery,
 		action.loadSourceAssets,
 		action.loadRecords,
 		action.loadPage,
-		func() {
-			hal.Render(action.W, action.Page)
-		},
+		func() { hal.Render(action.W, action.Page) },
 	)
+	return action.Err
 }
 
 func (action *PathIndexAction) loadQuery() {

@@ -15,7 +15,7 @@ type SubmissionListTestSuite struct {
 	list      OpenSubmissionList
 	realList  *submissionList
 	listeners []chan Result
-	hashes []string
+	hashes    []string
 	ctx       context.Context
 }
 
