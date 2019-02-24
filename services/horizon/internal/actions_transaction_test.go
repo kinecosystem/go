@@ -77,7 +77,7 @@ func TestTransactionActions_Index(t *testing.T) {
 		ht.Assert.PageOf(2, w.Body)
 	}
 
-	// regression: https://github.com/kinecosystem/go/services/horizon/internal/issues/365
+	// regression: https://github.com/stellar/go/services/horizon/internal/issues/365
 	w = ht.Get("/transactions?limit=200")
 	ht.Require.Equal(200, w.Code)
 	w = ht.Get("/transactions?limit=201")

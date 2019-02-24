@@ -16,7 +16,7 @@ func (lb *LedgerBundle) Load(db *db.Session) error {
 	if err != nil {
 		// Remove when Horizon is able to handle gaps in stellar-core DB.
 		// More info:
-		// * https://github.com/kinecosystem/go/issues/335
+		// * https://github.com/stellar/go/issues/335
 		// * https://www.stellar.org/developers/software/known-issues.html#gaps-detected
 		if err == sql.ErrNoRows {
 			return errors.New("Gap detected in stellar-core database. More information: https://www.stellar.org/developers/software/known-issues.html#gaps-detected")

@@ -78,7 +78,7 @@ func (base *Base) Execute(action interface{}) {
 		var oldHash [32]byte
 		for {
 			// Rate limit the request if it's a call to stream since it queries the DB every second. See
-			// https://github.com/kinecosystem/go/issues/715 for more details.
+			// https://github.com/stellar/go/issues/715 for more details.
 			app := base.R.Context().Value(&horizonContext.AppContextKey)
 			rateLimiter := app.(RateLimiterProvider).GetRateLimiter()
 			if rateLimiter != nil {
