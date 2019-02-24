@@ -8,7 +8,7 @@ import (
 	"github.com/kinecosystem/go/support/errors"
 )
 
-// ToBaseAsset transforms Asset to github.com/kinecosystem/go-stellar-base/build.Asset
+// ToBaseAsset transforms Asset to github.com/stellar/go-stellar-base/build.Asset
 func (a Asset) ToBaseAsset() build.Asset {
 	if a.Code == "" && a.Issuer == "" {
 		return build.NativeAsset()

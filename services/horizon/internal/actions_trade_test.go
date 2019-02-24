@@ -311,7 +311,7 @@ func TestTradeActions_Aggregation(t *testing.T) {
 }
 
 func TestTradeActions_IndexRegressions(t *testing.T) {
-	t.Run("Regression:  https://github.com/kinecosystem/go/services/horizon/internal/issues/318", func(t *testing.T) {
+	t.Run("Regression:  https://github.com/stellar/go/services/horizon/internal/issues/318", func(t *testing.T) {
 		ht := StartHTTPTest(t, "trades")
 		defer ht.Finish()
 
@@ -326,7 +326,7 @@ func TestTradeActions_IndexRegressions(t *testing.T) {
 		ht.Assert.Equal(404, w.Code) //This used to be 200 with length 0
 	})
 
-	t.Run("Regression for nil prices: https://github.com/kinecosystem/go/issues/357", func(t *testing.T) {
+	t.Run("Regression for nil prices: https://github.com/stellar/go/issues/357", func(t *testing.T) {
 		ht := StartHTTPTest(t, "trades")
 		defer ht.Finish()
 
@@ -341,7 +341,7 @@ func TestTradeActions_IndexRegressions(t *testing.T) {
 
 // TestTradeActions_AggregationOrdering checks that open/close aggregation
 // fields are correct for multiple trades that occur in the same ledger
-// https://github.com/kinecosystem/go/issues/215
+// https://github.com/stellar/go/issues/215
 func TestTradeActions_AggregationOrdering(t *testing.T) {
 
 	ht := StartHTTPTest(t, "base")
