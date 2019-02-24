@@ -15,6 +15,7 @@ import (
 
 // Interface verifications
 var _ actions.JSONer = (*OrderBookShowAction)(nil)
+var _ actions.EventStreamer = (*OrderBookShowAction)(nil)
 var _ actions.SingleObjectStreamer = (*OrderBookShowAction)(nil)
 
 // OrderBookShowAction renders a account summary found by its address.
@@ -80,7 +81,7 @@ func (action *OrderBookShowAction) JSON() error {
 }
 
 // SSE is a method for actions.SSE
-func (action *OrderBookShowAction) SSE(stream sse.Stream) {
+func (action *OrderBookShowAction) SSE(stream *sse.Stream) error {
 	action.Do(action.LoadQuery, action.LoadRecord, action.LoadResource)
 
 	action.Do(func() {
@@ -90,6 +91,7 @@ func (action *OrderBookShowAction) SSE(stream sse.Stream) {
 		})
 	})
 
+	return action.Err
 }
 
 func (action *OrderBookShowAction) LoadEvent() (sse.Event, error) {
