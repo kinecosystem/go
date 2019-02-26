@@ -162,7 +162,7 @@ func TestSSEPubsubTopic(t *testing.T) {
 		base.Set(reflect.ValueOf(*makeAction(tt.path, map[string]string{tt.paramKey: tt.paramValue})))
 
 		// Test that it's EventStreamer.GetTopic() returns the correct expected PubSub topic
-		assert.Equal(t, tt.paramValue, tt.streamEventType.GetTopic(), "Path: %s/%s", tt.path, "/", tt.paramValue)
+		assert.Equal(t, tt.paramValue, tt.streamEventType.GetPubsubTopic(), "Path: %s/%s", tt.path, "/", tt.paramValue)
 	}
 }
 

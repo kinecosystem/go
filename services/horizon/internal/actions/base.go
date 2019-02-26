@@ -63,7 +63,7 @@ func (base *Base) Execute(action interface{}) {
 		case EventStreamer:
 			// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
 			// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
-			topic := ac.GetTopic()
+			topic := ac.GetPubsubTopic()
 			if topic != "" {
 				notification = sse.Subscribe(topic)
 				defer sse.Unsubscribe(notification, topic)

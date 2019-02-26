@@ -99,10 +99,10 @@ func (action *OrderBookShowAction) LoadEvent() (sse.Event, error) {
 	return sse.Event{Data: action.Resource}, action.Err
 }
 
-// GetTopic is a method for actions.SSE
+// GetPubsubTopic is a method for actions.SSE
 //
 // There is no value in this action for specific order, so registration topic is a general
 // change in the ledger.
-func (action *OrderBookShowAction) GetTopic() string {
+func (action *OrderBookShowAction) GetPubsubTopic() string {
 	return "order_book"
 }

@@ -61,8 +61,8 @@ func (action *AccountShowAction) LoadEvent() (sse.Event, error) {
 	return sse.Event{Data: action.Resource}, action.Err
 }
 
-// GetTopic is a method for actions.SSE
-func (action *AccountShowAction) GetTopic() string {
+// GetPubsubTopic is a method for actions.SSE
+func (action *AccountShowAction) GetPubsubTopic() string {
 	return action.GetString("account_id")
 }
 

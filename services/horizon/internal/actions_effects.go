@@ -90,8 +90,8 @@ func (action *EffectIndexAction) SSE(stream *sse.Stream) error {
 	return action.Err
 }
 
-// GetTopic is a method for actions.SSE
-func (action *EffectIndexAction) GetTopic() string {
+// GetPubsubTopic is a method for actions.SSE
+func (action *EffectIndexAction) GetPubsubTopic() string {
 	if res := action.GetString("account_id"); res != "" {
 		return res
 	}
