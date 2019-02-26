@@ -71,6 +71,17 @@ func (action *TradeIndexAction) SSE(stream *sse.Stream) error {
 	return action.Err
 }
 
+// GetPubsubTopic is a method for actions.SSE
+func (action *TradeIndexAction) GetPubsubTopic() string {
+	if res := action.GetString("offer_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("account_id"); res != "" {
+		return res
+	}
+	return ""
+}
+
 // loadParams sets action.Query from the request params
 func (action *TradeIndexAction) loadParams() {
 	action.PagingParams = action.GetPageQuery()

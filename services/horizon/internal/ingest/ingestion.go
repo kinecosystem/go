@@ -3,18 +3,31 @@ package ingest
 import (
 	"encoding/json"
 	"fmt"
+	"math"
+	"strconv"
 	"time"
 
-	"math"
-
 	sq "github.com/Masterminds/squirrel"
+	"github.com/cskr/pubsub"
 	"github.com/guregu/null"
 	"github.com/stellar/go/services/horizon/internal/db2/core"
 	"github.com/stellar/go/services/horizon/internal/db2/history"
 	"github.com/stellar/go/services/horizon/internal/db2/sqx"
+	"github.com/stellar/go/services/horizon/internal/render/sse"
 	"github.com/stellar/go/support/errors"
+	ilog "github.com/stellar/go/support/log"
 	"github.com/stellar/go/xdr"
 )
+
+const (
+	pubsubCommitTopic    = "commit"
+	pubsubCommitCapacity = 0
+	pubsubStubValue      = 0
+)
+
+// Pubsub functionaly for history database ingestion.
+// This is required for invoking SSE clients to get updates on database changes.
+var commitPubsub = pubsub.New(pubsubCommitCapacity)
 
 // ClearAll clears the entire history database
 func (ingest *Ingestion) ClearAll() error {
@@ -169,6 +182,27 @@ func (ingest *Ingestion) UpdateAccountIDs(tables []TableName) error {
 	return nil
 }
 
+// subscribeToDBCommit subscribes to updates for ingestions that were committed to the database,
+// and returns a notification channel that notifies when a commit happened.
+func (ingest *Ingestion) subscribeToDBCommit() chan interface{} {
+	return commitPubsub.SubOnce(pubsubCommitTopic)
+}
+
+// publishOnDBCommit listens until the insert action was committed to the database,
+// then publishes a notification to SSE subscriptors, and also to the topic that was ingested.
+func (ingest *Ingestion) publishOnDBCommit(committed chan interface{}, topic string) {
+	l := log.WithFields(ilog.F{"topic": topic, "channel": committed})
+	l.Debug("Waiting for topic")
+	select {
+	case <-committed:
+		sse.Publish(topic, false)
+	case <-time.After(10 * time.Second):
+		// Timeout after a while
+		l.Errorf("Failed to get publish approval, releasing channel")
+		sse.Publish(topic, false)
+	}
+}
+
 // Ledger adds a ledger to the current ingestion
 func (ingest *Ingestion) Ledger(
 	id int64,
@@ -177,6 +211,15 @@ func (ingest *Ingestion) Ledger(
 	failedTxsCount int,
 	ops int,
 ) {
+
+	// Wait for data to be committed to database, then notify subscribers.
+	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), "ledger")
+	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), strconv.FormatInt(id, 10))
+
+	if successTxsCount > 0 || failedTxsCount > 0 {
+		go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), "transactions")
+	}
+
 	ingest.builders[LedgersTableName].Values(
 		CurrentVersion,
 		id,
@@ -225,6 +268,9 @@ func (ingest *Ingestion) Operation(
 // `history_operation_participants` table.
 func (ingest *Ingestion) OperationParticipants(op int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
+		// Wait for data to be committed to database, then notify subscribes.
+		go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), aid.Address())
+
 		ingest.builders[OperationParticipantsTableName].Values(op, Address(aid.Address()))
 	}
 }
@@ -255,6 +301,8 @@ func (ingest *Ingestion) Trade(
 	trade xdr.ClaimOfferAtom,
 	ledgerClosedAt int64,
 ) error {
+	// Wait for data to be committed to database, then notify subscribes.
+	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), "order_book")
 
 	q := history.Q{Session: ingest.DB}
 
@@ -315,6 +363,9 @@ func (ingest *Ingestion) Transaction(
 	// Enquote empty signatures
 	signatures := tx.Base64Signatures()
 
+	// Wait for data to be committed to database, then notify subscribes.
+	go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), tx.TransactionHash)
+
 	ingest.builders[TransactionsTableName].Values(
 		id,
 		tx.TransactionHash,
@@ -342,6 +393,8 @@ func (ingest *Ingestion) Transaction(
 // `history_transaction_participants` table.
 func (ingest *Ingestion) TransactionParticipants(tx int64, aids []xdr.AccountId) {
 	for _, aid := range aids {
+		// Wait for data to be committed to database, then notify subscribes.
+		go ingest.publishOnDBCommit(ingest.subscribeToDBCommit(), aid.Address())
 		ingest.builders[TransactionParticipantsTableName].Values(tx, Address(aid.Address()))
 	}
 }
@@ -460,7 +513,9 @@ func (ingest *Ingestion) commit() error {
 	if err != nil {
 		return err
 	}
-
+	// Update subscribers that a database commit occured.
+	log.Debug("Publishing to DB commit PubSub channel")
+	commitPubsub.TryPub(pubsubStubValue, pubsubCommitTopic)
 	return nil
 }
 

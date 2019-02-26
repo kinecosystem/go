@@ -6,10 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	horizonContext "github.com/stellar/go/services/horizon/internal/context"
-	"github.com/stellar/go/services/horizon/internal/ledger"
 	"github.com/stellar/go/services/horizon/internal/render"
 	hProblem "github.com/stellar/go/services/horizon/internal/render/problem"
 	"github.com/stellar/go/services/horizon/internal/render/sse"
@@ -26,18 +24,16 @@ type Base struct {
 	R   *http.Request
 	Err error
 
-	appCtx             context.Context
-	sseUpdateFrequency time.Duration
-	isSetup            bool
+	appCtx  context.Context
+	isSetup bool
 }
 
 // Prepare established the common attributes that get used in nearly every
 // action.  "Child" actions may override this method to extend action, but it
 // is advised you also call this implementation to maintain behavior.
-func (base *Base) Prepare(w http.ResponseWriter, r *http.Request, appCtx context.Context, sseUpdateFrequency time.Duration) {
+func (base *Base) Prepare(w http.ResponseWriter, r *http.Request, appCtx context.Context) {
 	base.W = w
 	base.R = r
-	base.sseUpdateFrequency = sseUpdateFrequency
 	base.appCtx = appCtx
 }
 
@@ -61,8 +57,18 @@ func (base *Base) Execute(action interface{}) {
 		}
 
 	case render.MimeEventStream:
-		switch action.(type) {
-		case EventStreamer, SingleObjectStreamer:
+		var notification chan interface{}
+
+		switch ac := action.(type) {
+		case EventStreamer:
+			// Subscribe this handler to the topic if the SSE request is related to a specific topic (tx_id, account_id, etc.).
+			// This causes action.SSE to only be triggered by this topic. Unsubscribe when done.
+			topic := ac.GetPubsubTopic()
+			if topic != "" {
+				notification = sse.Subscribe(topic)
+				defer sse.Unsubscribe(notification, topic)
+			}
+		case SingleObjectStreamer:
 		default:
 			goto NotAcceptable
 		}
@@ -71,8 +77,6 @@ func (base *Base) Execute(action interface{}) {
 
 		var oldHash [32]byte
 		for {
-			lastLedgerState := ledger.CurrentState()
-
 			// Rate limit the request if it's a call to stream since it queries the DB every second. See
 			// https://github.com/stellar/go/issues/715 for more details.
 			app := base.R.Context().Value(&horizonContext.AppContextKey)
@@ -128,23 +132,9 @@ func (base *Base) Execute(action interface{}) {
 				return
 			}
 
-			// Make sure this is buffered channel of size 1. Otherwise, the go routine below
-			// will never return if `newLedgers` channel is not read. From Effective Go:
-			// > If the channel is unbuffered, the sender blocks until the receiver has received the value.
-			newLedgers := make(chan bool, 1)
-			go func() {
-				for {
-					time.Sleep(base.sseUpdateFrequency)
-					currentLedgerState := ledger.CurrentState()
-					if currentLedgerState.HistoryLatest >= lastLedgerState.HistoryLatest+1 {
-						newLedgers <- true
-						return
-					}
-				}
-			}()
-
 			select {
-			case <-newLedgers:
+			case <-notification:
+				// No-op, continue onto the next iteration.
 				continue
 			case <-ctx.Done():
 			case <-base.appCtx.Done():

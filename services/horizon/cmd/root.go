@@ -98,14 +98,6 @@ var configOpts = []*support.ConfigOption{
 		Usage:       "max db connections (per DB), may need to be increased when responses are slow but DB CPU is normal",
 	},
 	&support.ConfigOption{
-		Name:           "sse-update-frequency",
-		ConfigKey:      &config.SSEUpdateFrequency,
-		OptType:        types.Int,
-		FlagDefault:    5,
-		CustomSetValue: support.SetDuration,
-		Usage:          "defines how often streams should check if there's a new ledger (in seconds), may need to increase in case of big number of streams",
-	},
-	&support.ConfigOption{
 		Name:           "connection-timeout",
 		ConfigKey:      &config.ConnectionTimeout,
 		OptType:        types.Int,

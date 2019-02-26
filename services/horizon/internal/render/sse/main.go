@@ -5,8 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
+
+	"github.com/cskr/pubsub"
+	"github.com/stellar/go/support/log"
 )
+
+const pubsubCapacity = 0
 
 // Event is the packet of data that gets sent over the wire to a connected
 // client.
@@ -98,11 +102,6 @@ var helloEvent = Event{
 	Retry: 1000,
 }
 
-var (
-	lock     sync.Mutex
-	nextTick = make(chan struct{})
-)
-
 func getJSON(val interface{}) string {
 	js, err := json.Marshal(val)
 
@@ -111,4 +110,46 @@ func getJSON(val interface{}) string {
 	}
 
 	return string(js)
+}
+
+// Pubsub for SSE requests, so they will run SSE.action only upon relevant data changes.
+var ssePubsub = pubsub.New(pubsubCapacity)
+
+// Subscribe to topic by SSE connection, usually with an ID (account, ledger, tx).
+// Once a change occurs in Horizon database happens, Publish() is called by ingestor so the
+// subscription channel is notified.
+func Subscribe(topic string) chan interface{} {
+	topicChan := ssePubsub.Sub(topic)
+	log.WithFields(log.F{"topic": topic, "channel": topicChan}).Debug("Subscribed to topic")
+	return topicChan
+}
+
+// Unsubscribe to a topic, for example when SSE connection is closed.
+func Unsubscribe(notification chan interface{}, topic string) {
+	log.WithField("topic", topic).Debug("Unsubscribed from topic")
+	ssePubsub.Unsub(notification, topic)
+}
+
+// Publish publishes to a PubSub subscription notification channel.
+//
+// NOTE there is good reason to usually publish in a non-blocking manner i.e. skipping publishing
+// and dropping sending the notification to the channel. The reason is in case channel queue is full,
+// and there's already a notification waiting to be consumed by a subscription.
+//
+// This can happen if multiple messages need to be published on short interval when sse.Execute() loop
+// is still busy on acting on the previous action, and haven't fetched the next message yet.
+//
+// It is OK to not publish a second message to the topic since the one already in the queue will
+// trigger the action in the next sse.Execute() iteration.
+//
+// Only reason to publish a notification in a blocking manner would be to write consistent unit
+// tests where a subscription can wait for notification to be published in separate goroutine.
+func Publish(topic string, blocking bool) {
+	log.WithField("topic", topic).Debug("Publishing to topic")
+
+	if blocking {
+		ssePubsub.Pub(0, topic)
+	} else {
+		ssePubsub.TryPub(0, topic)
+	}
 }

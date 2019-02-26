@@ -139,6 +139,14 @@
   revision = "31079b6807923eb23992c421b114992b95131b55"
 
 [[projects]]
+  digest = "1:5bdd0581421e643e6c3163bb5da785600a2d7d0d73fec58acebaf2e693868e9d"
+  name = "github.com/cskr/pubsub"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "65166f5ae403cbf6dcdced31e1f8f8ad95485cb3"
+  version = "v1.0.2"
+
+[[projects]]
   digest = "1:33ad47e6f2f3685027d42cbf66067e0e2e75f8841d95b802bad85f5fa4c7c956"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -873,6 +881,7 @@
     "github.com/btcsuite/btcd/txscript",
     "github.com/btcsuite/btcd/wire",
     "github.com/btcsuite/btcutil",
+    "github.com/cskr/pubsub",
     "github.com/ethereum/go-ethereum/common",
     "github.com/ethereum/go-ethereum/core/types",
     "github.com/ethereum/go-ethereum/crypto",

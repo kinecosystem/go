@@ -81,6 +81,20 @@ func (action *PaymentsIndexAction) SSE(stream *sse.Stream) error {
 	return action.Err
 }
 
+// GetPubsubTopic is a method for actions.SSE
+func (action *PaymentsIndexAction) GetPubsubTopic() string {
+	if res := action.GetString("account_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("ledger_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("tx_id"); res != "" {
+		return res
+	}
+	return ""
+}
+
 func (action *PaymentsIndexAction) loadParams() {
 	action.ValidateCursorAsDefault()
 	action.AccountFilter = action.GetAddress("account_id")

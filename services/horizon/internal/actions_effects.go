@@ -90,6 +90,23 @@ func (action *EffectIndexAction) SSE(stream *sse.Stream) error {
 	return action.Err
 }
 
+// GetPubsubTopic is a method for actions.SSE
+func (action *EffectIndexAction) GetPubsubTopic() string {
+	if res := action.GetString("account_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("ledger_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("tx_id"); res != "" {
+		return res
+	}
+	if res := action.GetString("op_id"); res != "" {
+		return res
+	}
+	return ""
+}
+
 // loadLedgers populates the ledger cache for this action
 func (action *EffectIndexAction) loadLedgers() {
 	action.Ledgers = &history.LedgerCache{}
