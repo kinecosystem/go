@@ -18,7 +18,7 @@ type RawDataResponder interface {
 // to be MimeEventStream.
 type EventStreamer interface {
 	SSE(*sse.Stream) error
-	GetTopic() string
+	GetPubsubTopic() string
 }
 
 // SingleObjectStreamer implementors can respond to a request whose response

@@ -15,6 +15,7 @@ import (
 
 // Interface verifications
 var _ actions.JSONer = (*OrderBookShowAction)(nil)
+var _ actions.EventStreamer = (*OrderBookShowAction)(nil)
 var _ actions.SingleObjectStreamer = (*OrderBookShowAction)(nil)
 
 // OrderBookShowAction renders a account summary found by its address.
@@ -80,7 +81,7 @@ func (action *OrderBookShowAction) JSON() error {
 }
 
 // SSE is a method for actions.SSE
-func (action *OrderBookShowAction) SSE(stream sse.Stream) {
+func (action *OrderBookShowAction) SSE(stream *sse.Stream) error {
 	action.Do(action.LoadQuery, action.LoadRecord, action.LoadResource)
 
 	action.Do(func() {
@@ -90,6 +91,7 @@ func (action *OrderBookShowAction) SSE(stream sse.Stream) {
 		})
 	})
 
+	return action.Err
 }
 
 func (action *OrderBookShowAction) LoadEvent() (sse.Event, error) {
@@ -97,10 +99,10 @@ func (action *OrderBookShowAction) LoadEvent() (sse.Event, error) {
 	return sse.Event{Data: action.Resource}, action.Err
 }
 
-// GetTopic is a method for actions.SSE
+// GetPubsubTopic is a method for actions.SSE
 //
 // There is no value in this action for specific order, so registration topic is a general
 // change in the ledger.
-func (action *OrderBookShowAction) GetTopic() string {
+func (action *OrderBookShowAction) GetPubsubTopic() string {
 	return "order_book"
 }

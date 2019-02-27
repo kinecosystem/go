@@ -16,6 +16,7 @@ import (
 
 // Interface verifications
 var _ actions.JSONer = (*AccountShowAction)(nil)
+var _ actions.EventStreamer = (*AccountShowAction)(nil)
 var _ actions.SingleObjectStreamer = (*AccountShowAction)(nil)
 
 // AccountShowAction renders a account summary found by its address.
@@ -42,8 +43,7 @@ func (action *AccountShowAction) JSON() error {
 }
 
 // SSE is a method for actions.SSE
-func (action *AccountShowAction) SSE(stream sse.Stream) {
-
+func (action *AccountShowAction) SSE(stream *sse.Stream) error {
 	action.Do(
 		action.loadParams,
 		action.loadRecord,
@@ -53,6 +53,7 @@ func (action *AccountShowAction) SSE(stream sse.Stream) {
 			stream.Send(sse.Event{Data: action.Resource})
 		},
 	)
+	return action.Err
 }
 
 func (action *AccountShowAction) LoadEvent() (sse.Event, error) {
@@ -60,9 +61,9 @@ func (action *AccountShowAction) LoadEvent() (sse.Event, error) {
 	return sse.Event{Data: action.Resource}, action.Err
 }
 
-// GetTopic is a method for actions.SSE
-func (action *AccountShowAction) GetTopic() string {
-	return action.GetString("id")
+// GetPubsubTopic is a method for actions.SSE
+func (action *AccountShowAction) GetPubsubTopic() string {
+	return action.GetString("account_id")
 }
 
 func (action *AccountShowAction) loadParams() {

@@ -1,16 +1,23 @@
 package horizon
 
 import (
+	"context"
+	"net/http"
+	"reflect"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/kinecosystem/go/network"
+	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/ingest"
 	"github.com/kinecosystem/go/services/horizon/internal/ledger"
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Test 2 subscriptions to different topics. Make sure that one topic doesnt
@@ -113,63 +120,87 @@ func TestSSEPubsubManySubscribers(t *testing.T) {
 	wg.Wait()
 }
 
-// Test SSE subscription get message when ingest to Horizon happens.
-func TestSSEPubsubTransactions(t *testing.T) {
-	SCENARIO_NAME := "kahuna"
-	TX_HASH := "GA46VRKBCLI2X6DXLX7AIEVRFLH3UA7XBE3NGNP6O74HQ5LXHMGTV2JB"
+// Test Actions which implement actions.EventStreamer return the correct URL path parameter value
+// which is used for SSE PubSub subscription.
+//
+// Actions and parameters are defined in services/horizon/internal/init_web.go
+func TestSSEPubsubTopic(t *testing.T) {
+	for _, tt := range []struct {
+		path,
+		paramKey,
+		paramValue string
+		streamEventType actions.EventStreamer
+	}{
+		// Constructs a URL using the structure as in init_web.go
+		// e.g. "/accounts/{account_id=12345}" ==> GetTopic() should return "12345"
 
-	tt := test.Start(t).ScenarioWithoutHorizon(SCENARIO_NAME)
-	defer tt.Finish()
+		// Unspecific topics.
+		{"/ledgers/", "ledger", "ledger", &LedgerIndexAction{}},
+		{"/order_book/", "order_book", "order_book", &OrderBookShowAction{}},
 
-	subscription := sse.Subscribe(TX_HASH)
-	defer sse.Unsubscribe(subscription, TX_HASH)
+		// Topics using a specific parameter e.g. and account address.
+		//
+		// NOTE the parameter we compare (e.g. the account address) doesn't have to be a valid
+		// address for the purpose of this test. We only care the SSE PubSub implementation fetches
+		// the correct parameter. The validity is already checked elsewhere and is out of the scope
+		// of SSE handling in general.
+		{"/accounts/", "account_id", "1", &AccountShowAction{}},
+		{"/transactions/", "account_id", "2", &TransactionIndexAction{}},
+		{"/operations/", "account_id", "3", &OperationIndexAction{}},
+		{"/payments/", "account_id", "4", &PaymentsIndexAction{}},
+		{"/effects/", "account_id", "5", &EffectIndexAction{}},
+		{"/offers/", "account_id", "6", &OffersByAccountAction{}},
+		{"/trades/", "account_id", "7", &TradeIndexAction{}},
 
-	var wg sync.WaitGroup
-	wg.Add(1)
+		// "2nd-level" parameters e.g. /accounts/{account_id}/data/{key}
+		{"/data/", "account_id", "8", &DataShowAction{}},
+	} {
+		// Initialize the Action implemented by the current actions.EventStreamer
+		action := reflect.ValueOf(tt.streamEventType).Elem()
+		base := action.FieldByName("Base")
+		require.True(t, base.IsValid()) // Sanity check: Base should be a struct member of action
+		base.Set(reflect.ValueOf(*makeAction(tt.path, map[string]string{tt.paramKey: tt.paramValue})))
 
-	go func(subscription chan interface{}, wg *sync.WaitGroup) {
-		select {
-		case <-subscription:
-			wg.Done()
-		case <-time.After(10 * time.Second):
-			t.Fatal("subscription did not trigger within fast enough")
-		}
-	}(subscription, &wg)
-	ingestHorizon(tt)
-
-	wg.Wait()
+		// Test that it's EventStreamer.GetTopic() returns the correct expected PubSub topic
+		assert.Equal(t, tt.paramValue, tt.streamEventType.GetPubsubTopic(), "Path: %s/%s", tt.path, "/", tt.paramValue)
+	}
 }
 
-// Test SSE subscription for transactions gets message when ingest to Horizon happens.
-func TestSSEPubsubTransactionsImplicit(t *testing.T) {
+// Test various SSE subscriptions to various topics receive notifications when an ingestion
+// that relates to these topics occur.
+func TestSSEPubsubSubscribeToTopics(t *testing.T) {
 	SCENARIO_NAME := "kahuna"
 
 	tt := test.Start(t).ScenarioWithoutHorizon(SCENARIO_NAME)
 	defer tt.Finish()
 
-	subscription := sse.Subscribe("transactions")
-	defer sse.Unsubscribe(subscription, "transactions")
-
 	var wg sync.WaitGroup
-	wg.Add(54)
+	for _, topic := range []string{
+		"transactions",
+		// account in "kahuna" memo test
+		"GA46VRKBCLI2X6DXLX7AIEVRFLH3UA7XBE3NGNP6O74HQ5LXHMGTV2JB",
+	} {
+		subscription := sse.Subscribe(topic)
+		defer sse.Unsubscribe(subscription, topic)
 
-	go func(subscription chan interface{}, wg *sync.WaitGroup) {
-		for i := 0; i < 54; i++ {
+		wg.Add(1)
+		go func(topic string, subscription chan interface{}, wg *sync.WaitGroup) {
+			defer wg.Done()
+
 			select {
 			case <-subscription:
-				wg.Done()
 			case <-time.After(10 * time.Second):
-				t.Fatal("subscription did not trigger fast enough")
+				t.Fatalf("subscription did not trigger within 10s for topic \"%s\"", topic)
 			}
-		}
-	}(subscription, &wg)
+		}(topic, subscription, &wg)
+	}
 
 	ingestHorizon(tt)
 
 	wg.Wait()
 }
 
-// Helpers from ingest/main_test.go
+// Helpers from actions/helpers_test.go and ingest/main_test.go
 
 func ingestHorizon(tt *test.T) *ingest.Session {
 	sys := sys(tt)
@@ -189,4 +220,18 @@ func sys(tt *test.T) *ingest.System {
 		"HORIZON",
 		ingest.Config{},
 	)
+}
+
+func makeAction(path string, body map[string]string) *actions.Base {
+	rctx := chi.NewRouteContext()
+	for k, v := range body {
+		rctx.URLParams.Add(k, v)
+	}
+
+	r, _ := http.NewRequest("GET", path, nil)
+	r = r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, rctx))
+	action := &actions.Base{
+		R: r,
+	}
+	return action
 }

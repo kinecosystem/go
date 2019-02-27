@@ -72,8 +72,8 @@ func (action *TransactionIndexAction) SSE(stream *sse.Stream) error {
 	return action.Err
 }
 
-// GetTopic is a method for actions.SSE
-func (action *TransactionIndexAction) GetTopic() string {
+// GetPubsubTopic is a method for actions.SSE
+func (action *TransactionIndexAction) GetPubsubTopic() string {
 	if res := action.GetString("account_id"); res != "" {
 		return res
 	}

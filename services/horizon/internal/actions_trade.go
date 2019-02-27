@@ -71,8 +71,8 @@ func (action *TradeIndexAction) SSE(stream *sse.Stream) error {
 	return action.Err
 }
 
-// GetTopic is a method for actions.SSE
-func (action *TradeIndexAction) GetTopic() string {
+// GetPubsubTopic is a method for actions.SSE
+func (action *TradeIndexAction) GetPubsubTopic() string {
 	if res := action.GetString("offer_id"); res != "" {
 		return res
 	}
