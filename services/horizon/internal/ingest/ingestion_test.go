@@ -2,10 +2,12 @@ package ingest
 
 import (
 	"testing"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/history"
+	"github.com/kinecosystem/go/services/horizon/internal/db2/sqx"
 	"github.com/kinecosystem/go/services/horizon/internal/test"
 	testDB "github.com/kinecosystem/go/services/horizon/internal/test/db"
 	"github.com/kinecosystem/go/support/db"
@@ -47,6 +49,42 @@ func TestEmptySignature(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = ingestion.Close()
+	assert.NoError(t, err)
+}
+
+func TestTimeBoundsMaxBig(t *testing.T) {
+	ingestion := Ingestion{
+		DB: &db.Session{
+			DB: testDB.Horizon(t),
+		},
+	}
+	ingestion.Start()
+
+	ingestion.builders[TransactionsTableName].Values(
+		125,
+		"hash",
+		"123",
+		0,
+		"abc",
+		1,
+		100,
+		1,
+		"",
+		"",
+		"",
+		"",
+		sqx.StringArray([]string{}),
+		ingestion.formatTimeBounds(&xdr.TimeBounds{
+			MinTime: xdr.Uint64(0),
+			MaxTime: xdr.Uint64(9999999999999999999),
+		}),
+		"id",
+		"111",
+		time.Now().UTC(),
+		time.Now().UTC(),
+	)
+
+	err := ingestion.Flush()
 	assert.NoError(t, err)
 }
 
