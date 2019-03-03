@@ -82,7 +82,6 @@ func TestTimeBoundsMaxBig(t *testing.T) {
 		"111",
 		time.Now().UTC(),
 		time.Now().UTC(),
-		true,
 	)
 
 	err := ingestion.Flush()
