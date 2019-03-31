@@ -4,6 +4,12 @@ import (
 	"net/http"
 )
 
+func (action AggregateBalanceAction) Handle(w http.ResponseWriter, r *http.Request) {
+	ap := &action.Action
+	ap.Prepare(w, r)
+	ap.Execute(&action)
+}
+
 func (action AccountShowAction) Handle(w http.ResponseWriter, r *http.Request) {
 	ap := &action.Action
 	ap.Prepare(w, r)

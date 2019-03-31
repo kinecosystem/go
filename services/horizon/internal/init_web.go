@@ -103,8 +103,13 @@ func initWebActions(app *App) {
 			r.Get("/offers", OffersByAccountAction{}.Handle)
 			r.Get("/trades", TradeIndexAction{}.Handle)
 			r.Get("/data/{key}", DataShowAction{}.Handle)
+			// Linked-Accounts actions:
+			r.Get("/aggregate_balance", AggregateBalanceAction{}.Handle)
+			//r.Get("/controlled_balances", ControlledBalance{}.Handle)
 		})
 	})
+
+
 
 	// transaction history actions
 	r.Route("/transactions", func(r chi.Router) {
