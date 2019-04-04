@@ -9,6 +9,24 @@ import (
 	"github.com/kinecosystem/go/xdr"
 )
 
+type AggregateBalance struct {
+	AccountId string    `json:"id"`
+	Balance   xdr.Int64 `json:"aggregate_balance"`
+}
+
+func (r AggregateBalance) PagingToken() string {
+	return "0"
+}
+
+type ControlledBalance struct {
+	AccountId string    `json:"id"`
+	Balance   xdr.Int64 `json:"balance"`
+}
+
+func (r ControlledBalance) PagingToken() string {
+	return "0"
+}
+
 // Account is a row of data from the `accounts` table
 type Account struct {
 	Accountid          string
