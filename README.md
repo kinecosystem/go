@@ -9,11 +9,6 @@ This repo is the home for all of the public go code produced by SDF.  In additio
 
 * [Horizon Server](services/horizon): Full-featured API server for Stellar network
 * [Go Clients (Horizon SDK)](clients): Go SDK for making requests to Horizon Server
-* [Bifrost](services/bifrost): Bitcoin/Ethereum -> Stellar bridge
-* Servers for Anchors & Financial Institutions
-  * [Bridge Server](services/bridge): send payments and take action when payments are received
-  * [Compliance Server](services/compliance): Allows financial institutions to exchange KYC information
-  * [Federation Server](services/federation): Allows organizations to provide addresses for users (`jane*examplebank.com`)
 
 ## Dependencies
 
