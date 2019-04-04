@@ -9,7 +9,7 @@ This folder contains `stellar-sign` a simple utility to make it easy to add your
 ## Installing
 
 ```bash
-$ go get -u github.com/stellar/go/tools/stellar-sign
+$ go get -u github.com/kinecosystem/go/tools/stellar-sign
 ```
 
 ## Running

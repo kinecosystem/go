@@ -13,7 +13,7 @@ GET /metrics
 ### curl Example Request
 
 ```sh
-curl "https://horizon-testnet.stellar.org/metrics"
+curl "https://horizon-testnet.kinfederation.com/metrics"
 ```
 
 
@@ -51,7 +51,7 @@ Horizon utilizes Go's built in concurrency primitives ([goroutines](https://goby
 
 #### History
 
-Horizon maintains its own database (postgres), a verbose and user friendly account of activity on the Stellar network.
+Horizon maintains its own database (postgres), a verbose and user friendly account of activity on the Kin network.
 
 |    Metric     |  Description                                                                                                                               |
 | ---------------- |  ------------------------------------------------------------------------------------------------------------------------------ |
@@ -73,7 +73,7 @@ Horizon maintains its own database (postgres), a verbose and user friendly accou
 ```
 
 #### Ingester
-Ingester represents metrics specific to Horizon's [ingestion](https://github.com/stellar/go/blob/master/services/horizon/internal/docs/reference/admin.md#ingesting-stellar-core-data) process, or the process by which Horizon consumes transaction results from a connected Stellar Core instance.
+Ingester represents metrics specific to Horizon's [ingestion](https://github.com/kinecosystem/go/blob/master/services/horizon/internal/docs/reference/admin.md#ingesting-stellar-core-data) process, or the process by which Horizon consumes transaction results from a connected Core instance.
 
 |    Metric     |  Description                                                                                                                               |
 | ---------------- |  ------------------------------------------------------------------------------------------------------------------------------ |
@@ -214,13 +214,13 @@ These metrics contain useful [sub metrics](#sub-metrics).
 },
 ```
 
-#### Stellar Core
-As noted above, Horizon relies on Stellar Core to stay in sync with the Stellar network. These metrics are specific to the underlying Stellar Core instance.
+#### Core
+As noted above, Horizon relies on Core to stay in sync with the Kin network. These metrics are specific to the underlying Core instance.
 
 |    Metric     |  Description                                                                                                                               |
 | ---------------- |  ------------------------------------------------------------------------------------------------------------------------------ |
-| latest_ledger    | The sequence number of the latest (most recent) ledger recorded in Stellar Core's database.  |
-| open_connections | The number of open connections to the Stellar Core postgres database.  |
+| latest_ledger    | The sequence number of the latest (most recent) ledger recorded in Core's database.  |
+| open_connections | The number of open connections to the Core postgres database.  |
 
 ##### *Example Response:*
 ```shell
@@ -234,13 +234,13 @@ As noted above, Horizon relies on Stellar Core to stay in sync with the Stellar 
 
 #### Transaction Submission
 
-Horizon does not submit transactions directly to the Stellar network. Instead, it sequences transactions and sends the base64 encoded, XDR serialized blob to its connected Stellar Core instance. 
+Horizon does not submit transactions directly to the Kin network. Instead, it sequences transactions and sends the base64 encoded, XDR serialized blob to its connected Core instance. 
 
 ##### Horizon Transaction Sequencing and Submission
 
-The following is a simplified version of the transaction submission process that glosses over the finer details. To dive deeper, check out the [source code](https://github.com/stellar/go/tree/master/services/horizon/internal/txsub).
+The following is a simplified version of the transaction submission process that glosses over the finer details. To dive deeper, check out the [source code](https://github.com/kinecosystem/go/tree/master/services/horizon/internal/txsub).
 
-Horizon's sequencing mechanism consists of a [manager](https://github.com/stellar/go/blob/master/services/horizon/internal/txsub/sequence/manager.go) that keeps track of [submission queues](https://github.com/stellar/go/blob/master/services/horizon/internal/txsub/sequence/queue.go) for a set of addresses. A submission queue is a  priority queue, prioritized by minimum transaction sequence number, that holds a set of pending transactions for an account. A pending transaction is represented as an object with a sequence number and a channel. Periodically, this queue is updated, popping off finished transactions, sending down the transaction's channel a successful/failure response.
+Horizon's sequencing mechanism consists of a [manager](https://github.com/kinecosystem/go/blob/master/services/horizon/internal/txsub/sequence/manager.go) that keeps track of [submission queues](https://github.com/kinecosystem/go/blob/master/services/horizon/internal/txsub/sequence/queue.go) for a set of addresses. A submission queue is a  priority queue, prioritized by minimum transaction sequence number, that holds a set of pending transactions for an account. A pending transaction is represented as an object with a sequence number and a channel. Periodically, this queue is updated, popping off finished transactions, sending down the transaction's channel a successful/failure response.
 
 These metrics contain useful [sub metrics](#sub-metrics).
 

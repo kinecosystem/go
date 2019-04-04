@@ -17,15 +17,15 @@ Building Horizon requires the following developer tools:
 - [mercurial](https://www.mercurial-scm.org/) (needed for `go-dep`)
 
 1. Set your [GOPATH](https://github.com/golang/go/wiki/GOPATH) environment variable, if you haven't already. The default `GOPATH` is `$HOME/go`.
-2. Clone the [Stellar Go](https://github.com/stellar/go) monorepo:  `go get github.com/stellar/go`. You should see the repository present at `$GOPATH/src/github.com/stellar/go`.
-3. Enter the source dir: `cd $GOPATH/src/github.com/stellar/go`, and download external dependencies: `dep ensure -v`. You should see the downloaded third party dependencies in `$GOPATH/pkg`.
-4. Compile the Horizon binary: `cd $GOPATH; go install github.com/stellar/go/services/horizon`. You should see the resulting `horizon` executable in `$GOPATH/bin`.
+2. Clone the [Kin Go](https://github.com/kinecosystem/go) monorepo:  `go get github.com/kinecosystem/go`. You should see the repository present at `$GOPATH/src/github.com/kinecosystem/go`.
+3. Enter the source dir: `cd $GOPATH/src/github.com/kinecosystem/go`, and download external dependencies: `dep ensure -v`. You should see the downloaded third party dependencies in `$GOPATH/pkg`.
+4. Compile the Horizon binary: `cd $GOPATH; go install github.com/kinecosystem/go/services/horizon`. You should see the resulting `horizon` executable in `$GOPATH/bin`.
 5. Add Go binaries to your PATH in your `bashrc` or equivalent, for easy access: `export PATH=${GOPATH//://bin:}/bin:$PATH`
 
 Open a new terminal. Confirm everything worked by running `horizon --help` successfully. You should see an informative message listing the command line options supported by Horizon.
 
 ## Set up Horizon's database
-Horizon uses a Postgres database backend to store test fixtures and record information ingested from an associated Stellar Core. To set this up:
+Horizon uses a Postgres database backend to store test fixtures and record information ingested from an associated Core. To set this up:
 1. Install [PostgreSQL](https://www.postgresql.org/).
 2. Run `createdb horizon_dev` to initialise an empty database for Horizon's use.
 3. Run `horizon db init --db-url postgres://localhost/horizon_dev` to install Horizon's database schema.
@@ -39,61 +39,59 @@ Horizon uses a Postgres database backend to store test fixtures and record infor
 ## Run tests
 At this point you should be able to run Horizon's unit tests:
 ```bash
-cd $GOPATH/src/github.com/stellar/go/services/horizon
+cd $GOPATH/src/github.com/kinecosystem/go/services/horizon
 bash ../../support/scripts/run_tests
 ```
 
-## Set up Stellar Core
-Horizon provides an API to the Stellar network. It does this by ingesting data from an associated `stellar-core` instance. Thus, to run a full Horizon instance requires a `stellar-core` instance to be configured, up to date with the network state, and accessible to Horizon. Horizon accesses `stellar-core` through both an HTTP endpoint and by connecting directly to the `stellar-core` Postgres database.
+## Set up Core
+Horizon provides an API to the Kin network. It does this by ingesting data from an associated `core` instance. Thus, to run a full Horizon instance requires a `core` instance to be configured, up to date with the network state, and accessible to Horizon. Horizon accesses `core` through both an HTTP endpoint and by connecting directly to the `core` Postgres database.
 
-The simplest way to set up Stellar Core is using the [Stellar Quickstart Docker Image](https://github.com/stellar/docker-stellar-core-horizon). This is a Docker container that provides both `stellar-core` and `horizon`, pre-configured for testing.
+The simplest way to set up Core is using the [Kin Quickstart Docker Image](https://hub.docker.com/r/kinecosystem/blockchain-quickstart). This is a Docker container that provides both `core` and `horizon`, pre-configured for testing.
 
 1. Install [Docker](https://www.docker.com/get-started).
 2. Verify your Docker installation works: `docker run hello-world`
-3. Create a local directory that the container can use to record state. This is helpful because it can take a few minutes to sync a new `stellar-core` with enough data for testing, and because it allows you to inspect and modify the configuration if needed. Here, we create a directory called `stellar` to use as the persistent volume: `cd $HOME; mkdir stellar`
-4. Download and run the Stellar Quickstart container:
+3. Create a local directory that the container can use to record state. This is helpful because it can take a few minutes to sync a new `core` with enough data for testing, and because it allows you to inspect and modify the configuration if needed. Here, we create a directory called `kin` to use as the persistent volume: `cd $HOME; mkdir kin`
+4. Download and run the Kin Quickstart container:
 
 ```bash
-docker run --rm -it -p "8000:8000" -p "11626:11626" -p "11625:11625" -p"8002:5432" -v $HOME/stellar:/opt/stellar --name stellar stellar/quickstart --testnet
+docker run --rm -it -p "8000:8000" -p "11626:11626" -p "11625:11625" -p"8002:5432" -v $HOME/kin:/opt/stellar --name kin kinecosystem/blockchain-quickstart --testnet
 ```
 
-In this example we run the container in interactive mode. We map the container's Horizon HTTP port (`8000`), the `stellar-core` HTTP port (`11626`), and the `stellar-core` peer node port (`11625`) from the container to the corresponding ports on `localhost`. Importantly, we map the container's `postgresql` port (`5432`) to a custom port (`8002`) on `localhost`, so that it doesn't clash with our local Postgres install.
-The `-v` option mounts the `stellar` directory for use by the container. See the [Quickstart Image documentation](https://github.com/stellar/docker-stellar-core-horizon) for a detailed explanation of these options.
+In this example we run the container in interactive mode. We map the container's Horizon HTTP port (`8000`), the `core` HTTP port (`11626`), and the `core` peer node port (`11625`) from the container to the corresponding ports on `localhost`. Importantly, we map the container's `postgresql` port (`5432`) to a custom port (`8002`) on `localhost`, so that it doesn't clash with our local Postgres install.
+The `-v` option mounts the `kin` directory for use by the container. See the [Quickstart Image documentation](https://github.com/kinecosystem/blockchain-ops/tree/master/apps/docker-quickstart) for a detailed explanation of these options.
 
-5. The container is running both a `stellar-core` and a `horizon` instance. Log in to the container and stop Horizon:
+5. The container is running both a `core` and a `horizon` instance. Log in to the container and stop Horizon:
 ```bash
-docker exec -it stellar /bin/bash
+docker exec -it kin /bin/bash
 supervisorctl
 stop horizon
 ```
 
-## Check Stellar Core status
-Stellar Core takes some time to synchronise with the rest of the network. The default configuration will pull roughly a couple of day's worth of ledgers, and may take 15 - 30 minutes to catch up. Logs are stored in the container at `/var/log/supervisor`. You can check the progress by monitoring logs with `supervisorctl`:
+## Check Core status
+Core takes some time to synchronise with the rest of the network. The default configuration will pull roughly a couple of day's worth of ledgers, and may take 15 - 30 minutes to catch up. Logs are stored in the container at `/var/log/supervisor`. You can check the progress by monitoring logs with `supervisorctl`:
 ```bash
-docker exec -it stellar /bin/bash
+docker exec -it kin /bin/bash
 supervisorctl tail -f stellar-core
 ```
 
 You can also check status by looking at the HTTP endpoint, e.g. by visiting http://localhost:11626 in your browser.
 
-## Connect Horizon to Stellar Core
-You can connect Horizon to `stellar-core` at any time, but Horizon will not begin ingesting data until `stellar-core` has completed its catch-up process.
+## Connect Horizon to Core
+You can connect Horizon to `core` at any time, but Horizon will not begin ingesting data until `core` has completed its catch-up process.
 
-Now run your development version of Horizon (which is outside of the container), pointing it at the `stellar-core` running inside the container:
+Now run your development version of Horizon (which is outside of the container), pointing it at the `core` running inside the container:
 
 ```bash
 horizon --db-url="postgres://localhost/horizon_dev" --stellar-core-db-url="postgres://stellar:postgres@localhost:8002/core" --stellar-core-url="http://localhost:11626" --port 8001 --network-passphrase "Test SDF Network ; September 2015" --ingest
 ```
 
-If all is well, you should see ingest logs written to standard out. You can test your Horizon instance with a query like: http://localhost:8001/transactions?limit=10&order=asc. Use the [Stellar Laboratory](https://www.stellar.org/laboratory/) to craft other queries to try out,
+If all is well, you should see ingest logs written to standard out. You can test your Horizon instance with a query like: http://localhost:8001/transactions?limit=10&order=asc. Use the [Kin Laboratory](https://kin.org/laboratory/) to craft other queries to try out,
 and read about the available endpoints and see examples in the [Horizon API reference](https://www.stellar.org/developers/horizon/reference/).
 
 ## The development cycle
 Congratulations! You can now run the full development cycle to build and test your code.
 1. Write code + tests
 2. Run tests
-3. Compile Horizon: `go install github.com/stellar/go/services/horizon`
-4. Run Horizon (pointing at your running `stellar-core`)
+3. Compile Horizon: `go install github.com/kinecosystem/go/services/horizon`
+4. Run Horizon (pointing at your running `core`)
 5. Try Horizon queries
-
-Check out the [Stellar Contributing Guide](https://github.com/stellar/docs/blob/master/CONTRIBUTING.md) to see how to contribute your work to the Stellar repositories. Once you've got something that works, open a pull request, linking to the issue that you are resolving with your contribution. We'll get back to you as quickly as we can.

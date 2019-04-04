@@ -48,7 +48,7 @@ Price is a precise representation of a bid/ask offer.
 Thus to get price you would take n / d.
 
 #### Synthetic Offer Ids
-Offer ids in the horizon trade resource (base_offer_id, counter_offer_id) are synthetic and don't always reflect the respective stellar-core offer ids. This is due to the fact that stellar-core does not assign offer ids when an offer gets filled immediately. In these cases, Horizon synthetically generates an offer id for the buying offer, based on the total order id of the offer operation. This allows wallets to aggregate historical trades based on offer ids without adding special handling for edge cases. The exact encoding can be found [here](https://github.com/stellar/go/blob/master/services/horizon/internal/db2/history/synt_offer_id.go). 
+Offer ids in the horizon trade resource (base_offer_id, counter_offer_id) are synthetic and don't always reflect the respective core offer ids. This is due to the fact that core does not assign offer ids when an offer gets filled immediately. In these cases, Horizon synthetically generates an offer id for the buying offer, based on the total order id of the offer operation. This allows wallets to aggregate historical trades based on offer ids without adding special handling for edge cases. The exact encoding can be found [here](https://github.com/kinecosystem/go/blob/master/services/horizon/internal/db2/history/synt_offer_id.go). 
 
 ## Links
 
