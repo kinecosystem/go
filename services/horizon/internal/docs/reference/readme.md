@@ -9,6 +9,6 @@ Horizon is an API server for the Kin ecosystem.  It acts as the interface betwee
 Horizon provides a RESTful API to allow client applications to interact with the Stellar network. You can communicate with Horizon using cURL or just your web browser. However, if you're building a client application, you'll likely want to use a Stellar SDK in the language of your client.
 Kin Foundation provides [SDKs](https://kin.org/developers) for clients to use to interact with Horizon.
 
-Kin Foundation runs an instance of Horizon that is connected to the test net: [https://horizon-testnet.kinfederation.com/](https://horizon-testnet.kinfederation.com/) and one that is connected to the public Stellar network:
+Kin Foundation runs an instance of Horizon that is connected to the test net: [https://horizon-testnet.kininfrastructure.com/](https://horizon-testnet.kininfrastructure.com/) and one that is connected to the public Stellar network:
 [https://horizon.kinfederation.com/](https://horizon.kinfederation.com/).
 

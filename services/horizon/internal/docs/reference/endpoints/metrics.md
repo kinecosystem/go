@@ -13,7 +13,7 @@ GET /metrics
 ### curl Example Request
 
 ```sh
-curl "https://horizon-testnet.kinfederation.com/metrics"
+curl "https://horizon-testnet.kininfrastructure.com/metrics"
 ```
 
 

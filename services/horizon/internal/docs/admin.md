@@ -9,7 +9,7 @@ This document describes how to administer a **production** Horizon instance. If 
 
 ## Why run Horizon?
 
-The Kin Foundation runs two Horizon servers, one for the public network and one for the test network, free for anyone's use at https://horizon.kinfederation.com and https://horizon-testnet.kinfederation.com .  These servers should be fine for development and small scale projects, but it is not recommended that you use them for production services that need strong reliability.  By running Horizon within your own infrastructure provides a number of benefits:
+The Kin Foundation runs two Horizon servers, one for the public network and one for the test network, free for anyone's use at https://horizon.kinfederation.com and https://horizon-testnet.kininfrastructure.com .  These servers should be fine for development and small scale projects, but it is not recommended that you use them for production services that need strong reliability.  By running Horizon within your own infrastructure provides a number of benefits:
 
   - Multiple instances can be run for redundancy and scalability.
   - Request rate limiting can be disabled.
@@ -140,4 +140,4 @@ To ensure that your instance of Horizon is performing correctly we encourage you
 
 Horizon will output logs to standard out.  Information about what requests are coming in will be reported, but more importantly, warnings or errors will also be emitted by default.  A correctly running Horizon instance will not output any warning or error log entries.
 
-Metrics are collected while a Horizon process is running and they are exposed at the `/metrics` path.  You can see an example at (https://horizon-testnet.kinfederation.com/metrics).
+Metrics are collected while a Horizon process is running and they are exposed at the `/metrics` path.  You can see an example at (https://horizon-testnet.kininfrastructure.com/metrics).

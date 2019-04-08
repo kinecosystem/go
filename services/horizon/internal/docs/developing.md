@@ -85,7 +85,7 @@ Now run your development version of Horizon (which is outside of the container),
 horizon --db-url="postgres://localhost/horizon_dev" --stellar-core-db-url="postgres://stellar:postgres@localhost:8002/core" --stellar-core-url="http://localhost:11626" --port 8001 --network-passphrase "Test SDF Network ; September 2015" --ingest
 ```
 
-If all is well, you should see ingest logs written to standard out. You can test your Horizon instance with a query like: http://localhost:8001/transactions?limit=10&order=asc. Use the [Kin Laboratory](https://kin.org/laboratory/) to craft other queries to try out,
+If all is well, you should see ingest logs written to standard out. You can test your Horizon instance with a query like: http://localhost:8001/transactions?limit=10&order=asc. Use the [Kin Laboratory](https://laboratory.kin.org/) to craft other queries to try out,
 and read about the available endpoints and see examples in the [Horizon API reference](https://www.stellar.org/developers/horizon/reference/).
 
 ## The development cycle
