@@ -7,7 +7,7 @@ title: Basic Examples
 
 ## Creating and submitting a payment transaction
 
-Crafting transactions and getting the base64-encoded transaction envelope (often referred to as the "transaction blob") is a central aspect of interacting with the stellar network.  The Go SDK uses the `build` package to craft transactions.  The example below builds a payment for testnet and outputs the encoded blob to standard out.  For this example, we have two previously created accounts on the test network.
+Crafting transactions and getting the base64-encoded transaction envelope (often referred to as the "transaction blob") is a central aspect of interacting with the Kin network.  The Go SDK uses the `build` package to craft transactions.  The example below builds a payment for testnet and outputs the encoded blob to standard out.  For this example, we have two previously created accounts on the test network.
 
 ```go
 package main
@@ -15,8 +15,8 @@ package main
 import (
 	"fmt"
 
-	b "github.com/stellar/go/build"
-	"github.com/stellar/go/clients/horizon"
+	b "github.com/kinecosystem/go/build"
+	"github.com/kinecosystem/go/clients/horizon"
 )
 
 func main() {
@@ -64,7 +64,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/stellar/go/clients/horizon"
+	"github.com/kinecosystem/go/clients/horizon"
 )
 
 func main() {

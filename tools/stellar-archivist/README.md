@@ -14,13 +14,13 @@ It is much smaller and simpler than `stellar-core`, and is intended only for arc
 ## Installation
 
 ```
-$ go install github.com/stellar/go/tools/stellar-archivist
+$ go install github.com/kinecosystem/go/tools/stellar-archivist
 ```
 
 ## Usage
 
 ```
-inspect stellar history archive
+inspect kin history archive
 
 Usage:
   stellar-archivist [flags]
