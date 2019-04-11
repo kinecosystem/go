@@ -27,11 +27,23 @@ func (q *Q) AggregateBalanceByAccountId(dest *ControlledBalance) error {
 
 // ControlledBalancesByAccountId returns the list of controlled accounts with their respective balance
 func (q *Q) ControlledBalancesByAccountId(dest *[]*ControlledBalance, aid string) error {
-	sql := sq.Select("a.accountid id, min(a.balance) balance").
-		From("accounts a, signers s").
+
+	// Ensure that the account exists
+	sql1 := sq.Select("count (*)").From("accounts a").Where(fmt.Sprintf("a.accountid='%s'", aid))
+	var count int
+	err := q.Get(&count, sql1)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return sqltypes.ErrNoRows // translates to 404 not found
+	}
+
+	// Get the data for the account
+	sql2 := sq.Select("a.accountid id, min(a.balance) balance").From("accounts a, signers s").
 		Where(fmt.Sprintf("s.publickey = '%s' AND (a.accountid = s.accountid OR a.accountid = s.publickey)", aid)).
 		GroupBy("a.accountid")
-	rows, err := q.Query(sql)
+	rows, err := q.Query(sql2)
 	if err != nil {
 		return err
 	}
