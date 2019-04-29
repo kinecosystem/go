@@ -1,0 +1,38 @@
+# This docker-compose can be used to run the test-suite for horizon.
+# copy it to the root of the repo (/go) , alias sudo to _ and docker-compose to dc and run it with:
+# dc down -v && _ rm -rf volumes && dc up -d postgresql mysql redis && dc run --no-deps horizon ./support/scripts/run_tests
+#
+# you can also run a specific test with:
+# dc down -v && _ rm -rf volumes results.txt && dc up -d postgresql mysql redis && dc run --rm --no-deps horizon go test -run "TestActionsAggregateBalance_Show" github.com/kinecosystem/go/services/horizon/internal | tee results.txt
+version: "3"
+
+services:
+  horizon:
+    # image: images_horizon-dev
+    build:
+      dockerfile: Dockerfile.horizon-build
+      context: .
+    environment:
+      MYSQL_HOST: 127.0.0.1
+    volumes:
+      - ./:/go/src/github.com/kinecosystem/go
+      - ./volumes/postgresql/var/run/postgresql:/var/run/postgresql
+    network_mode: host
+
+  postgresql:
+    image: postgres:10-alpine
+    network_mode: host
+    environment:
+      POSTGRES_USER: root
+    volumes:
+      - ./volumes/postgresql/var/run/postgresql:/var/run/postgresql
+
+  mysql:
+    image: mysql:5
+    network_mode: host
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+
+  redis:
+    image: redis:5
+    network_mode: host
