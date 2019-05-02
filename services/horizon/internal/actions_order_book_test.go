@@ -90,12 +90,12 @@ func TestOrderBookActions_Show(t *testing.T) {
 		ht.Require.Len(result.Asks, 3)
 		ht.Require.Len(result.Bids, 3)
 
-		ht.Assert.Equal("10000.00000", result.Asks[0].Amount)
-		ht.Assert.Equal("90000.00000", result.Asks[1].Amount)
-		ht.Assert.Equal("500000.00000", result.Asks[2].Amount)
-		ht.Assert.Equal("1000.00000", result.Bids[0].Amount)
-		ht.Assert.Equal("10000.00000", result.Bids[1].Amount)
-		ht.Assert.Equal("100000.00000", result.Bids[2].Amount)
+		ht.Assert.Equal("100.0000000", result.Asks[0].Amount)
+		ht.Assert.Equal("900.0000000", result.Asks[1].Amount)
+		ht.Assert.Equal("5000.0000000", result.Asks[2].Amount)
+		ht.Assert.Equal("10.0000000", result.Bids[0].Amount)
+		ht.Assert.Equal("100.0000000", result.Bids[1].Amount)
+		ht.Assert.Equal("1000.0000000", result.Bids[2].Amount)
 	}
 
 	// happy path with smaller limit
@@ -114,7 +114,7 @@ func TestOrderBookActions_Show(t *testing.T) {
 		ht.Require.Len(result.Asks, 1)
 		ht.Require.Len(result.Bids, 1)
 
-		ht.Assert.Equal("10000.00000", result.Asks[0].Amount)
-		ht.Assert.Equal("1000.00000", result.Bids[0].Amount)
+		ht.Assert.Equal("100.0000000", result.Asks[0].Amount)
+		ht.Assert.Equal("10.0000000", result.Bids[0].Amount)
 	}
 }

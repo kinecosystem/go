@@ -28,7 +28,7 @@ var _ = Describe("Payment Mutators", func() {
 					mut = CreditAmount{"USD", address, "50.0"}
 				})
 				It("sets the asset properly", func() {
-					Expect(subject.P.Amount).To(Equal(xdr.Int64(5000000)))
+					Expect(subject.P.Amount).To(Equal(xdr.Int64(500000000)))
 					Expect(subject.P.Asset.Type).To(Equal(xdr.AssetTypeAssetTypeCreditAlphanum4))
 					Expect(subject.P.Asset.AlphaNum4.AssetCode).To(Equal([4]byte{'U', 'S', 'D', 0}))
 					var aid xdr.AccountId
@@ -46,7 +46,7 @@ var _ = Describe("Payment Mutators", func() {
 					mut = CreditAmount{"ABCDEF", address, "50.0"}
 				})
 				It("sets the asset properly", func() {
-					Expect(subject.P.Amount).To(Equal(xdr.Int64(5000000)))
+					Expect(subject.P.Amount).To(Equal(xdr.Int64(500000000)))
 					Expect(subject.P.Asset.Type).To(Equal(xdr.AssetTypeAssetTypeCreditAlphanum12))
 					Expect(subject.P.Asset.AlphaNum4).To(BeNil())
 					Expect(subject.P.Asset.AlphaNum12.AssetCode).To(Equal([12]byte{'A', 'B', 'C', 'D', 'E', 'F', 0, 0, 0, 0, 0, 0}))
@@ -148,7 +148,7 @@ var _ = Describe("Payment Mutators", func() {
 			BeforeEach(func() { mut = NativeAmount{"101"} })
 			It("sets the starting balance properly", func() {
 				Expect(subject.P.Asset.Type).To(Equal(xdr.AssetTypeAssetTypeNative))
-				Expect(subject.P.Amount).To(Equal(xdr.Int64(10100000)))
+				Expect(subject.P.Amount).To(Equal(xdr.Int64(1010000000)))
 			})
 			It("succeeds", func() {
 				Expect(subject.Err).NotTo(HaveOccurred())
@@ -192,7 +192,7 @@ var _ = Describe("Payment Mutators", func() {
 					mut = NativeAmount{"50"}
 				})
 				It("sets the fields properly", func() {
-					Expect(subject.PP.DestAmount).To(Equal(xdr.Int64(5000000)))
+					Expect(subject.PP.DestAmount).To(Equal(xdr.Int64(500000000)))
 					Expect(subject.PP.DestAsset.Type).To(Equal(xdr.AssetTypeAssetTypeNative))
 					Expect(subject.PP.DestAsset.AlphaNum4).To(BeNil())
 					Expect(subject.PP.DestAsset.AlphaNum12).To(BeNil())
@@ -207,7 +207,7 @@ var _ = Describe("Payment Mutators", func() {
 					mut = CreditAmount{"USD", address, "50"}
 				})
 				It("sets the asset properly", func() {
-					Expect(subject.PP.DestAmount).To(Equal(xdr.Int64(5000000)))
+					Expect(subject.PP.DestAmount).To(Equal(xdr.Int64(500000000)))
 					Expect(subject.PP.DestAsset.Type).To(Equal(xdr.AssetTypeAssetTypeCreditAlphanum4))
 					Expect(subject.PP.DestAsset.AlphaNum4.AssetCode).To(Equal([4]byte{'U', 'S', 'D', 0}))
 					var aid xdr.AccountId
@@ -225,7 +225,7 @@ var _ = Describe("Payment Mutators", func() {
 					mut = CreditAmount{"ABCDEF", address, "50"}
 				})
 				It("sets the asset properly", func() {
-					Expect(subject.PP.DestAmount).To(Equal(xdr.Int64(5000000)))
+					Expect(subject.PP.DestAmount).To(Equal(xdr.Int64(500000000)))
 					Expect(subject.PP.DestAsset.Type).To(Equal(xdr.AssetTypeAssetTypeCreditAlphanum12))
 					Expect(subject.PP.DestAsset.AlphaNum4).To(BeNil())
 					Expect(subject.PP.DestAsset.AlphaNum12.AssetCode).To(Equal([12]byte{'A', 'B', 'C', 'D', 'E', 'F', 0, 0, 0, 0, 0, 0}))
