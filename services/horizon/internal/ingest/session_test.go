@@ -81,7 +81,7 @@ func Test_ingestOperationEffects(t *testing.T) {
 	var ad protocolEffects.AccountDebited
 	err = effects[1].UnmarshalDetails(&ad)
 	tt.Require.NoError(err)
-	tt.Assert.Equal("10000.00000", ad.Amount)
+	tt.Assert.Equal("100.0000000", ad.Amount)
 }
 
 func Test_ingestBumpSeq(t *testing.T) {

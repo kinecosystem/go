@@ -19,10 +19,10 @@ import (
 	"github.com/kinecosystem/go/xdr"
 )
 
-// One is the value of one whole unit of currency. Kin uses 5 fixed digits
-// for fractional values, thus One is 10 thousand (10^5).
+// One is the value of one whole unit of currency. Stellar uses 7 fixed digits
+// for fractional values, thus One is 10 million (10^7).
 const (
-	One = 100000
+	One = 10000000
 )
 
 var (
@@ -47,7 +47,7 @@ func MustParse(v string) xdr.Int64 {
 }
 
 // Parse parses the provided as a stellar "amount", i.e. a 64-bit signed integer
-// that represents a decimal number with 5 digits of significance in the
+// that represents a decimal number with 7 digits of significance in the
 // fractional portion of the number, and returns a xdr.Int64.
 func Parse(v string) (xdr.Int64, error) {
 	i, err := ParseInt64(v)
@@ -58,7 +58,7 @@ func Parse(v string) (xdr.Int64, error) {
 }
 
 // ParseInt64 parses the provided as a stellar "amount", i.e. a 64-bit signed
-// integer that represents a decimal number with 5 digits of significance in
+// integer that represents a decimal number with 7 digits of significance in
 // the fractional portion of the number.
 func ParseInt64(v string) (int64, error) {
 	if !validAmountSimple.MatchString(v) {
@@ -72,7 +72,7 @@ func ParseInt64(v string) (int64, error) {
 
 	r.Mul(r, bigOne)
 	if !r.IsInt() {
-		return 0, errors.Errorf("more than 5 significant digits: %s", v)
+		return 0, errors.Errorf("more than 7 significant digits: %s", v)
 	}
 
 	i, err := strconv.ParseInt(r.FloatString(0), 10, 64)
@@ -121,5 +121,5 @@ func String(v xdr.Int64) string {
 func StringFromInt64(v int64) string {
 	r := big.NewRat(v, 1)
 	r.Quo(r, bigOne)
-	return r.FloatString(5)
+	return r.FloatString(7)
 }
