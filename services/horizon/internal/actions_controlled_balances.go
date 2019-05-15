@@ -38,7 +38,7 @@ func (action *ControlledBalancesAction) loadParams() {
 
 func (action *ControlledBalancesAction) loadRecord() {
 	action.ControlledBalances = make([]*core.ControlledBalance, 0)
-	action.Err = action.CoreQ().ControlledBalancesByAccountId(&action.ControlledBalances, action.Address)
+	action.Err = action.CoreQ().ControlledBalancesByAccountId(action.ControlledBalances, action.Address)
 	if action.Err != nil {
 		return
 	}

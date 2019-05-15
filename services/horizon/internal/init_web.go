@@ -9,13 +9,13 @@ import (
 
 	"github.com/go-chi/chi"
 	chimiddleware "github.com/go-chi/chi/middleware"
-	metrics "github.com/rcrowley/go-metrics"
-	"github.com/rs/cors"
-	"github.com/sebest/xff"
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	hProblem "github.com/kinecosystem/go/services/horizon/internal/render/problem"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub/sequence"
 	"github.com/kinecosystem/go/support/render/problem"
+	metrics "github.com/rcrowley/go-metrics"
+	"github.com/rs/cors"
+	"github.com/sebest/xff"
 	"github.com/throttled/throttled"
 )
 
@@ -103,13 +103,11 @@ func initWebActions(app *App) {
 			r.Get("/offers", OffersByAccountAction{}.Handle)
 			r.Get("/trades", TradeIndexAction{}.Handle)
 			r.Get("/data/{key}", DataShowAction{}.Handle)
-			// Linked-Accounts actions:
+			// One-Wallet actions:
 			r.Get("/aggregate_balance", AggregateBalanceAction{}.Handle)
 			r.Get("/controlled_balances", ControlledBalancesAction{}.Handle)
 		})
 	})
-
-
 
 	// transaction history actions
 	r.Route("/transactions", func(r chi.Router) {

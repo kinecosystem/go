@@ -453,7 +453,7 @@ func MustKeyTypeFromAddress(address string) string {
 }
 
 type AggregateBalanceRecord struct {
-	Id               string `json:"id"`
+	Id               string `json:"account_id"`
 	AggregateBalance int    `json:"aggregate_balance"`
 }
 
@@ -473,7 +473,7 @@ type AggregatedBalances struct {
 }
 
 type ControlledBalanceRecord struct {
-	Id      string `json:"id"`
+	Id      string `json:"account_id"`
 	Balance int    `json:"balance"`
 }
 

@@ -10,7 +10,7 @@ import (
 )
 
 type AggregateBalance struct {
-	AccountId string    `json:"id"`
+	AccountId string    `json:"account_id"`
 	Balance   xdr.Int64 `json:"aggregate_balance"`
 }
 
@@ -19,7 +19,7 @@ func (r AggregateBalance) PagingToken() string {
 }
 
 type ControlledBalance struct {
-	AccountId string    `json:"id"`
+	AccountId string    `json:"account_id"`
 	Balance   xdr.Int64 `json:"balance"`
 }
 
