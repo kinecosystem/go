@@ -14,7 +14,12 @@ type AggregateBalance struct {
 	Balance   xdr.Int64 `json:"aggregate_balance"`
 }
 
-func (r AggregateBalance) PagingToken() string {
+type AggregateBalanceString struct {
+	AccountId string    `json:"account_id"`
+	Balance   string    `json:"aggregate_balance"`
+}
+
+func (r AggregateBalanceString) PagingToken() string {
 	return "0"
 }
 
@@ -23,7 +28,12 @@ type ControlledBalance struct {
 	Balance   xdr.Int64 `json:"balance"`
 }
 
-func (r ControlledBalance) PagingToken() string {
+type ControlledBalanceString struct {
+	AccountId string    `json:"account_id"`
+	Balance   string    `json:"balance"`
+}
+
+func (r ControlledBalanceString) PagingToken() string {
 	return "0"
 }
 

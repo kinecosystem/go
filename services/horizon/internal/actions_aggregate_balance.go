@@ -42,7 +42,7 @@ func (action *AggregateBalanceAction) loadRecord() {
 }
 
 func (action *AggregateBalanceAction) loadPage() {
-	var res core.AggregateBalance
+	var res core.AggregateBalanceString
 	resourceadapter.PopulateAggregateBalance(action.R.Context(), &res, action.ControlledBalance.AccountId, action.ControlledBalance.Balance)
 	fmt.Println("@ loadPage: %d", action.ControlledBalance.Balance)
 	action.Page.Add(res)

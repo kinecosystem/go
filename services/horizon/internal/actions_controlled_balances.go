@@ -48,7 +48,7 @@ func (action *ControlledBalancesAction) loadRecord() {
 func (action *ControlledBalancesAction) loadPage() {
 	fmt.Println("ControlledBalancesAction @ loadPage1") 
 	for _, cb := range action.ControlledBalances {
-		var res core.ControlledBalance
+		var res core.ControlledBalanceString
 		resourceadapter.PopulateControlledBalance(action.R.Context(), &res, *cb)
 		fmt.Println("ControlledBalancesAction @ loadPage2: %d", cb.Balance)
 		action.Page.Add(res)
