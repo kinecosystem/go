@@ -30,7 +30,7 @@ func (q *Q) AggregateBalanceByAccountId(dest *ControlledBalance) error {
 }
 
 // ControlledBalancesByAccountId returns the list of controlled accounts with their respective balance
-func (q *Q) ControlledBalancesByAccountId(controlledBalanceSlice []*ControlledBalance, aid string) error {
+func (q *Q) ControlledBalancesByAccountId(controlledBalanceSlice *[]*ControlledBalance, aid string) error {
 	// Ensure that the account exists
 	IsAccountExistsQuery := sq.Select("count (*)").
 		From("accounts a").
@@ -66,7 +66,8 @@ func (q *Q) ControlledBalancesByAccountId(controlledBalanceSlice []*ControlledBa
 		// convert the int64 to xdr
 		cb.Balance = xdr.Int64(balanceInt)
 		// append the results into the slice:
-		controlledBalanceSlice = append(controlledBalanceSlice, &cb)
+        fmt.Println("ControlledBalancesByAccountId: adding controlled balance: %d", cb.Balance)
+		*controlledBalanceSlice = append(*controlledBalanceSlice, &cb)
 	}
 	return err
 }

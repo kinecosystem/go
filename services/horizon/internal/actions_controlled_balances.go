@@ -1,6 +1,7 @@
 package horizon
 
 import (
+"fmt"
 	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
@@ -38,16 +39,18 @@ func (action *ControlledBalancesAction) loadParams() {
 
 func (action *ControlledBalancesAction) loadRecord() {
 	action.ControlledBalances = make([]*core.ControlledBalance, 0)
-	action.Err = action.CoreQ().ControlledBalancesByAccountId(action.ControlledBalances, action.Address)
+	action.Err = action.CoreQ().ControlledBalancesByAccountId(&action.ControlledBalances, action.Address)
 	if action.Err != nil {
 		return
 	}
 }
 
 func (action *ControlledBalancesAction) loadPage() {
+	fmt.Println("ControlledBalancesAction @ loadPage1") 
 	for _, cb := range action.ControlledBalances {
 		var res core.ControlledBalance
 		resourceadapter.PopulateControlledBalance(action.R.Context(), &res, *cb)
+		fmt.Println("ControlledBalancesAction @ loadPage2: %d", cb.Balance)
 		action.Page.Add(res)
 	}
 
