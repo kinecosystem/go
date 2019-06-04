@@ -8,6 +8,7 @@ PACKAGES=$(find $GOTOP/src/github.com/kinecosystem/go/services/horizon/internal/
 
 go install github.com/kinecosystem/go/services/horizon
 
+
 dropdb hayashi_scenarios --if-exists
 createdb hayashi_scenarios
 
@@ -19,21 +20,25 @@ export SKIP_CURSOR_UPDATE="true"
 
 # run all scenarios
 for i in $PACKAGES; do
+  
   CORE_SQL="${i%.rb}-core.sql"
   HORIZON_SQL="${i%.rb}-horizon.sql"
-  bundle exec scc -r $i --dump-root-db > $CORE_SQL
-
+  echo "package $i"
+  echo "core_sql: $CORE_SQL"
+  scc -r $i --dump-root-db > $CORE_SQL --stellar-core-bin ./stellar-core
+  echo "done with scc"
   # load the core scenario
   psql $STELLAR_CORE_DATABASE_URL < $CORE_SQL
 
   # recreate horizon dbs
+  echo "recreating horizon db"
   dropdb horizon_scenarios --if-exists
   createdb horizon_scenarios
 
   # import the core data into horizon
-  $GOTOP/bin/horizon db init
-  $GOTOP/bin/horizon db init-asset-stats
-  $GOTOP/bin/horizon db rebase
+  ./services/horizon/horizon db init
+  ./services/horizon/horizon db init-asset-stats
+  ./services/horizon/horizon db rebase
 
   # write horizon data to sql file
   pg_dump $DATABASE_URL \
@@ -43,7 +48,7 @@ for i in $PACKAGES; do
     > $HORIZON_SQL
 done
 
-
+echo 'genrating bindata'
 # commit new sql files to bindata
 go generate github.com/kinecosystem/go/services/horizon/internal/test/scenarios
 # go test github.com/kinecosystem/go/services/horizon/internal/ingest

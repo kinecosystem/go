@@ -22,18 +22,18 @@ func TestActionsControlledBalances_Show(t *testing.T) {
 		ht.Assert.Equal(0, len(controlledBalances.Embeded.Records))
 	}
 
-	// get controlled balance for andrew - should return 2 accounts (scott and andrew)
+	// get controlled balance for kp1 - should return both kp1 and kp2
 	resp2 := ht.Get(
-		"/accounts/GBXGQJWVLWOYHFLVTKWV5FGHA3LNYY2JQKM7OAJAUEQFU6LPCSEFVXON/controlled_balances",
+		"/accounts/SBOTI576E6NH4DWMRSWFW2SWMY7CCCGUX33DDJCG4RZLDSJ6RKZHI7NB/controlled_balances",
 	)
 	if ht.Assert.Equal(200, resp2.Code) {
 		var controlledBalances horizon.ControlledBalances
 		err := json.Unmarshal(resp2.Body.Bytes(), &controlledBalances)
 		ht.Require.NoError(err)
 		ht.Assert.Equal(2, len(controlledBalances.Embeded.Records))
-		ht.Assert.Equal(controlledBalances.Embeded.Records[0].Id, "GBXGQJWVLWOYHFLVTKWV5FGHA3LNYY2JQKM7OAJAUEQFU6LPCSEFVXON")
+		ht.Assert.Equal(controlledBalances.Embeded.Records[0].Id, "GCJ6M7DRW5RZW73UEHEOGIGKLY5BWA5QNR6WX25G5BSYWDQYR77DSIH7")
 		ht.Assert.Equal(controlledBalances.Embeded.Records[0].Balance, 1050000000)
-		ht.Assert.Equal(controlledBalances.Embeded.Records[1].Id, "GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU")
+		ht.Assert.Equal(controlledBalances.Embeded.Records[1].Id, "GDAZS2R3FGT7744HYEC3SOZ5VWUAJWDWYI4WBO4T5MADK5KDQ6BSQZ4Y")
 		ht.Assert.Equal(controlledBalances.Embeded.Records[1].Balance, 949999800)
 	}
 
