@@ -6,7 +6,6 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
 	"github.com/kinecosystem/go/support/render/hal"
-	"fmt"
 )
 
 // Interface verifications
@@ -44,7 +43,6 @@ func (action *AggregateBalanceAction) loadRecord() {
 func (action *AggregateBalanceAction) loadPage() {
 	var res core.AggregateBalanceString
 	resourceadapter.PopulateAggregateBalance(action.R.Context(), &res, action.ControlledBalance.AccountId, action.ControlledBalance.Balance)
-	fmt.Println("@ loadPage: %d", action.ControlledBalance.Balance)
 	action.Page.Add(res)
 
 	action.Page.FullURL = action.FullURL()
