@@ -66,7 +66,6 @@ func (q *Q) ControlledBalancesByAccountId(controlledBalanceSlice *[]*ControlledB
 		// convert the int64 to xdr
 		cb.Balance = xdr.Int64(balanceInt)
 		// append the results into the slice:
-        fmt.Println("ControlledBalancesByAccountId: adding controlled balance: %d", cb.Balance)
 		*controlledBalanceSlice = append(*controlledBalanceSlice, &cb)
 	}
 	return err

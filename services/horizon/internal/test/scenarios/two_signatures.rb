@@ -32,25 +32,29 @@ account :kp4, Stellar::KeyPair.from_seed("SC3CILTVMLKPF7YJXXIESDXNIA2QX6XX47WMLA
 
 # accounts must be created in a ledger prior to actual manipulation.
 create_account :kp1, :master, 100
-create_account :kp2, :master, 100
-create_account :kp3, :master, 100
-create_account :kp4, :master, 100
+create_account :kp2, :master, 200
+create_account :kp3, :master, 300
+create_account :kp4, :master, 400
 
 close_ledger
 
 payment :scott, :andrew,  [:native, 5]
 
-
+# add andrew as signer on sopott
 kp = Stellar::KeyPair.from_seed("SBQW4ZDSMV3SAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCA65I") # andrew's account
 add_signer :scott, kp, 1
 
-# add kp2 as signer in kp1
+# add kp2 as signer in kp1, kp1 pays for this operation
 kp2 = Stellar::KeyPair.from_seed("SBMTHT5NRNVJFBYDON5COPZRCRCMDOQNRPAOMVJJV6W7DFW32EKRN6RV")
 add_signer :kp1, kp2, 1
 
 # add kp3 as signer in kp2
 kp3 = Stellar::KeyPair.from_seed("SBOTI576E6NH4DWMRSWFW2SWMY7CCCGUX33DDJCG4RZLDSJ6RKZHI7NB")
 add_signer :kp2, kp3, 1
+
+# add kp4 as signer in kp3
+kp4 = Stellar::KeyPair.from_seed("SC3CILTVMLKPF7YJXXIESDXNIA2QX6XX47WMLAY3UI5YQL75Y2SRXOZN") # kp4
+add_signer :kp3, kp4, 1
 
 
 close_ledger

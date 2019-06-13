@@ -25,7 +25,7 @@ func TestActionsAggregateBalance_Show(t *testing.T) {
 		fmt.Printf("%+v\n", aggregateBalances)
 		fmt.Printf("%+s\n", resp.Body)
 		ht.Assert.Equal("GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H", aggregateBalances.Embeded.Records[0].Id)
-		ht.Assert.Equal(999999996999999700, aggregateBalances.Embeded.Records[0].AggregateBalance)
+		ht.Assert.Equal("9999999969999.99700", aggregateBalances.Embeded.Records[0].AggregateBalance)
 	}
 
 	// missing account
@@ -48,24 +48,34 @@ func TestActionsAggregateBalance_Show2(t *testing.T) {
 		fmt.Printf("%+v\n", aggregateBalances)
 		fmt.Printf("%+s\n", resp.Body)
 		ht.Assert.Equal("GBXGQJWVLWOYHFLVTKWV5FGHA3LNYY2JQKM7OAJAUEQFU6LPCSEFVXON", aggregateBalances.Embeded.Records[0].Id)
-		ht.Assert.Equal(999999996999999700, aggregateBalances.Embeded.Records[0].AggregateBalance)
-		ht.Assert.Equal("GBXGQJWVLWOYHFLVTKWV5FGHA3LNYY2JQKM7OAJAUEQFU6LPCSEFVXON", aggregateBalances.Embeded.Records[0].Id)
-		ht.Assert.Equal(999999996999999700, aggregateBalances.Embeded.Records[1].AggregateBalance)
+		ht.Assert.Equal("19999.99800", aggregateBalances.Embeded.Records[0].AggregateBalance) // andrew + scott
 	}
 
-
-	resp = ht.Get(
-		"/accounts/SBOTI576E6NH4DWMRSWFW2SWMY7CCCGUX33DDJCG4RZLDSJ6RKZHI7NB/aggregate_balance",
+	// get kp1's aggregate balance
+	resp2 := ht.Get(
+		"/accounts/GCJ6M7DRW5RZW73UEHEOGIGKLY5BWA5QNR6WX25G5BSYWDQYR77DSIH7/aggregate_balance",
 	)
-	if ht.Assert.Equal(200, resp.Code) {
+	if ht.Assert.Equal(200, resp2.Code) {
 		var aggregateBalances horizon.AggregatedBalances
-		err := json.Unmarshal(resp.Body.Bytes(), &aggregateBalances)
+		err := json.Unmarshal(resp2.Body.Bytes(), &aggregateBalances)
 		ht.Require.NoError(err)
 		fmt.Printf("%+v\n", aggregateBalances)
-		fmt.Printf("%+s\n", resp.Body)
-		ht.Assert.Equal("GBXGQJWVLWOYHFLVTKWV5FGHA3LNYY2JQKM7OAJAUEQFU6LPCSEFVXON", aggregateBalances.Embeded.Records[0].Id)
-		ht.Assert.Equal(999999996999999700, aggregateBalances.Embeded.Records[0].AggregateBalance)
-		ht.Assert.Equal("GBXGQJWVLWOYHFLVTKWV5FGHA3LNYY2JQKM7OAJAUEQFU6LPCSEFVXON", aggregateBalances.Embeded.Records[0].Id)
-		ht.Assert.Equal(999999996999999700, aggregateBalances.Embeded.Records[1].AggregateBalance)
+		fmt.Printf("%+s\n", resp2.Body)
+		ht.Assert.Equal("GCJ6M7DRW5RZW73UEHEOGIGKLY5BWA5QNR6WX25G5BSYWDQYR77DSIH7", aggregateBalances.Embeded.Records[0].Id)
+		ht.Assert.Equal("9999.99900", aggregateBalances.Embeded.Records[0].AggregateBalance) // kp1 only has itself, and payed for kp2
+	}
+
+	// get kp2's aggregate balance
+	resp3 := ht.Get(
+		"/accounts/GDAZS2R3FGT7744HYEC3SOZ5VWUAJWDWYI4WBO4T5MADK5KDQ6BSQZ4Y/aggregate_balance",
+	)
+	if ht.Assert.Equal(200, resp3.Code) {
+		var aggregateBalances horizon.AggregatedBalances
+		err := json.Unmarshal(resp3.Body.Bytes(), &aggregateBalances)
+		ht.Require.NoError(err)
+		fmt.Printf("%+v\n", aggregateBalances)
+		fmt.Printf("%+s\n", resp3.Body)
+		ht.Assert.Equal("GDAZS2R3FGT7744HYEC3SOZ5VWUAJWDWYI4WBO4T5MADK5KDQ6BSQZ4Y", aggregateBalances.Embeded.Records[0].Id)
+		ht.Assert.Equal("29999.99800", aggregateBalances.Embeded.Records[0].AggregateBalance) // kp2 (payed for kp3) + kp1 (payed for kp2) =~3000
 	}
 }
