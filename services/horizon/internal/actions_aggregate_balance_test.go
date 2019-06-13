@@ -78,4 +78,20 @@ func TestActionsAggregateBalance_Show2(t *testing.T) {
 		ht.Assert.Equal("GDAZS2R3FGT7744HYEC3SOZ5VWUAJWDWYI4WBO4T5MADK5KDQ6BSQZ4Y", aggregateBalances.Embeded.Records[0].Id)
 		ht.Assert.Equal("29999.99800", aggregateBalances.Embeded.Records[0].AggregateBalance) // kp2 (payed for kp3) + kp1 (payed for kp2) =~3000
 	}
+
+	// get kp7's aggregate balance. kp7 is a signer in kp5, and kp5 is a signer in kp6, but that should make no difference.
+	// we should only see (kp5 + kp7)'s balance
+	resp4 := ht.Get(
+		"/accounts/GDSLCGMN4WK2SAOANYYOSIATOT2CWTSM5AHBQYAAXXJYEHI5CDEHRYIL/aggregate_balance",
+	)
+	if ht.Assert.Equal(200, resp4.Code) {
+		var aggregateBalances horizon.AggregatedBalances
+		err := json.Unmarshal(resp4.Body.Bytes(), &aggregateBalances)
+		ht.Require.NoError(err)
+		fmt.Printf("%+v\n", aggregateBalances)
+		fmt.Printf("%+s\n", resp4.Body)
+		ht.Assert.Equal("GDSLCGMN4WK2SAOANYYOSIATOT2CWTSM5AHBQYAAXXJYEHI5CDEHRYIL", aggregateBalances.Embeded.Records[0].Id)
+		ht.Assert.Equal("119999.99800", aggregateBalances.Embeded.Records[0].AggregateBalance) // kp5 + kp7 (~1200 kins)
+	}
+
 }

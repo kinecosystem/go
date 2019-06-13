@@ -9,6 +9,7 @@ PACKAGES=$(find $GOTOP/src/github.com/kinecosystem/go/services/horizon/internal/
 go install github.com/kinecosystem/go/services/horizon
 
 
+
 dropdb hayashi_scenarios --if-exists
 createdb hayashi_scenarios
 
@@ -36,9 +37,9 @@ for i in $PACKAGES; do
   createdb horizon_scenarios
 
   # import the core data into horizon
-  ./services/horizon/horizon db init
-  ./services/horizon/horizon db init-asset-stats
-  ./services/horizon/horizon db rebase
+  ./horizon db init
+  ./horizon db init-asset-stats
+  ./horizon db rebase
 
   # write horizon data to sql file
   pg_dump $DATABASE_URL \

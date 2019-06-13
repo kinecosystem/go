@@ -86,6 +86,24 @@ func TestActionsControlledAccounts_Show(t *testing.T) {
 	// try a non exsiting account
 	resp5 := ht.Get("/accounts/GDBAPLDCAEJV6LSEDFEAUDAVFYSNFRUYZ4X75YYJJMMX5KFVUOHX46SQ/controlled_accounts")
 	ht.Assert.Equal(404, resp5.Code)
+
+
+	// get kp7's controleld accounts. kp7 is a signer in kp5, and kp5 is a signer in kp6, but that should make no difference.
+	// we should only see kp7, kp5 accounts
+	resp6 := ht.Get(
+		"/accounts/GDSLCGMN4WK2SAOANYYOSIATOT2CWTSM5AHBQYAAXXJYEHI5CDEHRYIL/controlled_accounts",
+	)
+	if ht.Assert.Equal(200, resp6.Code) {
+		var ControlledAccounts horizon.ControlledAccounts
+		err := json.Unmarshal(resp6.Body.Bytes(), &ControlledAccounts)
+		ht.Require.NoError(err)
+		fmt.Print(resp6.Body)
+		ht.Assert.Equal(2, len(ControlledAccounts.Embeded.Records))
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[0].Id, "GBKNDEBYVKMVRRR376KGV77XMEYKOHKZQRN5TEOKJYJZI3VHBV7YKLJZ") // kp5
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[0].Balance, "49999.99900")
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Id, "GDSLCGMN4WK2SAOANYYOSIATOT2CWTSM5AHBQYAAXXJYEHI5CDEHRYIL") // kp7
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Balance, "69999.99900") //didnt pay any fees
+	}
 }
 
 
