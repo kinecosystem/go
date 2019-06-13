@@ -9,19 +9,19 @@ import (
 )
 
 // Interface verifications
-var _ actions.JSONer = (*ControlledBalancesAction)(nil)
+var _ actions.JSONer = (*ControlledAccountsAction)(nil)
 
-// ControlledBalancesAction returns a map of accounts and their balance for the given master accountid
-type ControlledBalancesAction struct {
+// ControlledAccountsAction returns a map of accounts and their balance for the given master accountid
+type ControlledAccountsAction struct {
 	Action
 	Address            string
-	ControlledBalances []*core.ControlledBalance
+	ControlledAccounts []*core.ControlledAccountString
 	PagingParams       db2.PageQuery
 	Page               hal.Page
 }
 
 // JSON is a method for actions.JSON
-func (action *ControlledBalancesAction) JSON() error {
+func (action *ControlledAccountsAction) JSON() error {
 	action.Do(
 		action.EnsureHistoryFreshness,
 		action.loadParams,
@@ -32,22 +32,22 @@ func (action *ControlledBalancesAction) JSON() error {
 	return action.Err
 }
 
-func (action *ControlledBalancesAction) loadParams() {
+func (action *ControlledAccountsAction) loadParams() {
 	action.Address = action.GetAddress("account_id", actions.RequiredParam)
 }
 
-func (action *ControlledBalancesAction) loadRecord() {
-	action.ControlledBalances = make([]*core.ControlledBalance, 0)
-	action.Err = action.CoreQ().ControlledBalancesByAccountId(&action.ControlledBalances, action.Address)
+func (action *ControlledAccountsAction) loadRecord() {
+	action.ControlledAccounts = make([]*core.ControlledAccountString, 0)
+	action.Err = action.CoreQ().ControlledAccountsByAccountId(&action.ControlledAccounts, action.Address)
 	if action.Err != nil {
 		return
 	}
 }
 
-func (action *ControlledBalancesAction) loadPage() {
-	for _, cb := range action.ControlledBalances {
-		var res core.ControlledBalanceString
-		resourceadapter.PopulateControlledBalance(action.R.Context(), &res, *cb)
+func (action *ControlledAccountsAction) loadPage() {
+	for _, cb := range action.ControlledAccounts {
+		var res core.ControlledAccountString
+		resourceadapter.PopulateControlledAccount(action.R.Context(), &res, *cb)
 		action.Page.Add(res)
 	}
 

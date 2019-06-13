@@ -5,10 +5,11 @@ import (
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kinecosystem/go/xdr"
+	"github.com/kinecosystem/go/amount"
 )
 
 // AggregateBaalanceByAccountId returns the aggregate balance by the master account id
-func (q *Q) AggregateBalanceByAccountId(dest *ControlledBalance) error {
+func (q *Q) AggregateBalanceByAccountId(dest *ControlledAccountString) error {
 	sql := sq.Select("SUM(balance) aggbalance").
 		From("accounts").
 		Where(fmt.Sprintf("accountid = '%s' OR accountid IN (SELECT accountid FROM signers WHERE publickey = '%s')",
@@ -21,7 +22,7 @@ func (q *Q) AggregateBalanceByAccountId(dest *ControlledBalance) error {
 		return err
 	}
 	if result.NullableBalance.Valid {
-		dest.Balance = xdr.Int64(result.NullableBalance.Int64)
+		dest.Balance = amount.String(xdr.Int64(result.NullableBalance.Int64))
 	} else {
 		// translates to 404 not found
 		err = sqltypes.ErrNoRows
@@ -29,8 +30,8 @@ func (q *Q) AggregateBalanceByAccountId(dest *ControlledBalance) error {
 	return err
 }
 
-// ControlledBalancesByAccountId returns the list of controlled accounts with their respective balance
-func (q *Q) ControlledBalancesByAccountId(controlledBalanceSlice *[]*ControlledBalance, aid string) error {
+// ControlledAccountsByAccountId returns the list of controlled accounts with their respective balance
+func (q *Q) ControlledAccountsByAccountId(controlledAccountsSlice *[]*ControlledAccountString, aid string) error {
 	// Ensure that the account exists
 	IsAccountExistsQuery := sq.Select("count (*)").
 		From("accounts a").
@@ -58,15 +59,15 @@ func (q *Q) ControlledBalancesByAccountId(controlledBalanceSlice *[]*ControlledB
 
 	var balanceInt int64
 	for rows.Next() {
-		var cb ControlledBalance
+		var cb ControlledAccountString
 		err = rows.Scan(&cb.AccountId, &balanceInt)
 		if err != nil {
 			return err
 		}
 		// convert the int64 to xdr
-		cb.Balance = xdr.Int64(balanceInt)
+		cb.Balance = amount.String(xdr.Int64(balanceInt))
 		// append the results into the slice:
-		*controlledBalanceSlice = append(*controlledBalanceSlice, &cb)
+		*controlledAccountsSlice = append(*controlledAccountsSlice, &cb)
 	}
 	return err
 }

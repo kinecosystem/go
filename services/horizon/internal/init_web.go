@@ -105,7 +105,7 @@ func initWebActions(app *App) {
 			r.Get("/data/{key}", DataShowAction{}.Handle)
 			// One-Wallet actions:
 			r.Get("/aggregate_balance", AggregateBalanceAction{}.Handle)
-			r.Get("/controlled_balances", ControlledBalancesAction{}.Handle)
+			r.Get("/controlled_accounts", ControlledAccountsAction{}.Handle)
 		})
 	})
 

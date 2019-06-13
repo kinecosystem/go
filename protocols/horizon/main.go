@@ -472,12 +472,12 @@ type AggregatedBalances struct {
 	} `json:"_embedded"`
 }
 
-type ControlledBalanceRecord struct {
+type ControlledAccountRecord struct {
 	Id      string `json:"account_id"`
 	Balance string    `json:"balance"`
 }
 
-type ControlledBalances struct {
+type ControlledAccounts struct {
 	Links struct {
 		Self       hal.Link `json:"self"`
 		Account    hal.Link `json:"account"`
@@ -488,6 +488,6 @@ type ControlledBalances struct {
 		Succeeds   hal.Link `json:"succeeds"`
 	} `json:"_links"`
 	Embeded struct {
-		Records []ControlledBalanceRecord `json:"records"`
+		Records []ControlledAccountRecord `json:"records"`
 	} `json:"_embedded"`
 }

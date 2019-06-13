@@ -10,7 +10,7 @@ func (action AggregateBalanceAction) Handle(w http.ResponseWriter, r *http.Reque
 	ap.Execute(&action)
 }
 
-func (action ControlledBalancesAction) Handle(w http.ResponseWriter, r *http.Request) {
+func (action ControlledAccountsAction) Handle(w http.ResponseWriter, r *http.Request) {
 	ap := &action.Action
 	ap.Prepare(w, r)
 	ap.Execute(&action)
