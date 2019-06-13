@@ -102,27 +102,38 @@ func TestActionsControlledAccounts_Show(t *testing.T) {
 		ht.Assert.Equal(ControlledAccounts.Embeded.Records[0].Id, "GBKNDEBYVKMVRRR376KGV77XMEYKOHKZQRN5TEOKJYJZI3VHBV7YKLJZ") // kp5
 		ht.Assert.Equal(ControlledAccounts.Embeded.Records[0].Balance, "49999.99900")
 		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Id, "GDSLCGMN4WK2SAOANYYOSIATOT2CWTSM5AHBQYAAXXJYEHI5CDEHRYIL") // kp7
-		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Balance, "69999.99900") //didnt pay any fees
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Balance, "69999.99900") 
+	}
+
+	// get kp8's controleld accounts. kp8 is a signer in kp9, and kp9 is a signer in kp8, but that should make no difference.
+	resp7 := ht.Get(
+		"/accounts/GCDI34A4Y4ELTHGILNEC32NOAEIJLFRJFMJ75PFJAV7VXFU6BPQVYTEN/controlled_accounts",
+	)
+	if ht.Assert.Equal(200, resp7.Code) {
+		var ControlledAccounts horizon.ControlledAccounts
+		err := json.Unmarshal(resp7.Body.Bytes(), &ControlledAccounts)
+		ht.Require.NoError(err)
+		fmt.Print(resp7.Body)
+		ht.Assert.Equal(2, len(ControlledAccounts.Embeded.Records))
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[0].Id, "GCDI34A4Y4ELTHGILNEC32NOAEIJLFRJFMJ75PFJAV7VXFU6BPQVYTEN") // kp8
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[0].Balance, "79999.99900")
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Id, "GCXOZEDULG6VUL7RMUPZDAMFAZ5WGXZDYNOGYLFK3YAPH2PIYGHSJXPT") // kp9
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Balance, "89999.99900") 
+	}
+
+	// get kp9's controleld accounts. kp9 is a signer in kp8, and kp8 is a signer in kp9, but that should make no difference.
+	resp8 := ht.Get(
+		"/accounts/GCXOZEDULG6VUL7RMUPZDAMFAZ5WGXZDYNOGYLFK3YAPH2PIYGHSJXPT/controlled_accounts",
+	)
+	if ht.Assert.Equal(200, resp8.Code) {
+		var ControlledAccounts horizon.ControlledAccounts
+		err := json.Unmarshal(resp8.Body.Bytes(), &ControlledAccounts)
+		ht.Require.NoError(err)
+		fmt.Print(resp8.Body)
+		ht.Assert.Equal(2, len(ControlledAccounts.Embeded.Records))
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[0].Id, "GCDI34A4Y4ELTHGILNEC32NOAEIJLFRJFMJ75PFJAV7VXFU6BPQVYTEN") // kp8
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[0].Balance, "79999.99900")
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Id, "GCXOZEDULG6VUL7RMUPZDAMFAZ5WGXZDYNOGYLFK3YAPH2PIYGHSJXPT") // kp9
+		ht.Assert.Equal(ControlledAccounts.Embeded.Records[1].Balance, "89999.99900") 
 	}
 }
-
-
-// kp1
-// GCJ6M7DRW5RZW73UEHEOGIGKLY5BWA5QNR6WX25G5BSYWDQYR77DSIH7
-// SAYYMGTGIWMR6VO243LU5GG2J5YYMAPFK5ZSTITHPUV5DVUS3K6Q4ZNF
-// should have ~1000 kins
-
-// kp2
-// GDAZS2R3FGT7744HYEC3SOZ5VWUAJWDWYI4WBO4T5MADK5KDQ6BSQZ4Y
-// SBMTHT5NRNVJFBYDON5COPZRCRCMDOQNRPAOMVJJV6W7DFW32EKRN6RV
-// should have ~2000 kins
-
-// kp3
-// GBSD7E6QRGGEBFWVF4VNSAWPQJW7FFLYEV7O3DZUIRLYATFMLCRJGSNQ
-// SBOTI576E6NH4DWMRSWFW2SWMY7CCCGUX33DDJCG4RZLDSJ6RKZHI7NB
-// should have ~3000 kins
-
-// kp4
-// GBS2EWY4PAVG4SOSGZ6CM5F4SIJUAIEXGKXEXCGTMCAK6FFVDDDXVHI6
-// SC3CILTVMLKPF7YJXXIESDXNIA2QX6XX47WMLAY3UI5YQL75Y2SRXOZN
-// should have ~4000 kins

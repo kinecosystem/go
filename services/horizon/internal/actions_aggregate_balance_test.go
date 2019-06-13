@@ -94,4 +94,33 @@ func TestActionsAggregateBalance_Show2(t *testing.T) {
 		ht.Assert.Equal("119999.99800", aggregateBalances.Embeded.Records[0].AggregateBalance) // kp5 + kp7 (~1200 kins)
 	}
 
+	// get kp8's aggregate balance which should include both kp8 and kp9
+	resp5 := ht.Get(
+		"/accounts/GCDI34A4Y4ELTHGILNEC32NOAEIJLFRJFMJ75PFJAV7VXFU6BPQVYTEN/aggregate_balance",
+	)
+	if ht.Assert.Equal(200, resp5.Code) {
+		var aggregateBalances horizon.AggregatedBalances
+		err := json.Unmarshal(resp5.Body.Bytes(), &aggregateBalances)
+		ht.Require.NoError(err)
+		fmt.Printf("%+v\n", aggregateBalances)
+		fmt.Printf("%+s\n", resp5.Body)
+		ht.Assert.Equal("GCDI34A4Y4ELTHGILNEC32NOAEIJLFRJFMJ75PFJAV7VXFU6BPQVYTEN", aggregateBalances.Embeded.Records[0].Id)
+		ht.Assert.Equal("169999.99800", aggregateBalances.Embeded.Records[0].AggregateBalance) // kp8 + kp9
+	}
+
+	// get kp9's aggregate balance which should include both kp8 and kp9
+	resp6 := ht.Get(
+		"/accounts/GCXOZEDULG6VUL7RMUPZDAMFAZ5WGXZDYNOGYLFK3YAPH2PIYGHSJXPT/aggregate_balance",
+	)
+	if ht.Assert.Equal(200, resp6.Code) {
+		var aggregateBalances horizon.AggregatedBalances
+		err := json.Unmarshal(resp6.Body.Bytes(), &aggregateBalances)
+		ht.Require.NoError(err)
+		fmt.Printf("%+v\n", aggregateBalances)
+		fmt.Printf("%+s\n", resp6.Body)
+		ht.Assert.Equal("GCXOZEDULG6VUL7RMUPZDAMFAZ5WGXZDYNOGYLFK3YAPH2PIYGHSJXPT", aggregateBalances.Embeded.Records[0].Id)
+		ht.Assert.Equal("169999.99800", aggregateBalances.Embeded.Records[0].AggregateBalance) // kp8 + kp9
+	}
+
+
 }
