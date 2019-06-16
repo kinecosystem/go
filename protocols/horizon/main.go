@@ -451,3 +451,43 @@ func MustKeyTypeFromAddress(address string) string {
 
 	return ret
 }
+
+type AggregateBalanceRecord struct {
+	Id               string `json:"account_id"`
+	AggregateBalance string    `json:"aggregate_balance"`
+}
+
+type AggregatedBalances struct {
+	Links struct {
+		Self       hal.Link `json:"self"`
+		Account    hal.Link `json:"account"`
+		Ledger     hal.Link `json:"ledger"`
+		Operations hal.Link `json:"operations"`
+		Effects    hal.Link `json:"effects"`
+		Precedes   hal.Link `json:"precedes"`
+		Succeeds   hal.Link `json:"succeeds"`
+	} `json:"_links"`
+	Embeded struct {
+		Records []AggregateBalanceRecord `json:"records"`
+	} `json:"_embedded"`
+}
+
+type ControlledAccountRecord struct {
+	Id      string `json:"account_id"`
+	Balance string    `json:"balance"`
+}
+
+type ControlledAccounts struct {
+	Links struct {
+		Self       hal.Link `json:"self"`
+		Account    hal.Link `json:"account"`
+		Ledger     hal.Link `json:"ledger"`
+		Operations hal.Link `json:"operations"`
+		Effects    hal.Link `json:"effects"`
+		Precedes   hal.Link `json:"precedes"`
+		Succeeds   hal.Link `json:"succeeds"`
+	} `json:"_links"`
+	Embeded struct {
+		Records []ControlledAccountRecord `json:"records"`
+	} `json:"_embedded"`
+}
