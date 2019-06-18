@@ -23,7 +23,7 @@ type readResult struct {
 // by `Read()` are exactly the ledger entries present at the given ledger.
 type MemoryStateReader struct {
 	has        *historyarchive.HistoryArchiveState
-	archive    *historyarchive.Archive
+	archive    historyarchive.ArchiveInterface
 	sequence   uint32
 	readChan   chan readResult
 	streamOnce sync.Once
@@ -31,11 +31,11 @@ type MemoryStateReader struct {
 	done       chan bool
 }
 
-// enforce MemoryStateReader to implement StateReadCloser
+// Ensure MemoryStateReader implements StateReadCloser
 var _ StateReadCloser = &MemoryStateReader{}
 
 // MakeMemoryStateReader is a factory method for MemoryStateReader
-func MakeMemoryStateReader(archive *historyarchive.Archive, sequence uint32, bufferSize uint16) (*MemoryStateReader, error) {
+func MakeMemoryStateReader(archive historyarchive.ArchiveInterface, sequence uint32, bufferSize uint16) (*MemoryStateReader, error) {
 	has, e := archive.GetCheckpointHAS(sequence)
 	if e != nil {
 		return nil, fmt.Errorf("unable to get checkpoint HAS at ledger sequence %d: %s", sequence, e)

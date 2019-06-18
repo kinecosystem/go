@@ -51,6 +51,15 @@ func (aid *AccountId) LedgerKey() (ret LedgerKey) {
 	return
 }
 
+func MustAddress(address string) AccountId {
+	aid := AccountId{}
+	err := aid.SetAddress(address)
+	if err != nil {
+		panic(err)
+	}
+	return aid
+}
+
 // SetAddress modifies the receiver, setting it's value to the AccountId form
 // of the provided address.
 func (aid *AccountId) SetAddress(address string) error {

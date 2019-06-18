@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,6 +16,7 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -43,6 +45,25 @@ type ArchiveBackend interface {
 	ListFiles(path string) (chan string, chan error)
 	CanListFiles() bool
 }
+
+type ArchiveInterface interface {
+	GetPathHAS(path string) (HistoryArchiveState, error)
+	PutPathHAS(path string, has HistoryArchiveState, opts *CommandOptions) error
+	BucketExists(bucket Hash) bool
+	CategoryCheckpointExists(cat string, chk uint32) bool
+	GetRootHAS() (HistoryArchiveState, error)
+	GetCheckpointHAS(chk uint32) (HistoryArchiveState, error)
+	PutCheckpointHAS(chk uint32, has HistoryArchiveState, opts *CommandOptions) error
+	PutRootHAS(has HistoryArchiveState, opts *CommandOptions) error
+	ListBucket(dp DirPrefix) (chan string, chan error)
+	ListAllBuckets() (chan string, chan error)
+	ListAllBucketHashes() (chan Hash, chan error)
+	ListCategoryCheckpoints(cat string, pth string) (chan uint32, chan error)
+	GetXdrStreamForHash(hash Hash) (*XdrStream, error)
+	GetXdrStream(pth string) (*XdrStream, error)
+}
+
+var _ ArchiveInterface = &Archive{}
 
 type Archive struct {
 	mutex             sync.Mutex
@@ -168,6 +189,27 @@ func (a *Archive) ListCategoryCheckpoints(cat string, pth string) (chan uint32, 
 		close(ch)
 	}()
 	return ch, errs
+}
+
+func (a *Archive) GetXdrStreamForHash(hash Hash) (*XdrStream, error) {
+	path := fmt.Sprintf(
+		"bucket/%s/bucket-%s.xdr.gz",
+		HashPrefix(hash).Path(),
+		hash.String(),
+	)
+
+	return a.GetXdrStream(path)
+}
+
+func (a *Archive) GetXdrStream(pth string) (*XdrStream, error) {
+	if !strings.HasSuffix(pth, ".xdr.gz") {
+		return nil, errors.New("File has non-.xdr.gz suffix: " + pth)
+	}
+	rdr, err := a.backend.GetFile(pth)
+	if err != nil {
+		return nil, err
+	}
+	return NewXdrGzStream(rdr)
 }
 
 func Connect(u string, opts ConnectOptions) (*Archive, error) {
