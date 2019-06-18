@@ -74,12 +74,12 @@ func (s *MemoryStateReaderTestSuite) TestSimple() {
 			Return(createXdrStream(), nil).Once()
 	}
 
-	var e xdr.LedgerEntry
+	var e xdr.LedgerEntryChange
 	var err error
 	e, err = s.reader.Read()
 	s.Require().NoError(err)
 
-	id := e.Data.MustAccount().AccountId
+	id := e.State.Data.MustAccount().AccountId
 	s.Assert().Equal("GC3C4AKRBQLHOJ45U4XG35ESVWRDECWO5XLDGYADO6DPR3L7KIDVUMML", id.Address())
 
 	_, err = s.reader.Read()
@@ -193,7 +193,7 @@ func (s *MemoryStateReaderTestSuite) TestEnsureLatestLiveEntry() {
 	entry, err := s.reader.Read()
 	s.Require().Nil(err)
 	// Latest entry balance is 1
-	s.Assert().Equal(xdr.Int64(1), entry.Data.Account.Balance)
+	s.Assert().Equal(xdr.Int64(1), entry.State.Data.Account.Balance)
 
 	_, err = s.reader.Read()
 	s.Require().Equal(err, EOF)
