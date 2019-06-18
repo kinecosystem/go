@@ -27,6 +27,19 @@ is no need for a userid argument to the endpoints below.
 
 <img src=attachments/2019-04-24-keystore-auth-flows.png>
 
+All requests that the keystore is not able to derive a userID from will
+receive the following error:
+
+*not_authorized:*
+```json
+{
+	"type": "not_authorized",
+	"title": "Not Authorized",
+	"status": 401,
+	"detail": "The request is not authorized."
+}
+```
+
 ### Raw Key Data
 
 *RawKeyData Object:*
@@ -84,12 +97,88 @@ type PutKeysResponse = EncryptedKeysData;
 
 <details><summary>Errors</summary>
 
-TBD
+*bad_request:*
 ```json
 {
-	"code": "some error code",
-	"message": "some error message",
-	"retriable": false,
+	"keysBlob": "",
+	"salt": "some-salt",
+	"encrypterName": "identity"
+}
+```
+```json
+{
+	"type": "bad_request",
+	"title": "Bad Request",
+	"status": 400,
+	"detail": "The request you sent was invalid in some way.",
+	"extras": {
+		"invalid_field": "keysBlob",
+		"reason": "field value cannot be empty"
+	}
+}
+```
+<hr />
+
+*bad_request:*
+```json
+{
+	"keysBlob": "some-base64-encoded-blob",
+	"salt": "",
+	"encrypterName": "identity"
+}
+```
+```json
+{
+	"type": "bad_request",
+	"title": "Bad Request",
+	"status": 400,
+	"detail": "The request you sent was invalid in some way.",
+	"extras": {
+		"invalid_field": "salt",
+		"reason": "field value cannot be empty"
+	}
+}
+```
+<hr />
+
+*bad_request:*
+```json
+{
+	"keysBlob": "some-base64-encoded-blob",
+	"salt": "some-salt",
+	"encrypterName": ""
+}
+```
+```json
+{
+	"type": "bad_request",
+	"title": "Bad Request",
+	"status": 400,
+	"detail": "The request you sent was invalid in some way.",
+	"extras": {
+		"invalid_field": "encrypterName",
+		"reason": "field value cannot be empty"
+	}
+}
+```
+<hr />
+
+*invalid_keys_blob:*
+```json
+{
+	"keysBlob": "some-badly-encoded-blob",
+	"salt": "some-salt",
+	"encrypterName": "identity"
+}
+```
+```json
+{
+	"type": "invalid_keys_blob",
+	"title": "Invalid Keys Blob",
+	"status": 400,
+	"detail": "The keysBlob in your request body is not a valid base64
+		string. Please encode the keysBlob in your request body as a base64
+		string properly and try again."
 }
 ```
 </details>
@@ -109,12 +198,18 @@ type GetKeysResponse = EncryptedKeysData;
 ```
 <details><summary>Errors</summary>
 
-TBD
+*not_found:*
+
+The keystore cannot find any keys assocaited with the derived userID.
 ```json
 {
-	"code": "some error code",
-	"message": "some error message",
-	"retriable": false,
+	"type": "not_found",
+	"title": "Resourse Missing",
+	"status": 404,
+	"detail": "The resource at the url requested was not found. This
+		usually occurs for one of two reasons:  The url requested is not valid,
+		or no data in our database could be found with the parameters
+		provided."
 }
 ```
 </details>
@@ -138,15 +233,6 @@ interface Success {
 ```
 
 <details><summary>Errors</summary>
-
-TBD
-```json
-{
-	"code": "some error code",
-	"message": "some error message",
-	"retriable": false,
-}
-```
 </details>
 
 ### Required Changes in Client Server
