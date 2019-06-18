@@ -34,7 +34,7 @@ var (
 		Type:   "not_found",
 		Title:  "Resource Missing",
 		Status: http.StatusNotFound,
-		Detail: "The resource at the url requested was not found.  This is usually " +
+		Detail: "The resource at the url requested was not found.  This usually " +
 			"occurs for one of two reasons:  The url requested is not valid, or no " +
 			"data in our database could be found with the parameters provided.",
 	}
@@ -45,7 +45,7 @@ var (
 		Type:   "bad_request",
 		Title:  "Bad Request",
 		Status: http.StatusBadRequest,
-		Detail: "The request you sent was invalid in some way",
+		Detail: "The request you sent was invalid in some way.",
 	}
 )
 
