@@ -2,6 +2,7 @@ package keystore
 
 import (
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -98,6 +99,7 @@ func authHandler(next http.Handler, authenticator *Authenticator) http.Handler {
 		if clientIP, _, err = net.SplitHostPort(req.RemoteAddr); err == nil {
 			proxyReq.Header.Set("X-Forwarded-For", clientIP)
 		}
+		proxyReq.Header.Set("Accept-Encoding", "identity")
 
 		resp, err := client.Do(proxyReq)
 		if err != nil {
@@ -120,7 +122,7 @@ func authHandler(next http.Handler, authenticator *Authenticator) http.Handler {
 		var authResp authResponse
 		err = json.Unmarshal(body, &authResp)
 		if err != nil {
-			log.Ctx(ctx).Infof("the response body is %s\n", string(body))
+			log.Ctx(ctx).Infof("Response body as a plain string: %s\n. Response body as a hex dump string: %s\n", string(body), hex.Dump(body))
 			problem.Render(ctx, rw, errors.Wrap(err, "unmarshaling the auth response"))
 			return
 		}
