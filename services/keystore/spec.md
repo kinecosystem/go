@@ -71,7 +71,7 @@ interface EncryptedKeysData {
 	salt: string;
 	keysBlob: string;
 	creationTime: number;
-	modifiedTime: number;	
+	modifiedTime: number;
 }
 ```
 

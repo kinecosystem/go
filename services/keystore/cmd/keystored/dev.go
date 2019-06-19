@@ -3,7 +3,7 @@
 package main
 
 import (
-	"github.com/stellar/go/exp/services/keystore"
+	"github.com/stellar/go/services/keystore"
 	"github.com/stellar/go/support/env"
 )
 
