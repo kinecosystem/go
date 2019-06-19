@@ -120,6 +120,7 @@ func authHandler(next http.Handler, authenticator *Authenticator) http.Handler {
 		var authResp authResponse
 		err = json.Unmarshal(body, &authResp)
 		if err != nil {
+			log.Ctx(ctx).Infof("the response body is %s\n", string(body))
 			problem.Render(ctx, rw, errors.Wrap(err, "unmarshaling the auth response"))
 			return
 		}
