@@ -1,12 +1,12 @@
 package pipeline
 
 import (
-	"github.com/stellar/go/exp/ingest/io"
+	"io"
+
 	"github.com/stellar/go/support/errors"
-	"github.com/stellar/go/xdr"
 )
 
-func (m *multiWriteCloser) Write(entry xdr.LedgerEntryChange) error {
+func (m *multiWriteCloser) Write(entry interface{}) error {
 	m.mutex.Lock()
 	m.wroteEntries++
 	m.mutex.Unlock()
@@ -14,7 +14,7 @@ func (m *multiWriteCloser) Write(entry xdr.LedgerEntryChange) error {
 	results := make(chan error, len(m.writers))
 
 	for _, w := range m.writers {
-		go func(w io.StateWriteCloser) {
+		go func(w WriteCloser) {
 			// We can keep sending entries even when io.ErrClosedPipe is returned
 			// as bufferedStateReadWriteCloser will ignore them (won't add them to
 			// a channel).
@@ -64,4 +64,4 @@ func (m *multiWriteCloser) Close() error {
 	return nil
 }
 
-var _ io.StateWriteCloser = &multiWriteCloser{}
+var _ WriteCloser = &multiWriteCloser{}

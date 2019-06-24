@@ -36,7 +36,7 @@ func main() {
 		panic(err)
 	}
 
-	errChan := p.ProcessState(stateReader)
+	errChan := p.Process(stateReader)
 	doneStats := printPipelineStats(p)
 
 	err = <-errChan
@@ -64,10 +64,10 @@ func archive() (*historyarchive.Archive, error) {
 	)
 }
 
-func buildPipeline() (*pipeline.Pipeline, error) {
-	p := &pipeline.Pipeline{}
+func buildPipeline() (*pipeline.StatePipeline, error) {
+	p := &pipeline.StatePipeline{}
 
-	p.AddStateProcessorTree(
+	p.SetRoot(
 		// Passes accounts only
 		p.Node(&EntryTypeFilter{Type: xdr.LedgerEntryTypeAccount}).
 			Pipe(
@@ -80,7 +80,7 @@ func buildPipeline() (*pipeline.Pipeline, error) {
 	return p, nil
 }
 
-func printPipelineStats(p *pipeline.Pipeline) chan<- bool {
+func printPipelineStats(p *pipeline.StatePipeline) chan<- bool {
 	startTime := time.Now()
 	done := make(chan bool)
 	ticker := time.NewTicker(10 * time.Second)

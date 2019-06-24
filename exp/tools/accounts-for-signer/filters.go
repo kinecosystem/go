@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	stdio "io"
 	"os"
 	"sync"
 
 	"github.com/stellar/go/exp/ingest/io"
-	"github.com/stellar/go/exp/ingest/pipeline"
+	"github.com/stellar/go/exp/support/pipeline"
 	"github.com/stellar/go/xdr"
 )
 
@@ -44,7 +45,7 @@ func (p *EntryTypeFilter) ProcessState(ctx context.Context, store *pipeline.Stor
 	for {
 		entry, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err
@@ -54,7 +55,7 @@ func (p *EntryTypeFilter) ProcessState(ctx context.Context, store *pipeline.Stor
 		if entry.State.Data.Type == p.Type {
 			err := w.Write(entry)
 			if err != nil {
-				if err == io.ErrClosedPipe {
+				if err == stdio.ErrClosedPipe {
 					// Reader does not need more data
 					return nil
 				}
@@ -90,7 +91,7 @@ func (p *AccountsForSignerProcessor) ProcessState(ctx context.Context, store *pi
 	for {
 		entry, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err
@@ -105,7 +106,7 @@ func (p *AccountsForSignerProcessor) ProcessState(ctx context.Context, store *pi
 			if signer.Key.Address() == p.Signer {
 				err := w.Write(entry)
 				if err != nil {
-					if err == io.ErrClosedPipe {
+					if err == stdio.ErrClosedPipe {
 						// Reader does not need more data
 						return nil
 					}
@@ -154,7 +155,7 @@ func (p *PrintAllProcessor) ProcessState(ctx context.Context, store *pipeline.St
 	for {
 		entry, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err

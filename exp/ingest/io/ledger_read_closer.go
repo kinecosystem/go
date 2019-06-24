@@ -1,25 +1,13 @@
 package io
 
 import (
+	"io"
 	"sync"
 
 	"github.com/stellar/go/exp/ingest/ledgerbackend"
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/xdr"
 )
-
-// LedgerReadCloser provides convenient, streaming access to the transactions within a ledger.
-type LedgerReadCloser interface {
-	GetSequence() uint32
-	GetHeader() (xdr.LedgerHeaderHistoryEntry, error)
-	// Read should return the next transaction. If there are no more
-	// transactions it should return `EOF` error.
-	Read() (LedgerTransaction, error)
-	// Close should be called when reading is finished. This is especially
-	// helpful when there are still some entries available so the reader can stop
-	// streaming them.
-	Close() error
-}
 
 // LedgerTransaction represents the data for a single transaction within a ledger.
 type LedgerTransaction struct {
@@ -84,7 +72,7 @@ func (dblrc *DBLedgerReadCloser) Read() (LedgerTransaction, error) {
 		dblrc.readIdx++
 		return dblrc.transactions[dblrc.readIdx-1], nil
 	}
-	return LedgerTransaction{}, EOF
+	return LedgerTransaction{}, io.EOF
 }
 
 // Close moves the read pointer so that subsequent calls to Read() will return EOF.

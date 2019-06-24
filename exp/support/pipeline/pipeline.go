@@ -6,18 +6,16 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/stellar/go/exp/ingest/io"
 )
 
-func (p *Pipeline) Node(processor StateProcessor) *PipelineNode {
+func (p *Pipeline) Node(processor Processor) *PipelineNode {
 	return &PipelineNode{
 		Processor: processor,
 	}
 }
 
 func (p *Pipeline) PrintStatus() {
-	p.printNodeStatus(p.rootStateProcessor, 0)
+	p.printNodeStatus(p.root, 0)
 }
 
 func (p *Pipeline) printNodeStatus(node *PipelineNode, level int) {
@@ -60,11 +58,11 @@ func (p *Pipeline) printNodeStatus(node *PipelineNode, level int) {
 	}
 }
 
-func (p *Pipeline) AddStateProcessorTree(rootProcessor *PipelineNode) {
-	p.rootStateProcessor = rootProcessor
+func (p *Pipeline) SetRoot(rootProcessor *PipelineNode) {
+	p.root = rootProcessor
 }
 
-func (p *Pipeline) ProcessState(readCloser io.StateReadCloser) <-chan error {
+func (p *Pipeline) Process(readCloser ReadCloser) <-chan error {
 	p.doneMutex.Lock()
 	if p.done {
 		panic("Pipeline already running or done...")
@@ -73,14 +71,14 @@ func (p *Pipeline) ProcessState(readCloser io.StateReadCloser) <-chan error {
 	p.doneMutex.Unlock()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	return p.processStateNode(ctx, &Store{}, p.rootStateProcessor, readCloser, cancel)
+	return p.processStateNode(ctx, &Store{}, p.root, readCloser, cancel)
 }
 
-func (p *Pipeline) processStateNode(ctx context.Context, store *Store, node *PipelineNode, readCloser io.StateReadCloser, cancel context.CancelFunc) <-chan error {
-	outputs := make([]io.StateWriteCloser, len(node.Children))
+func (p *Pipeline) processStateNode(ctx context.Context, store *Store, node *PipelineNode, readCloser ReadCloser, cancel context.CancelFunc) <-chan error {
+	outputs := make([]WriteCloser, len(node.Children))
 
 	for i := range outputs {
-		outputs[i] = &bufferedStateReadWriteCloser{}
+		outputs[i] = &BufferedReadWriteCloser{}
 	}
 
 	var wg sync.WaitGroup
@@ -104,7 +102,7 @@ func (p *Pipeline) processStateNode(ctx context.Context, store *Store, node *Pip
 		go func() {
 			defer wg.Done()
 
-			err := node.Processor.ProcessState(ctx, store, readCloser, writeCloser)
+			err := node.Processor.Process(ctx, store, readCloser, writeCloser)
 			if err != nil {
 				// Protect from cancelling twice and sending multiple errors to err channel
 				p.cancelledMutex.Lock()
@@ -126,7 +124,7 @@ func (p *Pipeline) processStateNode(ctx context.Context, store *Store, node *Pip
 		wg.Add(1)
 		go func(i int, child *PipelineNode) {
 			defer wg.Done()
-			done := p.processStateNode(ctx, store, child, outputs[i].(*bufferedStateReadWriteCloser), cancel)
+			done := p.processStateNode(ctx, store, child, outputs[i].(*BufferedReadWriteCloser), cancel)
 			err := <-done
 			if err != nil {
 				errorChan <- err
@@ -148,7 +146,7 @@ func (p *Pipeline) processStateNode(ctx context.Context, store *Store, node *Pip
 	return errorChan
 }
 
-func (p *Pipeline) updateStats(node *PipelineNode, readCloser io.StateReadCloser, writeCloser *multiWriteCloser) chan<- bool {
+func (p *Pipeline) updateStats(node *PipelineNode, readCloser ReadCloser, writeCloser *multiWriteCloser) chan<- bool {
 	// Update stats
 	interval := time.Second
 	done := make(chan bool)
@@ -159,12 +157,12 @@ func (p *Pipeline) updateStats(node *PipelineNode, readCloser io.StateReadCloser
 
 		for {
 			// This is not thread-safe: check if Mutex slows it down a lot...
-			readBuffer, readBufferIsBufferedStateReadWriteCloser := readCloser.(*bufferedStateReadWriteCloser)
+			readBuffer, readBufferIsBufferedReadWriteCloser := readCloser.(*BufferedReadWriteCloser)
 
 			node.writesPerSecond = (writeCloser.wroteEntries - node.wroteEntries) * int(time.Second/interval)
 			node.wroteEntries = writeCloser.wroteEntries
 
-			if readBufferIsBufferedStateReadWriteCloser {
+			if readBufferIsBufferedReadWriteCloser {
 				node.readsPerSecond = (readBuffer.readEntries - node.readEntries) * int(time.Second/interval)
 				node.readEntries = readBuffer.readEntries
 				node.queuedEntries = readBuffer.QueuedEntries()

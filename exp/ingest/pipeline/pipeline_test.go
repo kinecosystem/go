@@ -3,6 +3,7 @@ package pipeline
 import (
 	"context"
 	"fmt"
+	stdio "io"
 	"math/rand"
 	"runtime"
 	"strings"
@@ -11,9 +12,9 @@ import (
 	"time"
 
 	"github.com/stellar/go/exp/ingest/io"
+	supportPipeline "github.com/stellar/go/exp/support/pipeline"
 	"github.com/stellar/go/keypair"
 	"github.com/stellar/go/xdr"
-	"github.com/stretchr/testify/assert"
 )
 
 func randomAccountId() xdr.AccountId {
@@ -97,59 +98,8 @@ func TrustLineLedgerEntryChange() xdr.LedgerEntryChange {
 	}
 }
 
-func TestStore(t *testing.T) {
-	var s Store
-
-	s.Lock()
-	s.Put("value", 0)
-	s.Unlock()
-
-	s.Lock()
-	v := s.Get("value")
-	s.Put("value", v.(int)+1)
-	s.Unlock()
-
-	assert.Equal(t, 1, s.Get("value"))
-}
-
-func TestBuffer(t *testing.T) {
-	buffer := &bufferedStateReadWriteCloser{}
-	write := 20
-	read := 0
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		for {
-			_, err := buffer.Read()
-			if err != nil {
-				if err == io.EOF {
-					break
-				} else {
-					panic(err)
-				}
-			}
-			read++
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		for i := 0; i < write; i++ {
-			buffer.Write(AccountLedgerEntryChange())
-		}
-		buffer.Close()
-	}()
-
-	wg.Wait()
-
-	assert.Equal(t, 20, read)
-}
-
 func ExamplePipeline(t *testing.T) {
-	pipeline := &Pipeline{}
+	pipeline := &StatePipeline{}
 
 	passthroughProcessor := &PassthroughProcessor{}
 	accountsOnlyFilter := &EntryTypeFilter{Type: xdr.LedgerEntryTypeAccount}
@@ -157,7 +107,7 @@ func ExamplePipeline(t *testing.T) {
 	printCountersProcessor := &PrintCountersProcessor{}
 	printAllProcessor := &PrintAllProcessor{}
 
-	pipeline.AddStateProcessorTree(
+	pipeline.SetRoot(
 		pipeline.Node(passthroughProcessor).
 			Pipe(
 				// Passes accounts only
@@ -183,7 +133,7 @@ func ExamplePipeline(t *testing.T) {
 			),
 	)
 
-	buffer := &bufferedStateReadWriteCloser{}
+	buffer := &supportPipeline.BufferedReadWriteCloser{}
 
 	go func() {
 		for i := 0; i < 1000000; i++ {
@@ -193,7 +143,7 @@ func ExamplePipeline(t *testing.T) {
 		buffer.Close()
 	}()
 
-	done := pipeline.ProcessState(buffer)
+	done := pipeline.Process(&readCloserWrapperState{buffer})
 	startTime := time.Now()
 
 	go func() {
@@ -251,14 +201,14 @@ type PassthroughProcessor struct {
 	SimpleProcessor
 }
 
-func (p *PassthroughProcessor) ProcessState(ctx context.Context, store *Store, r io.StateReadCloser, w io.StateWriteCloser) error {
+func (p *PassthroughProcessor) ProcessState(ctx context.Context, store *supportPipeline.Store, r io.StateReadCloser, w io.StateWriteCloser) error {
 	defer w.Close()
 	defer r.Close()
 
 	for {
 		entry, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err
@@ -267,7 +217,7 @@ func (p *PassthroughProcessor) ProcessState(ctx context.Context, store *Store, r
 
 		err = w.Write(entry)
 		if err != nil {
-			if err == io.ErrClosedPipe {
+			if err == stdio.ErrClosedPipe {
 				// Reader does not need more data
 				return nil
 			}
@@ -299,14 +249,14 @@ type EntryTypeFilter struct {
 	Type xdr.LedgerEntryType
 }
 
-func (p *EntryTypeFilter) ProcessState(ctx context.Context, store *Store, r io.StateReadCloser, w io.StateWriteCloser) error {
+func (p *EntryTypeFilter) ProcessState(ctx context.Context, store *supportPipeline.Store, r io.StateReadCloser, w io.StateWriteCloser) error {
 	defer w.Close()
 	defer r.Close()
 
 	for {
 		entry, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err
@@ -316,7 +266,7 @@ func (p *EntryTypeFilter) ProcessState(ctx context.Context, store *Store, r io.S
 		if entry.State.Data.Type == p.Type {
 			err := w.Write(entry)
 			if err != nil {
-				if err == io.ErrClosedPipe {
+				if err == stdio.ErrClosedPipe {
 					// Reader does not need more data
 					return nil
 				}
@@ -345,14 +295,14 @@ type AccountsForSignerProcessor struct {
 	Signer string
 }
 
-func (p *AccountsForSignerProcessor) ProcessState(ctx context.Context, store *Store, r io.StateReadCloser, w io.StateWriteCloser) error {
+func (p *AccountsForSignerProcessor) ProcessState(ctx context.Context, store *supportPipeline.Store, r io.StateReadCloser, w io.StateWriteCloser) error {
 	defer w.Close()
 	defer r.Close()
 
 	for {
 		entry, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err
@@ -367,7 +317,7 @@ func (p *AccountsForSignerProcessor) ProcessState(ctx context.Context, store *St
 			if signer.Key.Address() == p.Signer {
 				err := w.Write(entry)
 				if err != nil {
-					if err == io.ErrClosedPipe {
+					if err == stdio.ErrClosedPipe {
 						// Reader does not need more data
 						return nil
 					}
@@ -397,7 +347,7 @@ type CountPrefixProcessor struct {
 	Prefix string
 }
 
-func (p *CountPrefixProcessor) ProcessState(ctx context.Context, store *Store, r io.StateReadCloser, w io.StateWriteCloser) error {
+func (p *CountPrefixProcessor) ProcessState(ctx context.Context, store *supportPipeline.Store, r io.StateReadCloser, w io.StateWriteCloser) error {
 	defer w.Close()
 	defer r.Close()
 
@@ -406,7 +356,7 @@ func (p *CountPrefixProcessor) ProcessState(ctx context.Context, store *Store, r
 	for {
 		entry, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err
@@ -418,7 +368,7 @@ func (p *CountPrefixProcessor) ProcessState(ctx context.Context, store *Store, r
 		if strings.HasPrefix(address, p.Prefix) {
 			err := w.Write(entry)
 			if err != nil {
-				if err == io.ErrClosedPipe {
+				if err == stdio.ErrClosedPipe {
 					// Reader does not need more data
 					return nil
 				}
@@ -463,7 +413,7 @@ type PrintCountersProcessor struct {
 	SimpleProcessor
 }
 
-func (p *PrintCountersProcessor) ProcessState(ctx context.Context, store *Store, r io.StateReadCloser, w io.StateWriteCloser) error {
+func (p *PrintCountersProcessor) ProcessState(ctx context.Context, store *supportPipeline.Store, r io.StateReadCloser, w io.StateWriteCloser) error {
 	defer w.Close()
 	defer r.Close()
 
@@ -471,7 +421,7 @@ func (p *PrintCountersProcessor) ProcessState(ctx context.Context, store *Store,
 	for {
 		_, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err
@@ -508,7 +458,7 @@ type PrintAllProcessor struct {
 	SimpleProcessor
 }
 
-func (p *PrintAllProcessor) ProcessState(ctx context.Context, store *Store, r io.StateReadCloser, w io.StateWriteCloser) error {
+func (p *PrintAllProcessor) ProcessState(ctx context.Context, store *supportPipeline.Store, r io.StateReadCloser, w io.StateWriteCloser) error {
 	defer w.Close()
 	defer r.Close()
 
@@ -516,7 +466,7 @@ func (p *PrintAllProcessor) ProcessState(ctx context.Context, store *Store, r io
 	for {
 		_, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			if err == stdio.EOF {
 				break
 			} else {
 				return err

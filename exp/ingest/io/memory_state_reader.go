@@ -221,7 +221,7 @@ func (msr *MemoryStateReader) Read() (xdr.LedgerEntryChange, error) {
 	result, ok := <-msr.readChan
 	if !ok {
 		// when channel is closed then return io.EOF
-		return xdr.LedgerEntryChange{}, EOF
+		return xdr.LedgerEntryChange{}, io.EOF
 	}
 
 	if result.e != nil {
