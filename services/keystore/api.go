@@ -53,7 +53,7 @@ func (s *Service) keysHTTPMethodHandler() http.Handler {
 			jsonHandler(s.deleteKeys).ServeHTTP(rw, req)
 
 		default:
-			problem.Render(req.Context(), rw, probMethodNotAllowed)
+			problem.Render(req.Context(), rw, probMethodNotAllowed, true)
 		}
 	})
 }
@@ -83,14 +83,14 @@ func authHandler(next http.Handler, authenticator *Authenticator) http.Handler {
 		case REST:
 			proxyReq, err = http.NewRequest("GET", authenticator.URL, nil)
 			if err != nil {
-				problem.Render(ctx, rw, errors.Wrap(err, "creating the auth proxy request"))
+				problem.Render(ctx, rw, errors.Wrap(err, "creating the auth proxy request"), true)
 				return
 			}
 
 		case GraphQL:
 			// to be implemented later
 		default:
-			problem.Render(ctx, rw, probNotAuthorized)
+			problem.Render(ctx, rw, probNotAuthorized, true)
 			return
 		}
 
@@ -103,19 +103,19 @@ func authHandler(next http.Handler, authenticator *Authenticator) http.Handler {
 
 		resp, err := client.Do(proxyReq)
 		if err != nil {
-			problem.Render(ctx, rw, errors.Wrap(err, "sending the auth proxy request"))
+			problem.Render(ctx, rw, errors.Wrap(err, "sending the auth proxy request"), true)
 			return
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			problem.Render(ctx, rw, probNotAuthorized)
+			problem.Render(ctx, rw, probNotAuthorized, true)
 			return
 		}
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			problem.Render(ctx, rw, errors.Wrap(err, "reading the auth response"))
+			problem.Render(ctx, rw, errors.Wrap(err, "reading the auth response"), true)
 			return
 		}
 
@@ -123,11 +123,11 @@ func authHandler(next http.Handler, authenticator *Authenticator) http.Handler {
 		err = json.Unmarshal(body, &authResp)
 		if err != nil {
 			log.Ctx(ctx).Infof("Response body as a plain string: %s\n. Response body as a hex dump string: %s\n", string(body), hex.Dump(body))
-			problem.Render(ctx, rw, errors.Wrap(err, "unmarshaling the auth response"))
+			problem.Render(ctx, rw, errors.Wrap(err, "unmarshaling the auth response"), true)
 			return
 		}
 		if authResp.UserID == "" {
-			problem.Render(ctx, rw, probNotAuthorized)
+			problem.Render(ctx, rw, probNotAuthorized, true)
 			return
 		}
 
@@ -136,7 +136,7 @@ func authHandler(next http.Handler, authenticator *Authenticator) http.Handler {
 }
 
 func jsonHandler(f interface{}) http.Handler {
-	h, err := httpjson.ReqBodyHandler(f, httpjson.JSON)
+	h, err := httpjson.ReqBodyHandler(f, httpjson.JSON, true)
 	if err != nil {
 		panic(err)
 	}
@@ -160,7 +160,7 @@ func recoverHandler(next http.Handler) http.Handler {
 
 			ctx := req.Context()
 			log.Ctx(ctx).WithStack(err).Error(err)
-			problem.Render(ctx, rw, err)
+			problem.Render(ctx, rw, err, true)
 		}()
 
 		next.ServeHTTP(rw, req)
