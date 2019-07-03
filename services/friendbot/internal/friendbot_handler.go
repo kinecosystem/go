@@ -19,11 +19,11 @@ type FriendbotHandler struct {
 func (handler *FriendbotHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	result, err := handler.doHandle(r)
 	if err != nil {
-		problem.Render(r.Context(), w, err)
+		problem.Render(r.Context(), w, err, true)
 		return
 	}
 
-	hal.Render(w, *result)
+	hal.Render(w, *result, true)
 }
 
 // doHandle is just a convenience method that returns the object to be rendered

@@ -86,7 +86,7 @@ func initRouter(fb *internal.Bot) *chi.Mux {
 	mux.Get("/", handler.Handle)
 	mux.Post("/", handler.Handle)
 	mux.NotFound(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
-		problem.Render(r.Context(), w, problem.NotFound)
+		problem.Render(r.Context(), w, problem.NotFound, true)
 	}))
 
 	return mux
