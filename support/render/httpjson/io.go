@@ -16,8 +16,8 @@ const (
 )
 
 // renderToString renders the provided data as a json string
-func renderToString(data interface{}, pretty bool) ([]byte, error) {
-	if pretty {
+func renderToString(data interface{}, isIndentedJSON bool) ([]byte, error) {
+	if isIndentedJSON {
 		return json.MarshalIndent(data, "", "  ")
 	}
 
@@ -26,8 +26,8 @@ func renderToString(data interface{}, pretty bool) ([]byte, error) {
 
 // Render write data to w, after marshalling to json. The response header is
 // set based on cType.
-func Render(w http.ResponseWriter, data interface{}, cType contentType) {
-	js, err := renderToString(data, true)
+func Render(w http.ResponseWriter, data interface{}, cType contentType, isIndentedJSON bool) {
+	js, err := renderToString(data, isIndentedJSON)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -7,6 +7,6 @@ import (
 )
 
 // Render write data to w, after marshalling to json
-func Render(w http.ResponseWriter, data interface{}) {
-	httpjson.Render(w, data, httpjson.HALJSON)
+func Render(w http.ResponseWriter, data interface{}, isIndentedJSON bool) {
+	httpjson.Render(w, data, httpjson.HALJSON, isIndentedJSON)
 }

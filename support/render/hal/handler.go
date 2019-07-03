@@ -8,9 +8,9 @@ import (
 )
 
 func Handler(fn, param interface{}) (http.Handler, error) {
-	return httpjson.Handler(fn, param, httpjson.HALJSON)
+	return httpjson.Handler(fn, param, httpjson.HALJSON, true)
 }
 
 func ExecuteFunc(ctx context.Context, fn, param interface{}) (interface{}, bool, error) {
-	return httpjson.ExecuteFunc(ctx, fn, param, httpjson.HALJSON)
+	return httpjson.ExecuteFunc(ctx, fn, param, httpjson.HALJSON, true)
 }

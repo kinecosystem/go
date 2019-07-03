@@ -121,6 +121,6 @@ func TestInflate(t *testing.T) {
 
 func testRender(ctx context.Context, err error) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	Render(ctx, w, err)
+	Render(ctx, w, err, true)
 	return w
 }

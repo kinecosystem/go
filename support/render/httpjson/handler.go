@@ -19,11 +19,12 @@ var (
 var DefaultResponse = json.RawMessage(`{"message":"ok"}`)
 
 type handler struct {
-	fv           reflect.Value
-	inType       reflect.Type
-	inValue      reflect.Value
-	readFromBody bool
-	cType        contentType
+	fv             reflect.Value
+	inType         reflect.Type
+	inValue        reflect.Value
+	readFromBody   bool
+	cType          contentType
+	isIndentedJSON bool
 }
 
 // ReqBodyHandler returns an HTTP Handler for function fn.
@@ -33,14 +34,22 @@ type handler struct {
 // Please refer to funcParamType for the allowed function signature.
 // The caller of this function should probably panic on the returned error, if
 // any.
-func ReqBodyHandler(fn interface{}, cType contentType) (http.Handler, error) {
+func ReqBodyHandler(fn interface{}, cType contentType, isIndentedJSON bool) (http.Handler, error) {
 	fv := reflect.ValueOf(fn)
 	inType, err := funcParamType(fv)
 	if err != nil {
 		return nil, errors.Wrap(err, "parsing function prototype")
 	}
 
-	return &handler{fv, inType, reflect.Value{}, inType != nil, cType}, nil
+	h := &handler{
+		fv:             fv,
+		inType:         inType,
+		inValue:        reflect.Value{},
+		readFromBody:   inType != nil,
+		cType:          cType,
+		isIndentedJSON: isIndentedJSON,
+	}
+	return h, nil
 }
 
 // Handler returns an HTTP Handler for function fn.
@@ -48,7 +57,7 @@ func ReqBodyHandler(fn interface{}, cType contentType) (http.Handler, error) {
 // Please refer to funcParamType for the allowed function signature.
 // The caller of this function should probably panic on the returned error, if
 // any.
-func Handler(fn, param interface{}, cType contentType) (http.Handler, error) {
+func Handler(fn, param interface{}, cType contentType, isIndentedJSON bool) (http.Handler, error) {
 	fv := reflect.ValueOf(fn)
 	inType, err := funcParamType(fv)
 	if err != nil {
@@ -60,18 +69,26 @@ func Handler(fn, param interface{}, cType contentType) (http.Handler, error) {
 		inValue = reflect.ValueOf(param)
 	}
 
-	return &handler{fv, inType, inValue, false, cType}, nil
+	h := &handler{
+		fv:             fv,
+		inType:         inType,
+		inValue:        inValue,
+		readFromBody:   false,
+		cType:          cType,
+		isIndentedJSON: isIndentedJSON,
+	}
+	return h, nil
 }
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	res, err := h.executeFunc(ctx, req)
 	if err != nil {
-		problem.Render(ctx, w, err)
+		problem.Render(ctx, w, err, true)
 		return
 	}
 
-	Render(w, res, h.cType)
+	Render(w, res, h.cType, h.isIndentedJSON)
 }
 
 // executeFunc executes the function provided in the handler together with the
@@ -123,9 +140,9 @@ func (h *handler) executeFunc(ctx context.Context, req *http.Request) (interface
 // error normally; if it's false, it means the caller should probably panic on
 // the error.
 // The third return value is an error either from Handler() or from fn, if any.
-func ExecuteFunc(ctx context.Context, fn, param interface{}, cType contentType) (interface{}, bool, error) {
+func ExecuteFunc(ctx context.Context, fn, param interface{}, cType contentType, isIndentedJSON bool) (interface{}, bool, error) {
 	dontPanic := true
-	h, err := Handler(fn, param, cType)
+	h, err := Handler(fn, param, cType, isIndentedJSON)
 	if err != nil {
 		dontPanic = false
 		return nil, dontPanic, err

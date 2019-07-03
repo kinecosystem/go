@@ -10,21 +10,23 @@ import (
 	"testing"
 )
 
+// TODO add Marshal and MarshalIndent (Pretty JSON response) tests
 func TestHandler(t *testing.T) {
 	cases := []struct {
-		input   interface{}
-		output  string
-		f       interface{}
-		cType   contentType
+		input  interface{}
+		output string
+		f      interface{}
+		cType  contentType
+		isIndentedJSON,
 		wantErr bool
 	}{
-		{`foo`, `"foo"`, func(ctx context.Context, s string) (string, error) { return s, nil }, JSON, false},
-		{struct{ Foo int }{1}, `1`, func(ctx context.Context, param struct{ Foo int }) (int, error) { return param.Foo, nil }, HALJSON, false},
-		{``, ``, func(ctx context.Context) (int, error) { return 0, errors.New("test") }, JSON, true},
+		{`foo`, `"foo"`, func(ctx context.Context, s string) (string, error) { return s, nil }, JSON, true, false},
+		{struct{ Foo int }{1}, `1`, func(ctx context.Context, param struct{ Foo int }) (int, error) { return param.Foo, nil }, HALJSON, true, false},
+		{``, ``, func(ctx context.Context) (int, error) { return 0, errors.New("test") }, JSON, true, true},
 	}
 
 	for _, tc := range cases {
-		h, err := Handler(tc.f, tc.input, tc.cType)
+		h, err := Handler(tc.f, tc.input, tc.cType, tc.isIndentedJSON)
 		if err != nil {
 			t.Errorf("Handler(%v) got err %v", tc.f, err)
 			continue
@@ -65,18 +67,19 @@ func TestHandler(t *testing.T) {
 
 func TestReqBodyHandler(t *testing.T) {
 	cases := []struct {
-		input   string
-		output  string
-		f       interface{}
-		cType   contentType
+		input  string
+		output string
+		f      interface{}
+		cType  contentType
+		isIndentedJSON,
 		wantErr bool
 	}{
-		{`{"Foo":1}`, `1`, func(ctx context.Context, param struct{ Foo int }) (int, error) { return param.Foo, nil }, JSON, false},
-		{``, ``, func(ctx context.Context) (int, error) { return 0, errors.New("test") }, JSON, true},
+		{`{"Foo":1}`, `1`, func(ctx context.Context, param struct{ Foo int }) (int, error) { return param.Foo, nil }, JSON, true, false},
+		{``, ``, func(ctx context.Context) (int, error) { return 0, errors.New("test") }, JSON, true, true},
 	}
 
 	for _, tc := range cases {
-		h, err := ReqBodyHandler(tc.f, tc.cType)
+		h, err := ReqBodyHandler(tc.f, tc.cType, tc.isIndentedJSON)
 		if err != nil {
 			t.Errorf("Handler(%v) got err %v", tc.f, err)
 			continue

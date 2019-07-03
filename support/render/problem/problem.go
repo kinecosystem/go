@@ -87,7 +87,7 @@ func RegisterHost(host string) {
 // Render writes a http response to `w`, compliant with the "Problem
 // Details for HTTP APIs" RFC:
 // https://tools.ietf.org/html/draft-ietf-appsawg-http-problem-00
-func Render(ctx context.Context, w http.ResponseWriter, err error) {
+func Render(ctx context.Context, w http.ResponseWriter, err error, isIndentedJSON bool) {
 	origErr := errors.Cause(err)
 
 	var problem P
@@ -108,17 +108,25 @@ func Render(ctx context.Context, w http.ResponseWriter, err error) {
 		}
 	}
 
-	renderProblem(ctx, w, problem)
+	renderProblem(ctx, w, problem, isIndentedJSON)
 }
 
-func renderProblem(ctx context.Context, w http.ResponseWriter, p P) {
+func renderProblem(ctx context.Context, w http.ResponseWriter, p P, isIndentedJSON bool) {
 	if ServiceHost != "" && !strings.HasPrefix(p.Type, ServiceHost) {
 		p.Type = ServiceHost + p.Type
 	}
 
 	w.Header().Set("Content-Type", "application/problem+json; charset=utf-8")
 
-	js, err := json.MarshalIndent(p, "", "  ")
+	var (
+		err error
+		js  []byte
+	)
+	if isIndentedJSON {
+		js, err = json.MarshalIndent(p, "", "  ")
+	} else {
+		js, err = json.Marshal(p)
+	}
 	if err != nil {
 		err = errors.Wrap(err, "failed to encode problem")
 		log.Ctx(ctx).WithStack(err).Error(err)

@@ -25,6 +25,16 @@ func (lb *LinkBuilder) Link(parts ...string) Link {
 	return NewLink(href)
 }
 
+// LinkPtr is similar to Link(), but returns a pointer to the hal.Link object.
+//
+// This is a convinience function which allows for better code readability,
+// since the address operator can only be used with adressables operands.
+// See this section in the Go language spec for more information: https://golang.org/ref/spec#Address_operators
+func (lb *LinkBuilder) LinkPtr(parts ...string) *Link {
+	l := lb.Link(parts...)
+	return &l
+}
+
 // PagedLink creates a link using the `Link` method and
 // appends the common paging options
 func (lb *LinkBuilder) PagedLink(parts ...string) Link {
@@ -34,10 +44,26 @@ func (lb *LinkBuilder) PagedLink(parts ...string) Link {
 	return nl
 }
 
+// PagedLinkPtr is similar to PagedLink(), but returns a pointer to the hal.Link object.
+//
+// See LinkPtr() for more information on why this function exists.
+func (lb *LinkBuilder) PagedLinkPtr(parts ...string) *Link {
+	pl := lb.PagedLink(parts...)
+	return &pl
+}
+
 // Linkf provides a helper function that returns a link with an
 // href created by passing the arguments into fmt.Sprintf
 func (lb *LinkBuilder) Linkf(format string, args ...interface{}) Link {
 	return lb.Link(fmt.Sprintf(format, args...))
+}
+
+// LinkfPtr is similar to Linkf, but returns a pointer to the hal.Link object.
+//
+// See LinkPtr() for more information on why this function exists.
+func (lb *LinkBuilder) LinkfPtr(format string, args ...interface{}) *Link {
+	l := lb.Linkf(format, args...)
+	return &l
 }
 
 // expandLink takes an href and resolves it against the LinkBuilders base url,
