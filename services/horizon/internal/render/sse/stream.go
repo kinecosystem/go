@@ -26,20 +26,22 @@ var knownErrors = map[error]struct{}{
 }
 
 type Stream struct {
-	ctx      context.Context
-	initSync sync.Once  // Variable to ensure that Init only writes the preamble once.
-	mu       sync.Mutex // Mutex protects the following fields
-	w        http.ResponseWriter
-	done     bool
-	sent     int
-	limit    int
+	ctx                           context.Context
+	initSync                      sync.Once  // Variable to ensure that Init only writes the preamble once.
+	mu                            sync.Mutex // Mutex protects the following fields
+	w                             http.ResponseWriter
+	isIndentedJSONProblemResponse bool // Whether to marshal problems using json.Marshal() or json.MarshalIndent()
+	done                          bool
+	sent                          int
+	limit                         int
 }
 
 // NewStream creates a new stream against the provided response writer.
-func NewStream(ctx context.Context, w http.ResponseWriter) *Stream {
+func NewStream(ctx context.Context, w http.ResponseWriter, isIndentedJSONProblemResponse bool) *Stream {
 	return &Stream{
-		ctx: ctx,
-		w:   w,
+		ctx:                           ctx,
+		w:                             w,
+		isIndentedJSONProblemResponse: isIndentedJSONProblemResponse,
 	}
 }
 
@@ -107,7 +109,7 @@ func (s *Stream) Err(err error) {
 	// If we haven't sent an event, we should simply return the normal HTTP
 	// error because it means that we haven't sent the preamble.
 	if s.sent == 0 {
-		problem.Render(s.ctx, s.w, err)
+		problem.Render(s.ctx, s.w, err, s.isIndentedJSONProblemResponse)
 		return
 	}
 

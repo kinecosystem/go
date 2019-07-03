@@ -19,11 +19,11 @@ type MetricsAction struct {
 // JSON is a method for actions.JSON
 func (action *MetricsAction) JSON() error {
 	action.LoadSnapshot()
-	action.Snapshot["_links"] = map[string]interface{}{
-		"self": hal.NewLink("/metrics"),
+	if action.App.config.ShouldPopulateHalCustomLinks {
+		action.Snapshot["_links"] = map[string]interface{}{"self": hal.NewLink("/metrics")}
 	}
 
-	hal.Render(action.W, action.Snapshot)
+	hal.Render(action.W, action.Snapshot, action.App.config.IsIndentedJSON)
 	return action.Err
 }
 

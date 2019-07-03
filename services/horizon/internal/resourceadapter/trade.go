@@ -58,9 +58,10 @@ func populateTradeLinks(
 	opid int64,
 ) {
 	lb := hal.LinkBuilder{httpx.BaseURL(ctx)}
-	dest.Links.Base = lb.Link("/accounts", dest.BaseAccount)
-	dest.Links.Counter = lb.Link("/accounts", dest.CounterAccount)
-	dest.Links.Operation = lb.Link(
+	dest.Links = new(TradeLinks)
+	dest.Links.Base = lb.LinkPtr("/accounts", dest.BaseAccount)
+	dest.Links.Counter = lb.LinkPtr("/accounts", dest.CounterAccount)
+	dest.Links.Operation = lb.LinkPtr(
 		"/operations",
 		fmt.Sprintf("%d", opid),
 	)

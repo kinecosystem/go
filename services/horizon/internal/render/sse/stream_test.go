@@ -38,7 +38,7 @@ func (suite *StreamTestSuite) checkHeadersAndPreamble() {
 func (suite *StreamTestSuite) SetupTest() {
 	suite.ctx, _ = test.ContextWithLogBuffer()
 	suite.w = httptest.NewRecorder()
-	suite.stream = NewStream(suite.ctx, suite.w)
+	suite.stream = NewStream(suite.ctx, suite.w, true)
 }
 
 // Tests that the stream sends the preamble before any events and that events are correctly sent.
@@ -63,7 +63,7 @@ func (suite *StreamTestSuite) TestStream_Err() {
 
 	// Reset the stream to test the scenario where an event has been sent.
 	suite.w = httptest.NewRecorder()
-	suite.stream = NewStream(suite.ctx, suite.w)
+	suite.stream = NewStream(suite.ctx, suite.w, true)
 	suite.stream.sent++
 	suite.stream.Err(err)
 	suite.checkHeadersAndPreamble()

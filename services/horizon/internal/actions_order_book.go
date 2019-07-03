@@ -74,7 +74,7 @@ func (action *OrderBookShowAction) JSON() error {
 		action.LoadQuery,
 		action.LoadRecord,
 		action.LoadResource,
-		func() { hal.Render(action.W, action.Resource) },
+		func() { hal.Render(action.W, action.Resource, action.App.config.IsIndentedJSON) },
 	)
 	return action.Err
 }

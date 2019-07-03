@@ -15,6 +15,6 @@ type NotFoundAction struct {
 
 // JSON is a method for actions.JSON
 func (action *NotFoundAction) JSON() error {
-	problem.Render(action.R.Context(), action.W, problem.NotFound)
+	problem.Render(action.R.Context(), action.W, problem.NotFound, action.App.config.IsIndentedJSON)
 	return action.Err
 }

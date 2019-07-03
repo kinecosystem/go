@@ -39,7 +39,7 @@ func (we *web) streamableEndpointHandler(jfn interface{}, streamSingleObjectEnab
 		switch render.Negotiate(r) {
 		case render.MimeHal, render.MimeJSON:
 			if jfn == nil {
-				problem.Render(ctx, w, hProblem.NotAcceptable)
+				problem.Render(ctx, w, hProblem.NotAcceptable, we.isIndentedJSON)
 				return
 			}
 			h, err := hal.Handler(jfn, params)
@@ -52,7 +52,7 @@ func (we *web) streamableEndpointHandler(jfn interface{}, streamSingleObjectEnab
 
 		case render.MimeEventStream:
 			if sfn == nil && !streamSingleObjectEnabled {
-				problem.Render(ctx, w, hProblem.NotAcceptable)
+				problem.Render(ctx, w, hProblem.NotAcceptable, we.isIndentedJSON)
 				return
 			}
 
@@ -60,7 +60,7 @@ func (we *web) streamableEndpointHandler(jfn interface{}, streamSingleObjectEnab
 			return
 		}
 
-		problem.Render(ctx, w, hProblem.NotAcceptable)
+		problem.Render(ctx, w, hProblem.NotAcceptable, we.isIndentedJSON)
 	})
 }
 
@@ -73,7 +73,7 @@ func (we *web) streamHandler(jfn interface{}, sfn streamFunc, params interface{}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		stream := sse.NewStream(ctx, w)
+		stream := sse.NewStream(ctx, w, we.isIndentedJSON)
 		var oldHash [32]byte
 		for {
 			lastLedgerState := ledger.CurrentState()
@@ -166,7 +166,7 @@ func (we *web) streamShowActionHandler(jfn interface{}, requireAccountID bool) h
 		ctx := r.Context()
 		param, err := getShowActionQueryParams(r, requireAccountID)
 		if err != nil {
-			problem.Render(ctx, w, err)
+			problem.Render(ctx, w, err, we.isIndentedJSON)
 			return
 		}
 
@@ -183,13 +183,13 @@ func (we *web) streamIndexActionHandler(jfn interface{}, sfn streamFunc) http.Ha
 
 		params, err := getIndexActionQueryParams(r, we.ingestFailedTx)
 		if err != nil {
-			problem.Render(ctx, w, err)
+			problem.Render(ctx, w, err, we.isIndentedJSON)
 			return
 		}
 
 		err = validateCursorWithinHistory(params.PagingParams)
 		if err != nil {
-			problem.Render(ctx, w, err)
+			problem.Render(ctx, w, err, we.isIndentedJSON)
 			return
 		}
 
@@ -198,18 +198,18 @@ func (we *web) streamIndexActionHandler(jfn interface{}, sfn streamFunc) http.Ha
 }
 
 // showActionHandler handles all non-streamable endpoints.
-func showActionHandler(jfn interface{}) http.HandlerFunc {
+func showActionHandler(jfn interface{}, isIndentedJSON bool) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		contentType := render.Negotiate(r)
 		if jfn == nil || (contentType != render.MimeHal && contentType != render.MimeJSON) {
-			problem.Render(ctx, w, hProblem.NotAcceptable)
+			problem.Render(ctx, w, hProblem.NotAcceptable, isIndentedJSON)
 			return
 		}
 
 		params, err := getShowActionQueryParams(r, false)
 		if err != nil {
-			problem.Render(ctx, w, err)
+			problem.Render(ctx, w, err, isIndentedJSON)
 			return
 		}
 

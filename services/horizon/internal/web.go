@@ -32,12 +32,14 @@ const LRUCacheSize = 50000
 // Web contains the http server related fields for horizon: the router,
 // rate limiter, etc.
 type web struct {
-	appCtx             context.Context
-	router             *chi.Mux
-	rateLimiter        *throttled.HTTPRateLimiter
-	sseUpdateFrequency time.Duration
-	staleThreshold     uint
-	ingestFailedTx     bool
+	appCtx                       context.Context
+	router                       *chi.Mux
+	rateLimiter                  *throttled.HTTPRateLimiter
+	sseUpdateFrequency           time.Duration
+	staleThreshold               uint
+	ingestFailedTx               bool
+	shouldPopulateHalCustomLinks bool
+	isIndentedJSON               bool
 
 	historyQ *history.Q
 	coreQ    *core.Q
@@ -58,7 +60,7 @@ func init() {
 }
 
 // mustInitWeb installed a new Web instance onto the provided app object.
-func mustInitWeb(ctx context.Context, hq *history.Q, cq *core.Q, updateFreq time.Duration, threshold uint, ingest bool) *web {
+func mustInitWeb(ctx context.Context, hq *history.Q, cq *core.Q, updateFreq time.Duration, threshold uint, ingest, shouldPopulateHalCustomLinks, isIndentedJSON bool) *web {
 	if hq == nil {
 		log.Fatal("missing history DB for installing the web instance")
 	}
@@ -67,16 +69,18 @@ func mustInitWeb(ctx context.Context, hq *history.Q, cq *core.Q, updateFreq time
 	}
 
 	return &web{
-		appCtx:             ctx,
-		router:             chi.NewRouter(),
-		historyQ:           hq,
-		coreQ:              cq,
-		sseUpdateFrequency: updateFreq,
-		staleThreshold:     threshold,
-		ingestFailedTx:     ingest,
-		requestTimer:       metrics.NewTimer(),
-		failureMeter:       metrics.NewMeter(),
-		successMeter:       metrics.NewMeter(),
+		appCtx:                       ctx,
+		router:                       chi.NewRouter(),
+		historyQ:                     hq,
+		coreQ:                        cq,
+		sseUpdateFrequency:           updateFreq,
+		staleThreshold:               threshold,
+		ingestFailedTx:               ingest,
+		shouldPopulateHalCustomLinks: shouldPopulateHalCustomLinks,
+		isIndentedJSON:               isIndentedJSON,
+		requestTimer:                 metrics.NewTimer(),
+		failureMeter:                 metrics.NewMeter(),
+		successMeter:                 metrics.NewMeter(),
 	}
 }
 
@@ -101,7 +105,7 @@ func (w *web) mustInstallMiddlewares(app *App, connTimeout time.Duration) {
 	r.Use(xff.Handler)
 	r.Use(loggerMiddleware)
 	r.Use(requestMetricsMiddleware)
-	r.Use(recoverMiddleware)
+	r.Use(w.RecoverMiddleware)
 	r.Use(chimiddleware.Compress(flate.DefaultCompression, "application/hal+json"))
 
 	c := cors.New(cors.Options{
@@ -154,7 +158,7 @@ func (w *web) mustInstallActions(enableAssetStats bool, friendbotURL *url.URL) {
 	r.Route("/transactions", func(r chi.Router) {
 		r.Get("/", w.streamIndexActionHandler(w.getTransactionPage, w.streamTransactions))
 		r.Route("/{tx_id}", func(r chi.Router) {
-			r.Get("/", showActionHandler(w.getTransactionResource))
+			r.Get("/", showActionHandler(w.getTransactionResource, w.isIndentedJSON))
 			r.Get("/operations", OperationIndexAction{}.Handle)
 			r.Get("/payments", PaymentsIndexAction{}.Handle)
 			r.Get("/effects", EffectIndexAction{}.Handle)

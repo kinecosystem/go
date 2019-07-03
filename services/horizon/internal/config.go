@@ -67,4 +67,7 @@ type Config struct {
 	// Enabling it has a negative impact on CPU when ingesting ledgers full of
 	// many different assets related operations.
 	EnableAssetStats bool
+	// JSON response configuration
+	ShouldPopulateHalCustomLinks bool
+	IsIndentedJSON               bool
 }

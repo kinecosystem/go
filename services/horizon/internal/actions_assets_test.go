@@ -10,19 +10,13 @@ import (
 )
 
 func TestAssetsActions(t *testing.T) {
-	testDomain := struct {
-		Toml hal.Link `json:"toml"`
-	}{
-		Toml: hal.NewLink("https://test.com/.well-known/stellar.toml"),
+	testDomain := horizon.AssetStatLinks{
+		Toml: hal.NewLinkPtr("https://test.com/.well-known/stellar.toml"),
 	}
-	empty := struct {
-		Toml hal.Link `json:"toml"`
-	}{
-		Toml: hal.NewLink(""),
-	}
+	empty := horizon.AssetStatLinks{Toml: hal.NewLinkPtr("")}
 
 	BTCGateway := horizon.AssetStat{
-		Links: testDomain,
+		Links: &testDomain,
 		Asset: base.Asset{
 			Type:   "credit_alphanum4",
 			Code:   "BTC",
@@ -37,7 +31,7 @@ func TestAssetsActions(t *testing.T) {
 		},
 	}
 	SCOTScott := horizon.AssetStat{
-		Links: empty,
+		Links: &empty,
 		Asset: base.Asset{
 			Type:   "credit_alphanum4",
 			Code:   "SCOT",
@@ -52,7 +46,7 @@ func TestAssetsActions(t *testing.T) {
 		},
 	}
 	USDGateway := horizon.AssetStat{
-		Links: testDomain,
+		Links: &testDomain,
 		Asset: base.Asset{
 			Type:   "credit_alphanum4",
 			Code:   "USD",

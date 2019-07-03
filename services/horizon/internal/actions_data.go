@@ -25,7 +25,9 @@ func (action *DataShowAction) JSON() error {
 	action.Do(
 		action.loadParams,
 		action.loadRecord,
-		func() { hal.Render(action.W, map[string]string{"value": action.Data.Value}) },
+		func() {
+			hal.Render(action.W, map[string]string{"value": action.Data.Value}, action.App.config.IsIndentedJSON)
+		},
 	)
 	return action.Err
 }

@@ -50,7 +50,7 @@ func (action *OperationIndexAction) JSON() error {
 		action.loadRecords,
 		action.loadLedgers,
 		action.loadPage,
-		func() { hal.Render(action.W, action.Page) },
+		func() { hal.Render(action.W, action.Page, action.App.config.IsIndentedJSON) },
 	)
 	return action.Err
 }
@@ -246,7 +246,7 @@ func (action *OperationShowAction) JSON() error {
 		action.loadRecord,
 		action.loadLedger,
 		action.loadResource,
-		func() { hal.Render(action.W, action.Resource) },
+		func() { hal.Render(action.W, action.Resource, action.App.config.IsIndentedJSON) },
 	)
 	return action.Err
 }

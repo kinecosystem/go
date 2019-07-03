@@ -20,19 +20,23 @@ import (
 func TestTradeActions_Index(t *testing.T) {
 	ht := StartHTTPTest(t, "trades")
 	defer ht.Finish()
-	var records []horizon.Trade
-	var firstTrade horizon.Trade
+
+	var (
+		records        []horizon.Trade
+		reverseRecords []horizon.Trade
+		firstTrade     horizon.Trade
+	)
 
 	// All trades
 	w := ht.Get("/trades")
 	if ht.Assert.Equal(200, w.Code) {
 		ht.Assert.PageOf(2, w.Body)
 
-		// 	ensure created_at is populated correctly
+		//	ensure created_at is populated correctly
 		ht.UnmarshalPage(w.Body, &records)
 		firstTrade = records[0]
 
-		// 	ensure created_at is populated correctly
+		//	ensure created_at is populated correctly
 		l := history.Ledger{}
 		hq := history.Q{Session: ht.HorizonSession()}
 		ht.Require.NoError(hq.LedgerBySequence(&l, 9))
@@ -44,10 +48,10 @@ func TestTradeActions_Index(t *testing.T) {
 	w = ht.Get("/trades?order=desc")
 	if ht.Assert.Equal(200, w.Code) {
 		ht.Assert.PageOf(2, w.Body)
-		ht.UnmarshalPage(w.Body, &records)
+		ht.UnmarshalPage(w.Body, &reverseRecords)
 
 		// ensure that ordering is indeed reversed
-		ht.Assert.Equal(firstTrade, records[len(records)-1])
+		ht.Assert.Equal(firstTrade, reverseRecords[len(reverseRecords)-1])
 	}
 
 	var q = make(url.Values)
