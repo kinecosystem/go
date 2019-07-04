@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	hProtocol "github.com/stellar/go/protocols/horizon"
+	"github.com/stellar/go/support/render/hal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,6 +39,9 @@ func TestShouldDiscardAsset(t *testing.T) {
 	assert.Equal(t, shouldDiscardAsset(testAsset), true)
 
 	testAsset = hProtocol.AssetStat{
+		Links: &hProtocol.AssetStatLinks{
+			Toml: hal.NewLinkPtr(""),
+		},
 		Amount:      "123901.0129310",
 		NumAccounts: 100,
 	}
@@ -46,6 +50,9 @@ func TestShouldDiscardAsset(t *testing.T) {
 	assert.Equal(t, shouldDiscardAsset(testAsset), false)
 
 	testAsset = hProtocol.AssetStat{
+		Links: &hProtocol.AssetStatLinks{
+			Toml: hal.NewLinkPtr(""),
+		},
 		Amount:      "123901.0129310",
 		NumAccounts: 40,
 	}
