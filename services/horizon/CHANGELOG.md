@@ -6,6 +6,10 @@ file.  This project adheres to [Semantic Versioning](http://semver.org/).
 As this project is pre 1.0, breaking changes may happen for minor version
 bumps.  A breaking change will get clearly notified in this log.
 
+## v0.19.1
+
+* HAL response population is implemented using Go `strings` package intsead of `regexp`, improving its performance.
+
 ## v0.19.0
 
 * Add `join` parameter to operations and payments endpoints. Currently, the only valid value for the parameter is `transactions`. If `join=transactions` is included in a request then the response will include a `transaction` field for each operation in the response.
