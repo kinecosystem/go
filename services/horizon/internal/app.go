@@ -395,7 +395,7 @@ func (a *App) init() {
 	a.reaper = reap.New(a.config.HistoryRetentionCount, a.HorizonSession(nil))
 
 	// web.init
-	a.web = mustInitWeb(a.ctx, a.historyQ, a.coreQ, a.config.SSEUpdateFrequency, a.config.StaleThreshold, a.config.IngestFailedTransactions)
+	a.web = mustInitWeb(a.ctx, a.historyQ, a.coreQ, a.config.SSEUpdateFrequency, a.config.StaleThreshold, a.config.IngestFailedTransactions, a.config.ShouldPopulateHalCustomLinks, a.config.IsIndentedJSON)
 
 	// web.rate-limiter
 	a.web.rateLimiter = maybeInitWebRateLimiter(a.config.RateQuota)

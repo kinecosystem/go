@@ -32,6 +32,6 @@ func (action *RootAction) JSON() error {
 		action.App.config.FriendbotURL,
 	)
 
-	hal.Render(action.W, res)
+	hal.Render(action.W, res, action.App.config.IsIndentedJSON)
 	return action.Err
 }

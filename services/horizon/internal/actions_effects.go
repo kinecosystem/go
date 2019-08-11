@@ -47,7 +47,7 @@ func (action *EffectIndexAction) JSON() error {
 		action.loadRecords,
 		action.loadLedgers,
 		action.loadPage,
-		func() { hal.Render(action.W, action.Page) },
+		func() { hal.Render(action.W, action.Page, action.App.config.IsIndentedJSON) },
 	)
 	return action.Err
 }

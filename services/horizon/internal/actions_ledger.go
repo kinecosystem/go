@@ -38,7 +38,7 @@ func (action *LedgerIndexAction) JSON() error {
 		action.ValidateCursorWithinHistory,
 		action.loadRecords,
 		action.loadPage,
-		func() { hal.Render(action.W, action.Page) },
+		func() { hal.Render(action.W, action.Page, action.App.config.IsIndentedJSON) },
 	)
 	return action.Err
 }
@@ -109,7 +109,7 @@ func (action *LedgerShowAction) JSON() error {
 		func() {
 			var res horizon.Ledger
 			resourceadapter.PopulateLedger(action.R.Context(), &res, action.Record)
-			hal.Render(action.W, res)
+			hal.Render(action.W, res, action.App.config.IsIndentedJSON)
 		},
 	)
 	return action.Err

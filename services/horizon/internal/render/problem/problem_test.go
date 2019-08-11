@@ -12,7 +12,7 @@ import (
 var ctx = context.Background()
 var testRender = func(ctx context.Context, err error) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	problem.Render(ctx, w, err)
+	problem.Render(ctx, w, err, true)
 	return w
 }
 

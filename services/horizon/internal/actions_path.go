@@ -26,7 +26,7 @@ func (action *PathIndexAction) JSON() error {
 		action.loadSourceAssets,
 		action.loadRecords,
 		action.loadPage,
-		func() { hal.Render(action.W, action.Page) },
+		func() { hal.Render(action.W, action.Page, action.App.config.IsIndentedJSON) },
 	)
 	return action.Err
 }

@@ -50,31 +50,35 @@ func (action *OperationFeeStatsAction) JSON() error {
 			Detail: "/operation_fee_stats is unavailable when Horizon is not ingesting failed " +
 				"transactions. Set `INGEST_FAILED_TRANSACTIONS=true` to start ingesting them.",
 		}
-		problem.Render(action.R.Context(), action.W, p)
+		problem.Render(action.R.Context(), action.W, p, action.App.config.IsIndentedJSON)
 		return nil
 	}
 
 	action.Do(
 		action.loadRecords,
 		func() {
-			hal.Render(action.W, map[string]string{
-				"min_accepted_fee":      fmt.Sprint(action.FeeMin),
-				"mode_accepted_fee":     fmt.Sprint(action.FeeMode),
-				"p10_accepted_fee":      fmt.Sprint(action.FeeP10),
-				"p20_accepted_fee":      fmt.Sprint(action.FeeP20),
-				"p30_accepted_fee":      fmt.Sprint(action.FeeP30),
-				"p40_accepted_fee":      fmt.Sprint(action.FeeP40),
-				"p50_accepted_fee":      fmt.Sprint(action.FeeP50),
-				"p60_accepted_fee":      fmt.Sprint(action.FeeP60),
-				"p70_accepted_fee":      fmt.Sprint(action.FeeP70),
-				"p80_accepted_fee":      fmt.Sprint(action.FeeP80),
-				"p90_accepted_fee":      fmt.Sprint(action.FeeP90),
-				"p95_accepted_fee":      fmt.Sprint(action.FeeP95),
-				"p99_accepted_fee":      fmt.Sprint(action.FeeP99),
-				"ledger_capacity_usage": action.LedgerCapacityUsage,
-				"last_ledger_base_fee":  fmt.Sprint(action.LastBaseFee),
-				"last_ledger":           fmt.Sprint(action.LastLedger),
-			})
+			hal.Render(
+				action.W,
+				map[string]string{
+					"min_accepted_fee":      fmt.Sprint(action.FeeMin),
+					"mode_accepted_fee":     fmt.Sprint(action.FeeMode),
+					"p10_accepted_fee":      fmt.Sprint(action.FeeP10),
+					"p20_accepted_fee":      fmt.Sprint(action.FeeP20),
+					"p30_accepted_fee":      fmt.Sprint(action.FeeP30),
+					"p40_accepted_fee":      fmt.Sprint(action.FeeP40),
+					"p50_accepted_fee":      fmt.Sprint(action.FeeP50),
+					"p60_accepted_fee":      fmt.Sprint(action.FeeP60),
+					"p70_accepted_fee":      fmt.Sprint(action.FeeP70),
+					"p80_accepted_fee":      fmt.Sprint(action.FeeP80),
+					"p90_accepted_fee":      fmt.Sprint(action.FeeP90),
+					"p95_accepted_fee":      fmt.Sprint(action.FeeP95),
+					"p99_accepted_fee":      fmt.Sprint(action.FeeP99),
+					"ledger_capacity_usage": action.LedgerCapacityUsage,
+					"last_ledger_base_fee":  fmt.Sprint(action.LastBaseFee),
+					"last_ledger":           fmt.Sprint(action.LastLedger),
+				},
+				action.App.config.IsIndentedJSON,
+			)
 		},
 	)
 	return action.Err

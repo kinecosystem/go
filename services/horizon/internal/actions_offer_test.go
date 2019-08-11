@@ -71,7 +71,7 @@ func TestOfferActions_SSE(t *testing.T) {
 	defer tt.Finish()
 
 	ctx := context.Background()
-	stream := sse.NewStream(ctx, httptest.NewRecorder())
+	stream := sse.NewStream(ctx, httptest.NewRecorder(), true)
 	oa := OffersByAccountAction{Action: *NewTestAction(ctx, "/foo/bar?account_id=GA5WBPYA5Y4WAEHXWR2UKO2UO4BUGHUQ74EUPKON2QHV4WRHOIRNKKH2")}
 
 	oa.SSE(stream)

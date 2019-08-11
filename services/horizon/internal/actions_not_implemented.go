@@ -16,6 +16,6 @@ type NotImplementedAction struct {
 
 // JSON is a method for actions.JSON
 func (action *NotImplementedAction) JSON() error {
-	problem.Render(action.R.Context(), action.W, hProblem.NotImplemented)
+	problem.Render(action.R.Context(), action.W, hProblem.NotImplemented, action.App.config.IsIndentedJSON)
 	return action.Err
 }

@@ -23,7 +23,7 @@ func (action *MetricsAction) JSON() error {
 		"self": hal.NewLink("/metrics"),
 	}
 
-	hal.Render(action.W, action.Snapshot)
+	hal.Render(action.W, action.Snapshot, action.App.config.IsIndentedJSON)
 	return action.Err
 }
 

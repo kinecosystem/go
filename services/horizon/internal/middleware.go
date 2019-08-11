@@ -154,14 +154,14 @@ func (w *web) RateLimitMiddleware(next http.Handler) http.Handler {
 // recoverMiddleware helps the server recover from panics. It ensures that
 // no request can fully bring down the horizon server, and it also logs the
 // panics to the logging subsystem.
-func recoverMiddleware(h http.Handler) http.Handler {
+func (we *web) RecoverMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		defer func() {
 			if rec := recover(); rec != nil {
 				err := errors.FromPanic(rec)
 				errors.ReportToSentry(err, r)
-				problem.Render(ctx, w, err)
+				problem.Render(ctx, w, err, we.isIndentedJSON)
 			}
 		}()
 

@@ -28,17 +28,19 @@ type Base struct {
 
 	appCtx             context.Context
 	sseUpdateFrequency time.Duration
-	isSetup            bool
+	isSetup,
+	isIndentedJSON bool
 }
 
 // Prepare established the common attributes that get used in nearly every
 // action.  "Child" actions may override this method to extend action, but it
 // is advised you also call this implementation to maintain behavior.
-func (base *Base) Prepare(w http.ResponseWriter, r *http.Request, appCtx context.Context, sseUpdateFrequency time.Duration) {
+func (base *Base) Prepare(w http.ResponseWriter, r *http.Request, appCtx context.Context, sseUpdateFrequency time.Duration, isIndentedJSON bool) {
 	base.W = w
 	base.R = r
 	base.sseUpdateFrequency = sseUpdateFrequency
 	base.appCtx = appCtx
+	base.isIndentedJSON = isIndentedJSON
 }
 
 // Execute trigger content negotiation and the actual execution of one of the
@@ -56,7 +58,7 @@ func (base *Base) Execute(action interface{}) {
 
 		err := action.JSON()
 		if err != nil {
-			problem.Render(ctx, base.W, err)
+			problem.Render(ctx, base.W, err, base.isIndentedJSON)
 			return
 		}
 
@@ -67,7 +69,7 @@ func (base *Base) Execute(action interface{}) {
 			goto NotAcceptable
 		}
 
-		stream := sse.NewStream(ctx, base.W)
+		stream := sse.NewStream(ctx, base.W, base.isIndentedJSON)
 
 		var oldHash [32]byte
 		for {
@@ -161,7 +163,7 @@ func (base *Base) Execute(action interface{}) {
 
 		err := action.Raw()
 		if err != nil {
-			problem.Render(ctx, base.W, err)
+			problem.Render(ctx, base.W, err, base.isIndentedJSON)
 			return
 		}
 	default:
@@ -170,7 +172,7 @@ func (base *Base) Execute(action interface{}) {
 	return
 
 NotAcceptable:
-	problem.Render(ctx, base.W, hProblem.NotAcceptable)
+	problem.Render(ctx, base.W, hProblem.NotAcceptable, base.isIndentedJSON)
 	return
 }
 

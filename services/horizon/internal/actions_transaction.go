@@ -30,7 +30,7 @@ func (action *TransactionCreateAction) JSON() error {
 		action.loadTX,
 		action.loadResult,
 		action.loadResource,
-		func() { hal.Render(action.W, action.Resource) },
+		func() { hal.Render(action.W, action.Resource, action.App.config.IsIndentedJSON) },
 	)
 	return action.Err
 }

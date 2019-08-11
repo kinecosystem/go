@@ -15,5 +15,5 @@ type RateLimitExceededAction struct {
 func (action RateLimitExceededAction) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ap := &action.Action
 	ap.Prepare(w, r)
-	problem.Render(action.R.Context(), action.W, hProblem.RateLimitExceeded)
+	problem.Render(action.R.Context(), action.W, hProblem.RateLimitExceeded, action.App.config.IsIndentedJSON)
 }
