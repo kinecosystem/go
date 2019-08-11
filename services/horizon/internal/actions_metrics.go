@@ -89,7 +89,7 @@ func (action *MetricsAction) LoadSnapshot() {
 			values["1m.rate"] = t.Rate1()
 			values["5m.rate"] = t.Rate5()
 			values["15m.rate"] = t.Rate15()
-			values["mean"] = t.RateMean()
+			values["mean.rate"] = t.RateMean()
 		}
 		action.Snapshot[name] = values
 	})
