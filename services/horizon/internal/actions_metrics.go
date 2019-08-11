@@ -3,7 +3,7 @@ package horizon
 import (
 	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/support/render/hal"
-	"github.com/rcrowley/go-metrics"
+	metrics "github.com/rcrowley/go-metrics"
 )
 
 // Interface verification
