@@ -19,6 +19,7 @@ func PopulateAccount(
 	cd []core.AccountData,
 	cs []core.Signer,
 	ct []core.Trustline,
+	shouldPopulateHalCustomLinks bool,
 ) error {
 	dest.ID = ca.Accountid
 	dest.AccountID = ca.Accountid
@@ -60,16 +61,19 @@ func PopulateAccount(
 
 	PopulateMasterSigner(&dest.Signers[len(dest.Signers)-1], ca)
 
-	lb := hal.LinkBuilder{httpx.BaseURL(ctx)}
-	self := fmt.Sprintf("/accounts/%s", ca.Accountid)
-	dest.Links.Self = lb.Link(self)
-	dest.Links.Transactions = lb.PagedLink(self, "transactions")
-	dest.Links.Operations = lb.PagedLink(self, "operations")
-	dest.Links.Payments = lb.PagedLink(self, "payments")
-	dest.Links.Effects = lb.PagedLink(self, "effects")
-	dest.Links.Offers = lb.PagedLink(self, "offers")
-	dest.Links.Trades = lb.PagedLink(self, "trades")
-	dest.Links.Data = lb.Link(self, "data/{key}")
-	dest.Links.Data.PopulateTemplated()
+	if shouldPopulateHalCustomLinks {
+		lb := hal.LinkBuilder{httpx.BaseURL(ctx)}
+		self := fmt.Sprintf("/accounts/%s", ca.Accountid)
+		dest.Links = new(AccountLinks)
+		dest.Links.Self = lb.LinkPtr(self)
+		dest.Links.Transactions = lb.PagedLinkPtr(self, "transactions")
+		dest.Links.Operations = lb.PagedLinkPtr(self, "operations")
+		dest.Links.Payments = lb.PagedLinkPtr(self, "payments")
+		dest.Links.Effects = lb.PagedLinkPtr(self, "effects")
+		dest.Links.Offers = lb.PagedLinkPtr(self, "offers")
+		dest.Links.Trades = lb.PagedLinkPtr(self, "trades")
+		dest.Links.Data = lb.LinkPtr(self, "data/{key}")
+		dest.Links.Data.PopulateTemplated()
+	}
 	return nil
 }

@@ -33,6 +33,7 @@ func PopulateAssetStat(
 	}
 	res.PT = row.SortKey
 
-	res.Links.Toml = hal.NewLink(row.Toml)
+	res.Links = new(AssetStatLinks)
+	res.Links.Toml = hal.NewLinkPtr(row.Toml)
 	return
 }

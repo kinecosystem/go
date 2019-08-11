@@ -11,7 +11,7 @@ import (
 )
 
 // AccountInfo returns the information about an account identified by addr.
-func AccountInfo(ctx context.Context, cq *core.Q, addr string) (*pHorizon.Account, error) {
+func AccountInfo(ctx context.Context, cq *core.Q, addr string, shouldPopulateHalCustomLinks bool) (*pHorizon.Account, error) {
 	var (
 		coreRecord     core.Account
 		coreData       []core.AccountData
@@ -47,6 +47,7 @@ func AccountInfo(ctx context.Context, cq *core.Q, addr string) (*pHorizon.Accoun
 		coreData,
 		coreSigners,
 		coreTrustlines,
+		shouldPopulateHalCustomLinks,
 	)
 
 	return &resource, errors.Wrap(err, "populating account")

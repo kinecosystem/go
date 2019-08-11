@@ -68,5 +68,6 @@ type Config struct {
 	// many different assets related operations.
 	EnableAssetStats bool
 	// JSON response configuration
+	ShouldPopulateHalCustomLinks bool
 	IsIndentedJSON               bool
 }

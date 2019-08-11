@@ -12,7 +12,7 @@ import (
 	"github.com/stellar/go/xdr"
 )
 
-func PopulateLedger(ctx context.Context, dest *Ledger, row history.Ledger) {
+func PopulateLedger(ctx context.Context, dest *Ledger, row history.Ledger, shouldPopulateHalCustomLinks bool) {
 	dest.ID = row.LedgerHash
 	dest.PT = row.PagingToken()
 	dest.Hash = row.LedgerHash
@@ -39,13 +39,16 @@ func PopulateLedger(ctx context.Context, dest *Ledger, row history.Ledger) {
 		dest.HeaderXDR = ""
 	}
 
-	self := fmt.Sprintf("/ledgers/%d", row.Sequence)
-	lb := hal.LinkBuilder{httpx.BaseURL(ctx)}
-	dest.Links.Self = lb.Link(self)
-	dest.Links.Transactions = lb.PagedLink(self, "transactions")
-	dest.Links.Operations = lb.PagedLink(self, "operations")
-	dest.Links.Payments = lb.PagedLink(self, "payments")
-	dest.Links.Effects = lb.PagedLink(self, "effects")
+	if shouldPopulateHalCustomLinks {
+		self := fmt.Sprintf("/ledgers/%d", row.Sequence)
+		lb := hal.LinkBuilder{httpx.BaseURL(ctx)}
+		dest.Links = new(LedgerLinks)
+		dest.Links.Self = lb.LinkPtr(self)
+		dest.Links.Transactions = lb.PagedLinkPtr(self, "transactions")
+		dest.Links.Operations = lb.PagedLinkPtr(self, "operations")
+		dest.Links.Payments = lb.PagedLinkPtr(self, "payments")
+		dest.Links.Effects = lb.PagedLinkPtr(self, "effects")
+	}
 
 	return
 }

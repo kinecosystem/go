@@ -20,6 +20,7 @@ func PopulateRoot(
 	currentProtocolVersion int32,
 	coreSupportedProtocolVersion int32,
 	friendBotURL *url.URL,
+	shouldPopulateHalCustomLinks bool,
 ) {
 	dest.HorizonSequence = ledgerState.HistoryLatest
 	dest.HistoryElderSequence = ledgerState.HistoryElder
@@ -30,19 +31,24 @@ func PopulateRoot(
 	dest.CurrentProtocolVersion = currentProtocolVersion
 	dest.CoreSupportedProtocolVersion = coreSupportedProtocolVersion
 
-	lb := hal.LinkBuilder{Base: httpx.BaseURL(ctx)}
-	if friendBotURL != nil {
-		friendbotLinkBuild := hal.LinkBuilder{Base: friendBotURL}
-		l := friendbotLinkBuild.Link("{?addr}")
-		dest.Links.Friendbot = &l
-	}
+	if shouldPopulateHalCustomLinks {
+		lb := hal.LinkBuilder{Base: httpx.BaseURL(ctx)}
 
-	dest.Links.Account = lb.Link("/accounts/{account_id}")
-	dest.Links.AccountTransactions = lb.PagedLink("/accounts/{account_id}/transactions")
-	dest.Links.Assets = lb.Link("/assets{?asset_code,asset_issuer,cursor,limit,order}")
-	dest.Links.Metrics = lb.Link("/metrics")
-	dest.Links.OrderBook = lb.Link("/order_book{?selling_asset_type,selling_asset_code,selling_asset_issuer,buying_asset_type,buying_asset_code,buying_asset_issuer,limit}")
-	dest.Links.Self = lb.Link("/")
-	dest.Links.Transaction = lb.Link("/transactions/{hash}")
-	dest.Links.Transactions = lb.PagedLink("/transactions")
+		dest.Links = new(horizon.RootLinks)
+
+		if friendBotURL != nil {
+			friendbotLinkBuild := hal.LinkBuilder{Base: friendBotURL}
+			l := friendbotLinkBuild.Link("{?addr}")
+			dest.Links.Friendbot = &l
+		}
+
+		dest.Links.Account = lb.LinkPtr("/accounts/{account_id}")
+		dest.Links.AccountTransactions = lb.PagedLinkPtr("/accounts/{account_id}/transactions")
+		dest.Links.Assets = lb.LinkPtr("/assets{?asset_code,asset_issuer,cursor,limit,order}")
+		dest.Links.Metrics = lb.LinkPtr("/metrics")
+		dest.Links.OrderBook = lb.LinkPtr("/order_book{?selling_asset_type,selling_asset_code,selling_asset_issuer,buying_asset_type,buying_asset_code,buying_asset_issuer,limit}")
+		dest.Links.Self = lb.LinkPtr("/")
+		dest.Links.Transaction = lb.LinkPtr("/transactions/{hash}")
+		dest.Links.Transactions = lb.PagedLinkPtr("/transactions")
+	}
 }

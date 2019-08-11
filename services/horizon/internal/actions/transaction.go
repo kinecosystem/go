@@ -16,7 +16,7 @@ import (
 // TransactionPage returns a page containing the transaction records of an
 // account/ledger identified by accountID/ledgerID into a page based on pq and
 // includeFailedTx.
-func TransactionPage(ctx context.Context, hq *history.Q, accountID string, ledgerID int32, includeFailedTx bool, pq db2.PageQuery) (hal.Page, error) {
+func TransactionPage(ctx context.Context, hq *history.Q, accountID string, ledgerID int32, includeFailedTx bool, pq db2.PageQuery, shouldPopulateHalCustomLinks bool) (hal.Page, error) {
 	records, err := loadTransactionRecords(hq, accountID, ledgerID, includeFailedTx, pq)
 	if err != nil {
 		return hal.Page{}, errors.Wrap(err, "loading transaction records")
@@ -31,7 +31,7 @@ func TransactionPage(ctx context.Context, hq *history.Q, accountID string, ledge
 	for _, record := range records {
 		// TODO: make PopulateTransaction return horizon.Transaction directly.
 		var res horizon.Transaction
-		resourceadapter.PopulateTransaction(ctx, &res, record)
+		resourceadapter.PopulateTransaction(ctx, &res, record, shouldPopulateHalCustomLinks)
 		page.Add(res)
 	}
 
@@ -90,7 +90,7 @@ func loadTransactionRecords(hq *history.Q, accountID string, ledgerID int32, inc
 
 // StreamTransactions streams transaction records of an account/ledger
 // identified by accountID/ledgerID based on pq and includeFailedTx.
-func StreamTransactions(ctx context.Context, s *sse.Stream, hq *history.Q, accountID string, ledgerID int32, includeFailedTx bool, pq db2.PageQuery) error {
+func StreamTransactions(ctx context.Context, s *sse.Stream, hq *history.Q, accountID string, ledgerID int32, includeFailedTx bool, pq db2.PageQuery, shouldPopulateHalCustomLinks bool) error {
 	allRecords, err := loadTransactionRecords(hq, accountID, ledgerID, includeFailedTx, pq)
 	if err != nil {
 		return errors.Wrap(err, "loading transaction records")
@@ -100,7 +100,7 @@ func StreamTransactions(ctx context.Context, s *sse.Stream, hq *history.Q, accou
 	records := allRecords[s.SentCount():]
 	for _, record := range records {
 		var res horizon.Transaction
-		resourceadapter.PopulateTransaction(ctx, &res, record)
+		resourceadapter.PopulateTransaction(ctx, &res, record, shouldPopulateHalCustomLinks)
 		s.Send(sse.Event{ID: res.PagingToken(), Data: res})
 	}
 
@@ -108,7 +108,7 @@ func StreamTransactions(ctx context.Context, s *sse.Stream, hq *history.Q, accou
 }
 
 // TransactionResource returns a single transaction resource identified by txHash.
-func TransactionResource(ctx context.Context, hq *history.Q, txHash string) (horizon.Transaction, error) {
+func TransactionResource(ctx context.Context, hq *history.Q, txHash string, shouldPopulateHalCustomLinks bool) (horizon.Transaction, error) {
 	var (
 		record   history.Transaction
 		resource horizon.Transaction
@@ -118,6 +118,6 @@ func TransactionResource(ctx context.Context, hq *history.Q, txHash string) (hor
 		return resource, errors.Wrap(err, "loading transaction record")
 	}
 
-	resourceadapter.PopulateTransaction(ctx, &resource, record)
+	resourceadapter.PopulateTransaction(ctx, &resource, record, shouldPopulateHalCustomLinks)
 	return resource, nil
 }

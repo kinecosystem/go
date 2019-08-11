@@ -294,11 +294,18 @@ var configOpts = []*support.ConfigOption{
 		Usage:       "enables asset stats during the ingestion and expose `/assets` endpoint, Enabling it has a negative impact on CPU",
 	},
 	&support.ConfigOption{
+		Name:        "populate-hal-custom-links",
+		ConfigKey:   &config.ShouldPopulateHalCustomLinks,
+		OptType:     types.Bool,
+		FlagDefault: true,
+		Usage:       "Populate HAL (Hypertext Application Language) action-specific custom links in JSON response. Disabling this improves performance",
+	},
+	&support.ConfigOption{
 		Name:        "indent-json-response",
 		ConfigKey:   &config.IsIndentedJSON,
 		OptType:     types.Bool,
 		FlagDefault: true,
-		Usage:       "Indent JSON response, for human readability. Disabling this improves performance by a small margin",
+		Usage:       "Indent JSON response, for human readability. Disabling this improves performance",
 	},
 }
 

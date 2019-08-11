@@ -38,6 +38,7 @@ type web struct {
 	sseUpdateFrequency           time.Duration
 	staleThreshold               uint
 	ingestFailedTx               bool
+	shouldPopulateHalCustomLinks bool
 	isIndentedJSON               bool
 
 	historyQ *history.Q
@@ -75,6 +76,7 @@ func mustInitWeb(ctx context.Context, hq *history.Q, cq *core.Q, updateFreq time
 		sseUpdateFrequency:           updateFreq,
 		staleThreshold:               threshold,
 		ingestFailedTx:               ingest,
+		shouldPopulateHalCustomLinks: shouldPopulateHalCustomLinks,
 		isIndentedJSON:               isIndentedJSON,
 		requestTimer:                 metrics.NewTimer(),
 		failureMeter:                 metrics.NewMeter(),
@@ -103,7 +105,7 @@ func (w *web) mustInstallMiddlewares(app *App, connTimeout time.Duration) {
 	r.Use(xff.Handler)
 	r.Use(loggerMiddleware)
 	r.Use(requestMetricsMiddleware)
-	r.Use(recoverMiddleware)
+	r.Use(w.RecoverMiddleware)
 	r.Use(chimiddleware.Compress(flate.DefaultCompression, "application/hal+json"))
 
 	c := cors.New(cors.Options{

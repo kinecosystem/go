@@ -174,7 +174,7 @@ type showActionQueryParams struct {
 
 // getAccountInfo returns the information about an account based on the provided param.
 func (w *web) getAccountInfo(ctx context.Context, qp *showActionQueryParams) (interface{}, error) {
-	return actions.AccountInfo(ctx, &core.Q{w.coreSession(ctx)}, qp.AccountID)
+	return actions.AccountInfo(ctx, &core.Q{w.coreSession(ctx)}, qp.AccountID, w.shouldPopulateHalCustomLinks)
 }
 
 // getTransactionPage returns a page containing the transaction records of an account or a ledger.
@@ -184,7 +184,7 @@ func (w *web) getTransactionPage(ctx context.Context, qp *indexActionQueryParams
 		return nil, errors.Wrap(err, "getting horizon db session")
 	}
 
-	return actions.TransactionPage(ctx, &history.Q{horizonSession}, qp.AccountID, qp.LedgerID, qp.IncludeFailedTxs, qp.PagingParams)
+	return actions.TransactionPage(ctx, &history.Q{horizonSession}, qp.AccountID, qp.LedgerID, qp.IncludeFailedTxs, qp.PagingParams, w.shouldPopulateHalCustomLinks)
 }
 
 // getTransactionRecord returns a single transaction resource.
@@ -194,7 +194,7 @@ func (w *web) getTransactionResource(ctx context.Context, qp *showActionQueryPar
 		return nil, errors.Wrap(err, "getting horizon db session")
 	}
 
-	return actions.TransactionResource(ctx, &history.Q{horizonSession}, qp.TxHash)
+	return actions.TransactionResource(ctx, &history.Q{horizonSession}, qp.TxHash, w.shouldPopulateHalCustomLinks)
 }
 
 // streamTransactions streams the transaction records of an account or a ledger.
@@ -204,5 +204,5 @@ func (w *web) streamTransactions(ctx context.Context, s *sse.Stream, qp *indexAc
 		return errors.Wrap(err, "getting horizon db session")
 	}
 
-	return actions.StreamTransactions(ctx, s, &history.Q{horizonSession}, qp.AccountID, qp.LedgerID, qp.IncludeFailedTxs, qp.PagingParams)
+	return actions.StreamTransactions(ctx, s, &history.Q{horizonSession}, qp.AccountID, qp.LedgerID, qp.IncludeFailedTxs, qp.PagingParams, w.shouldPopulateHalCustomLinks)
 }

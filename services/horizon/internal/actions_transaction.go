@@ -53,7 +53,7 @@ func (action *TransactionCreateAction) loadResult() {
 
 func (action *TransactionCreateAction) loadResource() {
 	if action.Result.Err == nil {
-		resourceadapter.PopulateTransactionSuccess(action.R.Context(), &action.Resource, action.Result)
+		resourceadapter.PopulateTransactionSuccess(action.R.Context(), &action.Resource, action.Result, action.App.config.ShouldPopulateHalCustomLinks)
 		return
 	}
 

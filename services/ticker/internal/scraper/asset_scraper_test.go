@@ -54,6 +54,9 @@ func TestShouldDiscardAsset(t *testing.T) {
 	assert.Equal(t, shouldDiscardAsset(testAsset), true)
 
 	testAsset = hProtocol.AssetStat{
+		Links: &hProtocol.AssetStatLinks{
+			Toml: hal.NewLinkPtr(""),
+		},
 		Amount:      "123901.0129310",
 		NumAccounts: 40,
 	}
@@ -62,6 +65,9 @@ func TestShouldDiscardAsset(t *testing.T) {
 	assert.Equal(t, shouldDiscardAsset(testAsset), true)
 
 	testAsset = hProtocol.AssetStat{
+		Links: &hProtocol.AssetStatLinks{
+			Toml: hal.NewLinkPtr(""),
+		},
 		Amount:      "123901.0129310",
 		NumAccounts: 40,
 	}

@@ -28,7 +28,8 @@ func PopulateOffer(ctx context.Context, dest *Offer, row core.Offer, ledger *his
 		dest.LastModifiedTime = &ledger.ClosedAt
 	}
 	lb := hal.LinkBuilder{httpx.BaseURL(ctx)}
-	dest.Links.Self = lb.Linkf("/offers/%d", row.OfferID)
-	dest.Links.OfferMaker = lb.Linkf("/accounts/%s", row.SellerID)
+	dest.Links = new(OfferLinks)
+	dest.Links.Self = lb.LinkfPtr("/offers/%d", row.OfferID)
+	dest.Links.OfferMaker = lb.LinkfPtr("/accounts/%s", row.SellerID)
 	return
 }

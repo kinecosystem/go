@@ -22,33 +22,33 @@ func TestTransactionPage(t *testing.T) {
 	ctx := context.Background()
 
 	// filter by account
-	page, err := TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H", 0, true, defaultPage)
+	page, err := TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H", 0, true, defaultPage, true)
 	tt.Assert.NoError(err)
 	tt.Assert.Equal(3, len(page.Embedded.Records))
 
-	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "GA5WBPYA5Y4WAEHXWR2UKO2UO4BUGHUQ74EUPKON2QHV4WRHOIRNKKH2", 0, true, defaultPage)
+	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "GA5WBPYA5Y4WAEHXWR2UKO2UO4BUGHUQ74EUPKON2QHV4WRHOIRNKKH2", 0, true, defaultPage, true)
 	tt.Assert.NoError(err)
 	tt.Assert.Equal(1, len(page.Embedded.Records))
 
-	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU", 0, true, defaultPage)
+	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU", 0, true, defaultPage, true)
 	tt.Assert.NoError(err)
 	tt.Assert.Equal(2, len(page.Embedded.Records))
 
 	// filter by ledger
-	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "", 1, true, defaultPage)
+	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "", 1, true, defaultPage, true)
 	tt.Assert.NoError(err)
 	tt.Assert.Equal(0, len(page.Embedded.Records))
 
-	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "", 2, true, defaultPage)
+	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "", 2, true, defaultPage, true)
 	tt.Assert.NoError(err)
 	tt.Assert.Equal(3, len(page.Embedded.Records))
 
-	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "", 3, true, defaultPage)
+	page, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "", 3, true, defaultPage, true)
 	tt.Assert.NoError(err)
 	tt.Assert.Equal(1, len(page.Embedded.Records))
 
 	// conflict fields
-	_, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H", 1, true, defaultPage)
+	_, err = TransactionPage(ctx, &history.Q{tt.HorizonSession()}, "GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H", 1, true, defaultPage, true)
 	tt.Assert.Error(err)
 }
 

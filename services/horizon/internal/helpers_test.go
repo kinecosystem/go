@@ -32,6 +32,7 @@ func NewTestConfig() Config {
 		LogLevel:                     supportLog.InfoLevel,
 		NetworkPassphrase:            network.TestNetworkPassphrase,
 		IngestFailedTransactions:     true,
+		ShouldPopulateHalCustomLinks: true,
 		IsIndentedJSON:               true,
 	}
 }

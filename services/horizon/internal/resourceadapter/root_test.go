@@ -20,7 +20,8 @@ func TestPopulateRoot(t *testing.T) {
 		"passphrase",
 		100,
 		101,
-		urlMustParse(t, "https://friendbot.example.com"))
+		urlMustParse(t, "https://friendbot.example.com"),
+		true)
 
 	assert.Equal(t, int32(1), res.CoreSequence)
 	assert.Equal(t, int32(2), res.HistoryElderSequence)
@@ -40,7 +41,8 @@ func TestPopulateRoot(t *testing.T) {
 		"passphrase",
 		100,
 		101,
-		nil)
+		nil,
+		true)
 
 	assert.Equal(t, int32(1), res.CoreSequence)
 	assert.Equal(t, int32(2), res.HistoryElderSequence)

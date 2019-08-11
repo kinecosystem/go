@@ -18,6 +18,7 @@ func PopulateTransaction(
 	ctx context.Context,
 	dest *Transaction,
 	row history.Transaction,
+	shouldPopulateHalCustomLinks bool,
 ) {
 	dest.ID = row.TransactionHash
 	dest.PT = row.PagingToken()
@@ -49,13 +50,18 @@ func PopulateTransaction(
 	dest.ValidAfter = timeString(dest, row.ValidAfter)
 
 	lb := hal.LinkBuilder{Base: httpx.BaseURL(ctx)}
-	dest.Links.Account = lb.Link("/accounts", dest.Account)
-	dest.Links.Ledger = lb.Link("/ledgers", fmt.Sprintf("%d", dest.Ledger))
-	dest.Links.Operations = lb.PagedLink("/transactions", dest.ID, "operations")
-	dest.Links.Effects = lb.PagedLink("/transactions", dest.ID, "effects")
-	dest.Links.Self = lb.Link("/transactions", dest.ID)
-	dest.Links.Succeeds = lb.Linkf("/transactions?order=desc&cursor=%s", dest.PT)
-	dest.Links.Precedes = lb.Linkf("/transactions?order=asc&cursor=%s", dest.PT)
+
+	dest.Links = new(TransactionLinks)
+
+	if shouldPopulateHalCustomLinks {
+		dest.Links.Account = lb.LinkPtr("/accounts", dest.Account)
+		dest.Links.Ledger = lb.LinkPtr("/ledgers", fmt.Sprintf("%d", dest.Ledger))
+		dest.Links.Operations = lb.PagedLinkPtr("/transactions", dest.ID, "operations")
+		dest.Links.Effects = lb.PagedLinkPtr("/transactions", dest.ID, "effects")
+		dest.Links.Self = lb.LinkPtr("/transactions", dest.ID)
+	}
+	dest.Links.Succeeds = lb.LinkfPtr("/transactions?order=desc&cursor=%s", dest.PT)
+	dest.Links.Precedes = lb.LinkfPtr("/transactions?order=asc&cursor=%s", dest.PT)
 }
 
 func timeString(res *Transaction, in null.Int) string {

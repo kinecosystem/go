@@ -30,6 +30,7 @@ func (action *RootAction) JSON() error {
 		action.App.currentProtocolVersion,
 		action.App.coreSupportedProtocolVersion,
 		action.App.config.FriendbotURL,
+		action.App.config.ShouldPopulateHalCustomLinks,
 	)
 
 	hal.Render(action.W, res, action.App.config.IsIndentedJSON)

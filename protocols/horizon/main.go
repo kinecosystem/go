@@ -26,18 +26,21 @@ var KeyTypeNames = map[strkey.VersionByte]string{
 	strkey.VersionByteHashTx:    "preauth_tx",
 }
 
+// AccountLinks is the HAL _links section of an Account response.
+type AccountLinks struct {
+	Self         *hal.Link `json:"self,omitempty"`
+	Transactions *hal.Link `json:"transactions,omitempty"`
+	Operations   *hal.Link `json:"operations,omitempty"`
+	Payments     *hal.Link `json:"payments,omitempty"`
+	Effects      *hal.Link `json:"effects,omitempty"`
+	Offers       *hal.Link `json:"offers,omitempty"`
+	Trades       *hal.Link `json:"trades,omitempty"`
+	Data         *hal.Link `json:"data,omitempty"`
+}
+
 // Account is the summary of an account
 type Account struct {
-	Links struct {
-		Self         hal.Link `json:"self"`
-		Transactions hal.Link `json:"transactions"`
-		Operations   hal.Link `json:"operations"`
-		Payments     hal.Link `json:"payments"`
-		Effects      hal.Link `json:"effects"`
-		Offers       hal.Link `json:"offers"`
-		Trades       hal.Link `json:"trades"`
-		Data         hal.Link `json:"data"`
-	} `json:"_links"`
+	Links *AccountLinks `json:"_links,omitempty"`
 
 	ID                   string            `json:"id"`
 	AccountID            string            `json:"account_id"`
@@ -141,11 +144,14 @@ type AccountThresholds struct {
 // Asset represents a single asset
 type Asset base.Asset
 
+// AssetStatLinks is the HAL _links section of an AssetStat response.
+type AssetStatLinks struct {
+	Toml *hal.Link `json:"toml,omitempty"`
+}
+
 // AssetStat represents the statistics for a single Asset
 type AssetStat struct {
-	Links struct {
-		Toml hal.Link `json:"toml"`
-	} `json:"_links"`
+	Links *AssetStatLinks `json:"_links,omitempty"`
 
 	base.Asset
 	PT          string       `json:"paging_token"`
@@ -170,15 +176,19 @@ type Balance struct {
 	base.Asset
 }
 
+// LedgerLinks is the HAL _links section of a Ledger response.
+type LedgerLinks struct {
+	Self         *hal.Link `json:"self,omitempty"`
+	Transactions *hal.Link `json:"transactions,omitempty"`
+	Operations   *hal.Link `json:"operations,omitempty"`
+	Payments     *hal.Link `json:"payments,omitempty"`
+	Effects      *hal.Link `json:"effects,omitempty"`
+}
+
 // Ledger represents a single closed ledger
 type Ledger struct {
-	Links struct {
-		Self         hal.Link `json:"self"`
-		Transactions hal.Link `json:"transactions"`
-		Operations   hal.Link `json:"operations"`
-		Payments     hal.Link `json:"payments"`
-		Effects      hal.Link `json:"effects"`
-	} `json:"_links"`
+	Links *LedgerLinks `json:"_links,omitempty"`
+
 	ID                         string    `json:"id"`
 	PT                         string    `json:"paging_token"`
 	Hash                       string    `json:"hash"`
@@ -201,12 +211,15 @@ func (l Ledger) PagingToken() string {
 	return l.PT
 }
 
+// OfferLinks is the HAL _links section of an Offer response.
+type OfferLinks struct {
+	Self       *hal.Link `json:"self,omitempty"`
+	OfferMaker *hal.Link `json:"offer_maker,omitempty"`
+}
+
 // Offer is the display form of an offer to trade currency.
 type Offer struct {
-	Links struct {
-		Self       hal.Link `json:"self"`
-		OfferMaker hal.Link `json:"offer_maker"`
-	} `json:"_links"`
+	Links *OfferLinks `json:"_links,omitempty"`
 
 	ID                 int64      `json:"id"`
 	PT                 string     `json:"paging_token"`
@@ -260,19 +273,22 @@ type PriceLevel struct {
 	Amount string `json:"amount"`
 }
 
+// RootLinks is the HAL _links section of a Root response.
+type RootLinks struct {
+	Account             *hal.Link `json:"account,omitempty"`
+	AccountTransactions *hal.Link `json:"account_transactions,omitempty"`
+	Assets              *hal.Link `json:"assets,omitempty"`
+	Friendbot           *hal.Link `json:"friendbot,omitempty"`
+	Metrics             *hal.Link `json:"metrics,omitempty"`
+	OrderBook           *hal.Link `json:"order_book,omitempty"`
+	Self                *hal.Link `json:"self,omitempty"`
+	Transaction         *hal.Link `json:"transaction,omitempty"`
+	Transactions        *hal.Link `json:"transactions,omitempty"`
+}
+
 // Root is the initial map of links into the api.
 type Root struct {
-	Links struct {
-		Account             hal.Link  `json:"account"`
-		AccountTransactions hal.Link  `json:"account_transactions"`
-		Assets              hal.Link  `json:"assets"`
-		Friendbot           *hal.Link `json:"friendbot,omitempty"`
-		Metrics             hal.Link  `json:"metrics"`
-		OrderBook           hal.Link  `json:"order_book"`
-		Self                hal.Link  `json:"self"`
-		Transaction         hal.Link  `json:"transaction"`
-		Transactions        hal.Link  `json:"transactions"`
-	} `json:"_links"`
+	Links *RootLinks `json:"_links,omitempty"`
 
 	HorizonVersion               string `json:"horizon_version"`
 	StellarCoreVersion           string `json:"core_version"`
@@ -291,14 +307,17 @@ type Signer struct {
 	Type   string `json:"type"`
 }
 
+// TradeLinks is the HAL _links section of a Trade response.
+type TradeLinks struct {
+	Self      *hal.Link `json:"self,omitempty"`
+	Base      *hal.Link `json:"base,omitempty"`
+	Counter   *hal.Link `json:"counter,omitempty"`
+	Operation *hal.Link `json:"operation,omitempty"`
+}
+
 // Trade represents a horizon digested trade
 type Trade struct {
-	Links struct {
-		Self      hal.Link `json:"self"`
-		Base      hal.Link `json:"base"`
-		Counter   hal.Link `json:"counter"`
-		Operation hal.Link `json:"operation"`
-	} `json:"_links"`
+	Links *TradeLinks `json:"_links,omitempty"`
 
 	ID                 string    `json:"id"`
 	PT                 string    `json:"paging_token"`
@@ -325,17 +344,20 @@ func (res Trade) PagingToken() string {
 	return res.PT
 }
 
+// TradeEffectLinks is the HAL _links section in a TradeEffect response.
+type TradeEffectLinks struct {
+	Self      *hal.Link `json:"self,omitempty"`
+	Seller    *hal.Link `json:"seller,omitempty"`
+	Buyer     *hal.Link `json:"buyer,omitempty"`
+	Operation *hal.Link `json:"operation,omitempty"`
+}
+
 // TradeEffect represents a trade effect resource.  NOTE (scott, 2017-12-08):
 // this resource is being added back in temporarily to deal with a deploy snafu.
 // I didn't properly message the community that we were changing the response
 // format, and so we're adding this back in to allow transition.
 type TradeEffect struct {
-	Links struct {
-		Self      hal.Link `json:"self"`
-		Seller    hal.Link `json:"seller"`
-		Buyer     hal.Link `json:"buyer"`
-		Operation hal.Link `json:"operation"`
-	} `json:"_links"`
+	Links *TradeEffectLinks `json:"_links,omitempty"`
 
 	ID                string    `json:"id"`
 	PT                string    `json:"paging_token"`
@@ -375,17 +397,21 @@ func (res TradeAggregation) PagingToken() string {
 	return string(res.Timestamp)
 }
 
+// TransactionLinks is the HAL _links section of a transaction response.
+type TransactionLinks struct {
+	Self       *hal.Link `json:"self,omitempty"`
+	Account    *hal.Link `json:"account,omitempty"`
+	Ledger     *hal.Link `json:"ledger,omitempty"`
+	Operations *hal.Link `json:"operations,omitempty"`
+	Effects    *hal.Link `json:"effects,omitempty"`
+	Precedes   *hal.Link `json:"precedes,omitempty"`
+	Succeeds   *hal.Link `json:"succeeds,omitempty"`
+}
+
 // Transaction represents a single, successful transaction
 type Transaction struct {
-	Links struct {
-		Self       hal.Link `json:"self"`
-		Account    hal.Link `json:"account"`
-		Ledger     hal.Link `json:"ledger"`
-		Operations hal.Link `json:"operations"`
-		Effects    hal.Link `json:"effects"`
-		Precedes   hal.Link `json:"precedes"`
-		Succeeds   hal.Link `json:"succeeds"`
-	} `json:"_links"`
+	Links *TransactionLinks `json:"_links,omitempty"`
+
 	ID              string    `json:"id"`
 	PT              string    `json:"paging_token"`
 	Successful      bool      `json:"successful"`
@@ -441,12 +467,16 @@ type TransactionResultCodes struct {
 	OperationCodes  []string `json:"operations,omitempty"`
 }
 
+// TransactionSuccessLinks is the HAL _links section in a TransactionSuccess response.
+type TransactionSuccessLinks struct {
+	Transaction *hal.Link `json:"transaction,omitempty"`
+}
+
 // TransactionSuccess represents the result of a successful transaction
 // submission.
 type TransactionSuccess struct {
-	Links struct {
-		Transaction hal.Link `json:"transaction"`
-	} `json:"_links"`
+	Links *TransactionSuccessLinks `json:"_links,omitempty"`
+
 	Hash   string `json:"hash"`
 	Ledger int32  `json:"ledger"`
 	Env    string `json:"envelope_xdr"`
@@ -465,6 +495,18 @@ func (resp TransactionSuccess) TransactionSuccessToString() (s string) {
 	s += fmt.Sprintln("    Meta:", resp.Meta)
 
 	return
+}
+
+// String implements the fmt.Stringer interface, and behaves the same like calling fmt.Print(),
+// except it dereferences the TransactionSuccess.Links member if it is not nil.
+//
+// This implementation is necessary due to failed example test in ../../client/horizonclient package.
+func (resp TransactionSuccess) String() string {
+	var links string
+	if resp.Links != nil {
+		links = fmt.Sprintf("{{%s %t}} ", resp.Links.Transaction.Href, resp.Links.Transaction.Templated)
+	}
+	return fmt.Sprintf("{%s%s %d %s %s %s}", links, resp.Hash, resp.Ledger, resp.Env, resp.Result, resp.Meta)
 }
 
 // KeyTypeFromAddress converts the version byte of the provided strkey encoded
@@ -501,7 +543,8 @@ type AccountData struct {
 
 // TradeAggregationsPage returns a list of aggregated trade records, aggregated by resolution
 type TradeAggregationsPage struct {
-	Links    hal.Links `json:"_links"`
+	Links *hal.Links `json:"_links,omitempty"`
+
 	Embedded struct {
 		Records []TradeAggregation `json:"records"`
 	} `json:"_embedded"`
@@ -509,7 +552,8 @@ type TradeAggregationsPage struct {
 
 // TradesPage returns a list of trade records
 type TradesPage struct {
-	Links    hal.Links `json:"_links"`
+	Links *hal.Links `json:"_links,omitempty"`
+
 	Embedded struct {
 		Records []Trade `json:"records"`
 	} `json:"_embedded"`
@@ -517,7 +561,8 @@ type TradesPage struct {
 
 // OffersPage returns a list of offers
 type OffersPage struct {
-	Links    hal.Links `json:"_links"`
+	Links *hal.Links `json:"_links,omitempty"`
+
 	Embedded struct {
 		Records []Offer `json:"records"`
 	} `json:"_embedded"`
@@ -525,7 +570,8 @@ type OffersPage struct {
 
 // AssetsPage contains page of assets returned by Horizon.
 type AssetsPage struct {
-	Links    hal.Links `json:"_links"`
+	Links *hal.Links `json:"_links,omitempty"`
+
 	Embedded struct {
 		Records []AssetStat
 	} `json:"_embedded"`
@@ -533,7 +579,8 @@ type AssetsPage struct {
 
 // LedgersPage contains page of ledger information returned by Horizon
 type LedgersPage struct {
-	Links    hal.Links `json:"_links"`
+	Links *hal.Links `json:"_links,omitempty"`
+
 	Embedded struct {
 		Records []Ledger
 	} `json:"_embedded"`
@@ -569,7 +616,8 @@ type LogTotalMetric struct {
 
 // Metrics represents a response of metrics from horizon
 type Metrics struct {
-	Links                  hal.Links      `json:"_links"`
+	Links *hal.Links `json:"_links,omitempty"`
+
 	GoRoutines             SingleMetric   `json:"goroutines"`
 	HistoryElderLedger     SingleMetric   `json:"history.elder_ledger"`
 	HistoryLatestLedger    SingleMetric   `json:"history.latest_ledger"`
@@ -616,7 +664,8 @@ type FeeStats struct {
 
 // TransactionsPage contains records of transaction information returned by Horizon
 type TransactionsPage struct {
-	Links    hal.Links `json:"_links"`
+	Links *hal.Links `json:"_links,omitempty"`
+
 	Embedded struct {
 		Records []Transaction
 	} `json:"_embedded"`
@@ -624,7 +673,8 @@ type TransactionsPage struct {
 
 // PathsPage contains records of payment paths found by horizon
 type PathsPage struct {
-	Links    hal.Links `json:"_links"`
+	Links *hal.Links `json:"_links,omitempty"`
+
 	Embedded struct {
 		Records []Path
 	} `json:"_embedded"`

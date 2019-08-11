@@ -57,7 +57,7 @@ func (action *LedgerIndexAction) SSE(stream *sse.Stream) error {
 			records := action.Records[stream.SentCount():]
 			for _, record := range records {
 				var res horizon.Ledger
-				resourceadapter.PopulateLedger(action.R.Context(), &res, record)
+				resourceadapter.PopulateLedger(action.R.Context(), &res, record, action.App.config.ShouldPopulateHalCustomLinks)
 				stream.Send(sse.Event{ID: res.PagingToken(), Data: res})
 			}
 		},
@@ -78,7 +78,7 @@ func (action *LedgerIndexAction) loadRecords() {
 func (action *LedgerIndexAction) loadPage() {
 	for _, record := range action.Records {
 		var res horizon.Ledger
-		resourceadapter.PopulateLedger(action.R.Context(), &res, record)
+		resourceadapter.PopulateLedger(action.R.Context(), &res, record, action.App.config.ShouldPopulateHalCustomLinks)
 		action.Page.Add(res)
 	}
 
@@ -108,7 +108,7 @@ func (action *LedgerShowAction) JSON() error {
 		action.loadRecord,
 		func() {
 			var res horizon.Ledger
-			resourceadapter.PopulateLedger(action.R.Context(), &res, action.Record)
+			resourceadapter.PopulateLedger(action.R.Context(), &res, action.Record, action.App.config.ShouldPopulateHalCustomLinks)
 			hal.Render(action.W, res, action.App.config.IsIndentedJSON)
 		},
 	)
