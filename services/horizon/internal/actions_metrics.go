@@ -75,7 +75,7 @@ func (action *MetricsAction) LoadSnapshot() {
 			t := metric.Snapshot()
 			ps := t.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
 			values["type"] = "timer"
-			values["duration_unit"] = "ms"
+			values["duration_unit"] = "ns"
 			values["count"] = t.Count()
 			values["min"] = t.Min()
 			values["max"] = t.Max()
