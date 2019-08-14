@@ -1,0 +1,31 @@
+---
+version: "3"
+
+services:
+  # go development environment to build and run unit tests in
+  horizon:
+    build: .
+    environment:
+      MYSQL_HOST: 127.0.0.1
+    volumes:
+      - ../../../:/go/src/github.com/kinecosystem/go
+      - ./volumes/postgresql/var/run/postgresql:/var/run/postgresql
+    network_mode: host
+
+  postgresql:
+    image: postgres:10-alpine
+    network_mode: host
+    environment:
+      POSTGRES_USER: root
+    volumes:
+      - ./volumes/postgresql/var/run/postgresql:/var/run/postgresql
+
+  mysql:
+    image: mysql:5
+    network_mode: host
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+
+  redis:
+    image: redis:5
+    network_mode: host
