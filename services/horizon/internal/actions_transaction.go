@@ -148,7 +148,12 @@ func (action *TransactionShowAction) JSON() error {
 		action.loadParams,
 		action.loadRecord,
 		action.loadResource,
-		func() { hal.Render(action.W, action.Resource) },
+		func() {
+			if len(action.Resource.Signatures) > 1 {
+				action.Resource.FeePaid = 0
+			}
+			hal.Render(action.W, action.Resource)
+		},
 	)
 	return action.Err
 }
