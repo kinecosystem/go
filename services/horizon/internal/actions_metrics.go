@@ -1,9 +1,9 @@
 package horizon
 
 import (
-	metrics "github.com/rcrowley/go-metrics"
 	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/support/render/hal"
+	metrics "github.com/rcrowley/go-metrics"
 )
 
 // Interface verification
@@ -39,6 +39,7 @@ func (action *MetricsAction) LoadSnapshot() {
 		case metrics.Counter:
 			values["count"] = metric.Count()
 		case metrics.Gauge:
+			values["type"] = "gauge"
 			values["value"] = metric.Value()
 		case metrics.GaugeFloat64:
 			values["value"] = metric.Value()
@@ -51,6 +52,7 @@ func (action *MetricsAction) LoadSnapshot() {
 		case metrics.Histogram:
 			h := metric.Snapshot()
 			ps := h.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
+			values["type"] = "histogram"
 			values["count"] = h.Count()
 			values["min"] = h.Min()
 			values["max"] = h.Max()
@@ -63,6 +65,7 @@ func (action *MetricsAction) LoadSnapshot() {
 			values["99.9%"] = ps[4]
 		case metrics.Meter:
 			m := metric.Snapshot()
+			values["type"] = "meter"
 			values["count"] = m.Count()
 			values["1m.rate"] = m.Rate1()
 			values["5m.rate"] = m.Rate5()
@@ -71,6 +74,8 @@ func (action *MetricsAction) LoadSnapshot() {
 		case metrics.Timer:
 			t := metric.Snapshot()
 			ps := t.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
+			values["type"] = "timer"
+			values["duration_unit"] = "ns"
 			values["count"] = t.Count()
 			values["min"] = t.Min()
 			values["max"] = t.Max()
