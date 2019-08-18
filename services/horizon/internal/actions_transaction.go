@@ -1,8 +1,8 @@
 package horizon
 
 import (
-	"net/http"
-
+	"encoding/json"
+	"fmt"
 	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
@@ -11,8 +11,11 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/render/sse"
 	"github.com/kinecosystem/go/services/horizon/internal/resourceadapter"
 	"github.com/kinecosystem/go/services/horizon/internal/txsub"
+	"github.com/kinecosystem/go/support/log"
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
+	"io/ioutil"
+	"net/http"
 )
 
 // This file contains the actions:
@@ -128,6 +131,15 @@ type TransactionShowAction struct {
 	Record   history.Transaction
 	Resource horizon.Transaction
 }
+type InfoResponse struct {
+	Info struct {
+		WhiteListAccount string `json:"whitelist"`
+	}
+}
+
+type Accounts struct {
+	WhitelistedAccounts map[string]string `json:"data"`
+}
 
 func (action *TransactionShowAction) loadParams() {
 	action.Hash = action.GetString("tx_id")
@@ -148,9 +160,40 @@ func (action *TransactionShowAction) JSON() error {
 		action.loadParams,
 		action.loadRecord,
 		action.loadResource,
+<<<<<<< e4620e391251814a1f771d7db78b45af2cc2a721
 		func() { hal.Render(action.W, action.Resource) },
+=======
+		func() {
+			ValidateFee(action, action.App.config.StellarCoreURL)
+			hal.Render(action.W, action.Resource)
+		},
+>>>>>>> fix fee paid bug for whitelisted accounts. if the source account is whitelisted the fee paid will return 0, if the source account is not whitelisted it will return the actual paid fee for that transaction.
 	)
 	return action.Err
+}
+
+func ValidateFee(action *TransactionShowAction, CoreUrl string) {
+	WhiteList := InfoResponse{}
+	CoreInfoUrl := fmt.Sprintf("%s/info", CoreUrl)
+	response, err := http.Get(CoreInfoUrl)
+	if err != nil {
+		log.Errorf("The HTTP request failed with error %s\n", err)
+	}
+	data, _ := ioutil.ReadAll(response.Body)
+	_ = json.Unmarshal(data, &WhiteList)
+
+	WhiteLiseAccount := Accounts{}
+	localUrl := fmt.Sprintf("http://localhost:8000/accounts/%s", WhiteList.Info.WhiteListAccount)
+	response, err = http.Get(localUrl)
+	if err != nil {
+		log.Errorf("The HTTP request failed with error %s\n", err)
+	}
+	data, _ = ioutil.ReadAll(response.Body)
+	_ = json.Unmarshal(data, &WhiteLiseAccount)
+
+	if _, found := WhiteLiseAccount.WhitelistedAccounts[action.Resource.Account]; found {
+		action.Resource.FeePaid = 0
+	}
 }
 
 // Interface verification
