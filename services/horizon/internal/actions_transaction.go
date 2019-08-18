@@ -1,8 +1,11 @@
 package horizon
 
 import (
+<<<<<<< e4620e391251814a1f771d7db78b45af2cc2a721
 	"net/http"
 
+=======
+>>>>>>> fix fee paid bug for whitelisted accounts. if the source account is whitelisted the fee paid will return 0, if the source account is not whitelisted it will return the actual paid fee for that transaction.
 	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
@@ -13,6 +16,10 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/txsub"
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
+<<<<<<< e4620e391251814a1f771d7db78b45af2cc2a721
+=======
+	"net/http"
+>>>>>>> fix fee paid bug for whitelisted accounts. if the source account is whitelisted the fee paid will return 0, if the source account is not whitelisted it will return the actual paid fee for that transaction.
 )
 
 // This file contains the actions:
@@ -128,6 +135,13 @@ type TransactionShowAction struct {
 	Record   history.Transaction
 	Resource horizon.Transaction
 }
+<<<<<<< e4620e391251814a1f771d7db78b45af2cc2a721
+=======
+
+type WhitelistAccount struct {
+	WhitelistedAccounts map[string]string `json:"data"`
+}
+>>>>>>> fix fee paid bug for whitelisted accounts. if the source account is whitelisted the fee paid will return 0, if the source account is not whitelisted it will return the actual paid fee for that transaction.
 
 func (action *TransactionShowAction) loadParams() {
 	action.Hash = action.GetString("tx_id")
@@ -149,10 +163,35 @@ func (action *TransactionShowAction) JSON() error {
 		action.loadRecord,
 		action.loadResource,
 		func() { hal.Render(action.W, action.Resource) },
+<<<<<<< e4620e391251814a1f771d7db78b45af2cc2a721
+=======
+=======
+		func() {
+			ValidateFee(action)
+			hal.Render(action.W, action.Resource)
+		},
+>>>>>>> fix fee paid bug for whitelisted accounts. if the source account is whitelisted the fee paid will return 0, if the source account is not whitelisted it will return the actual paid fee for that transaction.
+>>>>>>> fix fee paid bug for whitelisted accounts. if the source account is whitelisted the fee paid will return 0, if the source account is not whitelisted it will return the actual paid fee for that transaction.
 	)
 	return action.Err
 }
 
+<<<<<<< e4620e391251814a1f771d7db78b45af2cc2a721
+=======
+func ValidateFee(action *TransactionShowAction) {
+	mAccountAction := AccountShowAction{}
+	mWhiteListAccount := WhitelistAccount{}
+
+	_ = action.CoreQ().AllDataByAddress(&mAccountAction.CoreData, action.App.WhiteListAccount)
+	for _, d := range mAccountAction.CoreData {
+		mWhiteListAccount.WhitelistedAccounts[d.Key] = d.Value
+	}
+	if _, found := mWhiteListAccount.WhitelistedAccounts[action.Resource.Account]; found {
+		action.Resource.FeePaid = 0
+	}
+}
+
+>>>>>>> fix fee paid bug for whitelisted accounts. if the source account is whitelisted the fee paid will return 0, if the source account is not whitelisted it will return the actual paid fee for that transaction.
 // Interface verification
 var _ actions.JSONer = (*TransactionCreateAction)(nil)
 
