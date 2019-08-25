@@ -359,6 +359,7 @@ func (ingest *Ingestion) Transaction(
 	id int64,
 	tx *core.Transaction,
 	fee *core.TransactionFee,
+	whiteListData map[string]string,
 ) {
 	// Enquote empty signatures
 	signatures := tx.Base64Signatures()
@@ -373,7 +374,7 @@ func (ingest *Ingestion) Transaction(
 		tx.Index,
 		tx.SourceAddress(),
 		tx.Sequence(),
-		tx.Fee(),
+		tx.Fee(whiteListData),
 		len(tx.Envelope.Tx.Operations),
 		tx.EnvelopeXDR(),
 		tx.ResultXDR(),

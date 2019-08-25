@@ -128,10 +128,6 @@ type TransactionShowAction struct {
 	Resource horizon.Transaction
 }
 
-type WhitelistAccount struct {
-	WhitelistedAccounts map[string]string `json:"data"`
-}
-
 func (action *TransactionShowAction) loadParams() {
 	action.Hash = action.GetString("tx_id")
 }
@@ -151,25 +147,9 @@ func (action *TransactionShowAction) JSON() error {
 		action.loadParams,
 		action.loadRecord,
 		action.loadResource,
-		func() {
-			validateFee(action)
-			hal.Render(action.W, action.Resource)
-		},
+		func() { hal.Render(action.W, action.Resource) },
 	)
 	return action.Err
-}
-
-func validateFee(action *TransactionShowAction) {
-	mAccountAction := AccountShowAction{}
-	mWhiteListAccount := WhitelistAccount{}
-
-	_ = action.CoreQ().AllDataByAddress(&mAccountAction.CoreData, action.App.WhiteListAccount)
-	for _, d := range mAccountAction.CoreData {
-		mWhiteListAccount.WhitelistedAccounts[d.Key] = d.Value
-	}
-	if _, found := mWhiteListAccount.WhitelistedAccounts[action.Resource.Account]; found {
-		action.Resource.FeePaid = 0
-	}
 }
 
 // Interface verification

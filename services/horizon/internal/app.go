@@ -48,7 +48,6 @@ type App struct {
 	ingester                     *ingest.System
 	reaper                       *reap.System
 	ticks                        *time.Ticker
-	WhiteListAccount             string
 
 	// metrics
 	metrics                  metrics.Registry
@@ -280,7 +279,7 @@ func (a *App) UpdateStellarCoreInfo() {
 	a.coreVersion = resp.Info.Build
 	a.currentProtocolVersion = int32(resp.Info.Ledger.Version)
 	a.coreSupportedProtocolVersion = int32(resp.Info.ProtocolVersion)
-	a.WhiteListAccount = resp.Info.WhiteListAccount
+	a.config.WhiteListAccount = resp.Info.WhiteListAccount
 }
 
 // UpdateMetrics triggers a refresh of several metrics gauges, such as open
@@ -315,7 +314,7 @@ func (a *App) Tick() {
 	wg.Wait()
 
 	if a.ingester != nil {
-		go a.ingester.Tick()
+		go a.ingester.Tick(a.config.WhiteListAccount)
 	}
 
 	wg.Add(2)
