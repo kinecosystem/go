@@ -61,3 +61,36 @@ func TestSignatures(t *testing.T) {
 	tt.Assert.Equal("8qkkeKaKfsbgInyIkzXJhqJE5/Ufxri2LdxmyKkgkT6I3sPmvrs5cPWQSzEQyhV750IW2ds97xTHqTpOfuZCAg==", signatures[0])
 	tt.Assert.Equal("", signatures[1])
 }
+
+func TestFee(t *testing.T) {
+	tt := test.Start(t).Scenario("base")
+	defer tt.Finish()
+	var tx Transaction
+	xdr.SafeUnmarshalBase64("AAAAAEfdynqlBdqSRiFQ+TcvlVB0Vr025FEJhm2H8k2Drs7QAAAD5wAbppsAAAAPAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAEfdynqlBdqSRiFQ+TcvlVB0Vr025FEJhm2H8k2Drs7QAAAAAAAAAAAD+DxAAAAAAAAAAAGDrs7QAAAAQGYgWJlJrfeRHuGT2KZqePqlbLKUeD4KWStP6QVyWdC84trpcHH84zcHcdz+j5tWtECyITn9pvxfHXbch5x0bgs=", &tx.Envelope)
+
+	// #1
+	// Source account is whitelisted
+	WhiteListData := map[string]string{
+		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
+	}
+	tt.Assert.Equal(tx.Fee(WhiteListData), 0)
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), 999)
+
+	// #2
+	// Source account is NOT whitelisted
+	WhiteListData = map[string]string{
+		"GAMRH6ZXD2ZMXUOPUBDFHPJXWGIMVTIU26RTWV4OLJ5SQCLVFD2G552E": "dSj0bg==",
+	}
+	tt.Assert.Equal(tx.Fee(WhiteListData), 999)
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), 0)
+
+	xdr.SafeUnmarshalBase64("AAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAD5wAeR6IAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAAAAAAAAAD+DxAAAAAAAAAAAISEWYAAAAAQBfY4JbVVG0uCJVbwiWpOWynWMHtlNYXgEq9AwTycKh2IZyOFBP3UkdzqqqvgO4q73/9OTigmU3X8ODZ8TkmMguDrs7QAAAAQK49fDeOKvOLEKEHRE0Bhdg6sV3jGxuHRZwiutnNxJNAQonk2M79ZVyc/qqASwJawRVv/+KOVEuSDFYw5W/RWAc=", &tx.Envelope)
+	// #3
+	// Source account is NOT whitelisted BUT whitelisted account sign on the transaction
+	WhiteListData = map[string]string{
+		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
+	}
+	tt.Assert.Equal(tx.Fee(WhiteListData), 0)
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), 999)
+
+}

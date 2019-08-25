@@ -41,8 +41,11 @@ func TestEmptySignature(t *testing.T) {
 	}
 
 	transactionFee := &core.TransactionFee{}
-
-	ingestion.Transaction(1, transaction, transactionFee)
+	WhiteListData := map[string]string{
+		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
+		"GB74VHWBGITCW6S5N4B5SWVMT34VAQDPT2EXZPUWIQXVSKDCUDBT7NSC": "YqDDPw==",
+	}
+	ingestion.Transaction(1, transaction, transactionFee, WhiteListData)
 	assert.Equal(t, 1, len(ingestion.builders[TransactionsTableName].rows))
 
 	err := ingestion.Flush()
@@ -52,6 +55,46 @@ func TestEmptySignature(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestWhiteListIngest(t *testing.T) {
+	tt := test.Start(t).ScenarioWithoutHorizon("ingest_fee")
+	defer tt.Finish()
+
+	s := ingest(tt, false)
+	tt.Require.NoError(s.Err)
+	q := history.Q{Session: s.Ingestion.DB}
+
+	ingestion := Ingestion{
+		DB: &db.Session{
+			DB: testDB.Horizon(t),
+		},
+	}
+	_ = ingestion.Start()
+
+	WhiteListData := map[string]string{
+		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
+		"GB74VHWBGITCW6S5N4B5SWVMT34VAQDPT2EXZPUWIQXVSKDCUDBT7NSC": "YqDDPw==",
+	}
+
+	transaction := &core.Transaction{}
+	transactionFee := &core.TransactionFee{}
+	_ = xdr.SafeUnmarshalBase64("AAAAAEfdynqlBdqSRiFQ+TcvlVB0Vr025FEJhm2H8k2Drs7QAAAD5wAbppsAAAAQAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAEfdynqlBdqSRiFQ+TcvlVB0Vr025FEJhm2H8k2Drs7QAAAAAAAAAAAEoZugAAAAAAAAAAGDrs7QAAAAQENTqHseNbw0R6RWBUM15SMp8uOiFpieIlVS+M2zk4oVdKtRmDhWJzEmzwWwOOfsYqIoyjZLOEkIMrr28FomBQ4=", &transaction.Envelope)
+	ingestion.Transaction(2, transaction, transactionFee, WhiteListData)
+	assert.Equal(t, 2, len(ingestion.builders[TransactionsTableName].rows))
+
+	err := ingestion.Flush()
+	assert.NoError(t, err)
+
+	err = ingestion.Close()
+	assert.NoError(t, err)
+
+	// Check if the transaction fee saved as 0 instead of 999
+	var tx history.Transaction
+	err = q.TransactionByHash(&tx, transaction.TransactionHash)
+	assert.Equal(t, tx.FeePaid, int32(0))
+	assert.NotEqual(t, tx.FeePaid, int32(999))
+	assert.NoError(t, err)
+
+}
 func TestTimeBoundsMaxBig(t *testing.T) {
 	ingestion := Ingestion{
 		DB: &db.Session{
