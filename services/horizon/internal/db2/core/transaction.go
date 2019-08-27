@@ -64,6 +64,9 @@ func (tx *Transaction) isTxWhitelisted(whiteListData map[string]string) bool {
 		PK, _ := base32.StdEncoding.DecodeString(Account)
 		DecodedPublicKey := PK[1:32]
 		for _, sig := range tx.Envelope.Signatures {
+			if sig.Signature == nil {
+				continue
+			}
 			if C.crypto_sign_verify_detached((*C.uchar)(&sig.Signature[0]), (*C.uchar)(&DecodedTxHash[0]), (C.ulonglong)(len(DecodedTxHash)), (*C.uchar)(&DecodedPublicKey[0])) == 0 {
 				return true
 			}

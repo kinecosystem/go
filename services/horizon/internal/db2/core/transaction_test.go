@@ -73,24 +73,23 @@ func TestFee(t *testing.T) {
 	WhiteListData := map[string]string{
 		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
 	}
-	tt.Assert.Equal(tx.Fee(WhiteListData), 0)
-	tt.Assert.NotEqual(tx.Fee(WhiteListData), 999)
+	tt.Assert.Equal(tx.Fee(WhiteListData), int32(0))
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), int32(999))
 
 	// #2
 	// Source account is NOT whitelisted
 	WhiteListData = map[string]string{
 		"GAMRH6ZXD2ZMXUOPUBDFHPJXWGIMVTIU26RTWV4OLJ5SQCLVFD2G552E": "dSj0bg==",
 	}
-	tt.Assert.Equal(tx.Fee(WhiteListData), 999)
-	tt.Assert.NotEqual(tx.Fee(WhiteListData), 0)
-
-	xdr.SafeUnmarshalBase64("AAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAD5wAeR6IAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAAAAAAAAAD+DxAAAAAAAAAAAISEWYAAAAAQBfY4JbVVG0uCJVbwiWpOWynWMHtlNYXgEq9AwTycKh2IZyOFBP3UkdzqqqvgO4q73/9OTigmU3X8ODZ8TkmMguDrs7QAAAAQK49fDeOKvOLEKEHRE0Bhdg6sV3jGxuHRZwiutnNxJNAQonk2M79ZVyc/qqASwJawRVv/+KOVEuSDFYw5W/RWAc=", &tx.Envelope)
+	tt.Assert.Equal(tx.Fee(WhiteListData), int32(999))
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), int32(0))
+	xdr.SafeUnmarshalBase64("AAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAD5wAeR6IAAAACAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAAAAAAABRomnlgAAAAAAAAAAISEWYAAAAAQIz5H6aXA/G4iiw76ozetodEvjhy6QbvXGOxPpiwK4oIYIUJVVvo4HIzIt8ajQRwu/apNU75mQG5xBIFwG5EwgqDrs7QAAAAQNLXZaIxKQtrI4ieY/CD+XRLDI3yIM9TZibucUC3hAzRmRG8dYYzHjccd1iWJg4rEY/UXo9qUKgWif+E6Q2v9g8=", &tx.Envelope)
 	// #3
 	// Source account is NOT whitelisted BUT whitelisted account sign on the transaction
 	WhiteListData = map[string]string{
 		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
 	}
-	tt.Assert.Equal(tx.Fee(WhiteListData), 0)
-	tt.Assert.NotEqual(tx.Fee(WhiteListData), 999)
-
+	tx.TransactionHash = "69404880e6210f0d0d10717da7cf183e1054dbba9fe6271d939b7560998d16ee"
+	tt.Assert.Equal(tx.Fee(WhiteListData), int32(0))
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), int32(999))
 }
