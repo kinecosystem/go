@@ -51,9 +51,10 @@ func (tx *Transaction) Fee(whiteListData map[string]string) int32 {
 
 func (tx *Transaction) isTxWhitelisted(whiteListData map[string]string) bool {
 	// First check if the source account is a Whitelist account.
-	if _, found := whiteListData[tx.Envelope.Tx.SourceAccount.Address()]; found {
-		return true
-	}
+	// TODO This check will be valid when this Jira task will be solved : https://kin.atlassian.net/browse/BC-814
+	//if _, found := whiteListData[tx.Envelope.Tx.SourceAccount.Address()]; found {
+	//	return true
+	//}
 	//If source account is not whitelisted and Tx has only one signature then the Tx is not whitelisted
 	if len(tx.Envelope.Signatures) == 1 {
 		return false
