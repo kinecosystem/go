@@ -535,8 +535,8 @@
   name = "github.com/throttled/throttled"
   packages = ["."]
   pruneopts = "T"
-  revision = "c99eef3ad70a3be5a983770523e0e379699c805c"
-  source = "https://github.com/bartekn/throttled.git"
+  revision = "def5708c45a0d2b2b9a3604521f3164e227d2c83"
+  source = "https://github.com/throttled/throttled.git"
 
 [[projects]]
   digest = "1:e8a3550c8786316675ff54ad6f09d265d129c9d986919af7f541afba50d87ce2"
