@@ -55,12 +55,12 @@ func (tx *Transaction) isTxWhitelisted(whiteListData map[string]string) bool {
 	//if _, found := whiteListData[tx.Envelope.Tx.SourceAccount.Address()]; found {
 	//	return true
 	//}
-	//If source account is not whitelisted and Tx has only one signature then the Tx is not whitelisted
-	if len(tx.Envelope.Signatures) == 1 {
-		return false
-	}
-	DecodedTxHash, _ := hex.DecodeString(tx.TransactionHash)
+	////If source account is not whitelisted and Tx has only one signature then the Tx is not whitelisted
+	//if len(tx.Envelope.Signatures) == 1 {
+	//	return false
+	//}
 	// Check for each Whitelist account if it matches to one of the signatures.
+	DecodedTxHash, _ := hex.DecodeString(tx.TransactionHash)
 	for Account := range whiteListData {
 		PK, _ := base32.StdEncoding.DecodeString(Account)
 		DecodedPublicKey := PK[1:32]
