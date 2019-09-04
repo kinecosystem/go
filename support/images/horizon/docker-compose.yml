@@ -9,8 +9,9 @@ services:
       MYSQL_HOST: 127.0.0.1
     volumes:
       - ../../../:/go/src/github.com/kinecosystem/go
-      - ./volumes/postgresql/var/run/postgresql:/var/run/postgresql
+      - .:/var/run/postgresql
     network_mode: host
+
 
   postgresql:
     image: postgres:10-alpine
@@ -18,7 +19,7 @@ services:
     environment:
       POSTGRES_USER: root
     volumes:
-      - ./volumes/postgresql/var/run/postgresql:/var/run/postgresql
+      - .:/var/run/postgresql/
 
   mysql:
     image: mysql:5
@@ -29,3 +30,6 @@ services:
   redis:
     image: redis:5
     network_mode: host
+
+volumes:
+  dev-postgres-run:
