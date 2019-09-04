@@ -3,7 +3,7 @@ dep:
 	dep ensure -v
 
 build:
-	go build -ldflags="-X github.com/kinecosystem/go/support/app.buildTime=${DATE} -X "github.com/kinecosystem/go/support/app.version={VERSION}"
+	docker build --build-arg DATE="1-9-19" --build-arg VERSION="1.2.3" --target=builder -f services/horizon/Dockerfile .
 
 test: 
 	@$(MAKE) test_teardown
