@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	metrics "github.com/rcrowley/go-metrics"
 	"github.com/kinecosystem/go/clients/stellarcore"
 	horizonContext "github.com/kinecosystem/go/services/horizon/internal/context"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
@@ -25,9 +24,10 @@ import (
 	"github.com/kinecosystem/go/support/app"
 	"github.com/kinecosystem/go/support/db"
 	"github.com/kinecosystem/go/support/log"
+	"github.com/rcrowley/go-metrics"
 	"github.com/throttled/throttled"
 	"golang.org/x/net/http2"
-	graceful "gopkg.in/tylerb/graceful.v1"
+	"gopkg.in/tylerb/graceful.v1"
 )
 
 // App represents the root of the state of a horizon instance.
@@ -279,6 +279,7 @@ func (a *App) UpdateStellarCoreInfo() {
 	a.coreVersion = resp.Info.Build
 	a.currentProtocolVersion = int32(resp.Info.Ledger.Version)
 	a.coreSupportedProtocolVersion = int32(resp.Info.ProtocolVersion)
+	a.config.WhiteListAccount = resp.Info.WhiteListAccount
 }
 
 // UpdateMetrics triggers a refresh of several metrics gauges, such as open
@@ -313,7 +314,7 @@ func (a *App) Tick() {
 	wg.Wait()
 
 	if a.ingester != nil {
-		go a.ingester.Tick()
+		go a.ingester.Tick(a.config.WhiteListAccount)
 	}
 
 	wg.Add(2)

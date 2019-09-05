@@ -1,8 +1,6 @@
 package horizon
 
 import (
-	"net/http"
-
 	"github.com/kinecosystem/go/protocols/horizon"
 	"github.com/kinecosystem/go/services/horizon/internal/actions"
 	"github.com/kinecosystem/go/services/horizon/internal/db2"
@@ -13,6 +11,7 @@ import (
 	"github.com/kinecosystem/go/services/horizon/internal/txsub"
 	"github.com/kinecosystem/go/support/render/hal"
 	"github.com/kinecosystem/go/support/render/problem"
+	"net/http"
 )
 
 // This file contains the actions:
@@ -211,7 +210,7 @@ func (action *TransactionCreateAction) loadResource() {
 	switch err := action.Result.Err.(type) {
 	case *txsub.FailedTransactionError:
 		rcr := horizon.TransactionResultCodes{}
-		resourceadapter.PopulateTransactionResultCodes(action.R.Context(), &rcr, err)
+		_ = resourceadapter.PopulateTransactionResultCodes(action.R.Context(), &rcr, err)
 
 		action.Err = &problem.P{
 			Type:   "transaction_failed",

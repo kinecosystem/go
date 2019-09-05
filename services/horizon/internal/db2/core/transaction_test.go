@@ -61,3 +61,36 @@ func TestSignatures(t *testing.T) {
 	tt.Assert.Equal("8qkkeKaKfsbgInyIkzXJhqJE5/Ufxri2LdxmyKkgkT6I3sPmvrs5cPWQSzEQyhV750IW2ds97xTHqTpOfuZCAg==", signatures[0])
 	tt.Assert.Equal("", signatures[1])
 }
+
+func TestFee(t *testing.T) {
+	tt := test.Start(t).Scenario("base")
+	defer tt.Finish()
+	var tx Transaction
+	xdr.SafeUnmarshalBase64("AAAAAEfdynqlBdqSRiFQ+TcvlVB0Vr025FEJhm2H8k2Drs7QAAANgAAbppsAAAASAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAEfdynqlBdqSRiFQ+TcvlVB0Vr025FEJhm2H8k2Drs7QAAAAAAAAAAAD+DxAAAAAAAAAAAGDrs7QAAAAQEi7utDPO9EBTLdTS8WPZ1AdVc9QZhKF6tPABRO8la6MEmjkQQREoijI7UMy6PiEN6XeVuoaC/HU9nPuRikPGwg=", &tx.Envelope)
+
+	// #1
+	// Source account is whitelisted
+	WhiteListData := map[string]string{
+		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
+	}
+	tx.TransactionHash = "f6f1763b3465a7cb1ed206d9736ca5c720e62fae391efc5ff1999a29aeaddb13"
+	tt.Assert.Equal(tx.Fee(WhiteListData), int32(0))
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), int32(3456))
+
+	// #2
+	// Source account is NOT whitelisted
+	WhiteListData = map[string]string{
+		"GAMRH6ZXD2ZMXUOPUBDFHPJXWGIMVTIU26RTWV4OLJ5SQCLVFD2G552E": "dSj0bg==",
+	}
+	tt.Assert.Equal(tx.Fee(WhiteListData), int32(3456))
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), int32(0))
+	xdr.SafeUnmarshalBase64("AAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAD5wAeR6IAAAACAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAAAAAAABRomnlgAAAAAAAAAAISEWYAAAAAQIz5H6aXA/G4iiw76ozetodEvjhy6QbvXGOxPpiwK4oIYIUJVVvo4HIzIt8ajQRwu/apNU75mQG5xBIFwG5EwgqDrs7QAAAAQNLXZaIxKQtrI4ieY/CD+XRLDI3yIM9TZibucUC3hAzRmRG8dYYzHjccd1iWJg4rEY/UXo9qUKgWif+E6Q2v9g8=", &tx.Envelope)
+	// #3
+	// Source account is NOT whitelisted BUT whitelisted account sign on the transaction
+	WhiteListData = map[string]string{
+		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
+	}
+	tx.TransactionHash = "69404880e6210f0d0d10717da7cf183e1054dbba9fe6271d939b7560998d16ee"
+	tt.Assert.Equal(tx.Fee(WhiteListData), int32(0))
+	tt.Assert.NotEqual(tx.Fee(WhiteListData), int32(999))
+}

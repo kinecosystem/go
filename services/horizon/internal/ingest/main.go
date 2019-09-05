@@ -7,11 +7,11 @@ import (
 	"sync"
 
 	sq "github.com/Masterminds/squirrel"
-	metrics "github.com/rcrowley/go-metrics"
 	"github.com/kinecosystem/go/services/horizon/internal/db2/core"
 	"github.com/kinecosystem/go/support/db"
 	ilog "github.com/kinecosystem/go/support/log"
 	"github.com/kinecosystem/go/xdr"
+	"github.com/rcrowley/go-metrics"
 )
 
 var log = ilog.DefaultLogger.WithField("service", "ingest")
@@ -200,7 +200,8 @@ type Session struct {
 	Err error
 	// Ingested is the number of ledgers that were successfully ingested during
 	// this session.
-	Ingested int
+	Ingested      int
+	WhiteListData map[string]string
 }
 
 // New initializes the ingester, causing it to begin polling the stellar-core

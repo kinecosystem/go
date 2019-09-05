@@ -207,7 +207,7 @@ func (i *System) ReingestSingle(sequence int32) error {
 
 // Tick triggers the ingestion system to ingest any new ledger data, provided
 // that there currently is not an import session in progress.
-func (i *System) Tick() *Session {
+func (i *System) Tick(whiteListAccount string) *Session {
 	i.lock.Lock()
 	if i.current != nil {
 		log.Info("ingest: already in progress")
@@ -219,13 +219,13 @@ func (i *System) Tick() *Session {
 	i.current = is
 	i.lock.Unlock()
 
-	i.runOnce()
+	i.runOnce(whiteListAccount)
 	return is
 }
 
 // run causes the importer to check stellar-core to see if we can import new
 // data.
-func (i *System) runOnce() {
+func (i *System) runOnce(whiteListAccount string) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			err := herr.FromPanic(rec)
@@ -301,6 +301,8 @@ func (i *System) runOnce() {
 	log.WithFields(logFields).Info("Ingesting ledgers...")
 	ingestStart := time.Now()
 
+	// Update Whitelist Data every new block
+	updateWhiteListData(err, coreQ, whiteListAccount, is)
 	is.Run()
 
 	if is.Err != nil {
@@ -315,6 +317,16 @@ func (i *System) runOnce() {
 	log.WithFields(logFields).Info("Finished ingesting ledgers")
 
 	return
+}
+
+func updateWhiteListData(err error, coreQ core.Q, whiteListAccount string, is *Session) {
+	// Save new Whitelist Date into session object
+	var mAccountAction []core.AccountData
+	err = coreQ.AllDataByAddress(&mAccountAction, whiteListAccount)
+	is.WhiteListData = make(map[string]string)
+	for _, d := range mAccountAction {
+		is.WhiteListData[d.Key] = d.Value
+	}
 }
 
 // trimAbandondedLedgers deletes all "abandonded" ledgers from the history

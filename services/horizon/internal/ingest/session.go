@@ -646,6 +646,7 @@ func (is *Session) ingestTransaction() {
 		is.Cursor.TransactionID(),
 		is.Cursor.Transaction(),
 		is.Cursor.TransactionFee(),
+		is.WhiteListData,
 	)
 
 	for is.Cursor.NextOp() {

@@ -41,8 +41,11 @@ func TestEmptySignature(t *testing.T) {
 	}
 
 	transactionFee := &core.TransactionFee{}
-
-	ingestion.Transaction(1, transaction, transactionFee)
+	WhiteListData := map[string]string{
+		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
+		"GB74VHWBGITCW6S5N4B5SWVMT34VAQDPT2EXZPUWIQXVSKDCUDBT7NSC": "YqDDPw==",
+	}
+	ingestion.Transaction(1, transaction, transactionFee, WhiteListData)
 	assert.Equal(t, 1, len(ingestion.builders[TransactionsTableName].rows))
 
 	err := ingestion.Flush()
@@ -52,6 +55,62 @@ func TestEmptySignature(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestWhiteListIngest(t *testing.T) {
+	tt := test.Start(t).ScenarioWithoutHorizon("ingest_asset_stats")
+	defer tt.Finish()
+
+	s := ingest(tt, false)
+	tt.Require.NoError(s.Err)
+	q := history.Q{Session: s.Ingestion.DB}
+
+	ingestion := Ingestion{
+		DB: &db.Session{
+			DB: testDB.Horizon(t),
+		},
+	}
+	_ = ingestion.Start()
+
+	WhiteListData := map[string]string{
+		"GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV": "dSj0bg==",
+		"GB74VHWBGITCW6S5N4B5SWVMT34VAQDPT2EXZPUWIQXVSKDCUDBT7NSC": "YqDDPw==",
+	}
+
+	//transaction := &core.Transaction{}
+	//transactionFee := &core.TransactionFee{}
+	envelope := xdr.TransactionEnvelope{}
+	resultPair := xdr.TransactionResultPair{}
+	meta := xdr.TransactionMeta{}
+	_ = xdr.SafeUnmarshalBase64("AAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAD5wAeR6IAAAACAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAGw/UOu5NoueYpdBpxFiiWlMoooS57T7/hwA/6ISEWYAAAAAAAAAABRomnlgAAAAAAAAAAISEWYAAAAAQIz5H6aXA/G4iiw76ozetodEvjhy6QbvXGOxPpiwK4oIYIUJVVvo4HIzIt8ajQRwu/apNU75mQG5xBIFwG5EwgqDrs7QAAAAQNLXZaIxKQtrI4ieY/CD+XRLDI3yIM9TZibucUC3hAzRmRG8dYYzHjccd1iWJg4rEY/UXo9qUKgWif+E6Q2v9g8=", &envelope)
+	_ = xdr.SafeUnmarshalBase64("AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=", &resultPair.Result)
+	_ = xdr.SafeUnmarshalBase64("AAAAAAAAAAEAAAADAAAAAQAZphoAAAAAAAAAAMIK9djC7k75ziKOLJcvMAIBG7tnBuoeI34x+Pi6zqcZAAAAF0h255wAGaYWAAAAAQAAAAMAAAAAAAAAAAAAAAADBQUFAAAAAwAAAAAtkqVYLPLYhqNMmQLPc+T9eTWp8LIE8eFlR5K4wNJKTQAAAAMAAAAAynnCTTyw53VVRLOWX6XKTva63IM1LslPNW01YB0hz/8AAAADAAAAAuOwxEKY/BwUmvv0yJlvuSQnrkHkZJuTTKSVmRt4UrhVAAAAAwAAAAAAAAAAAAAAAwAZphYAAAAAAAAAAMp5wk08sOd1VUSzll+lyk72utyDNS7JTzVtNWAdIc//AAAAF0h26AAAGaYWAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAQAZphoAAAAAAAAAAMp5wk08sOd1VUSzll+lyk72utyDNS7JTzVtNWAdIc//AAAAGZyCzAAAGaYWAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA", &meta)
+
+	transaction := &core.Transaction{
+		TransactionHash: "69404880e6210f0d0d10717da7cf183e1054dbba9fe6271d939b7560998d16ee",
+		LedgerSequence:  1680922,
+		Index:           1,
+		Envelope:        envelope,
+		Result:          resultPair,
+		ResultMeta:      meta,
+	}
+
+	transactionFee := &core.TransactionFee{}
+	ingestion.Transaction(1, transaction, transactionFee, WhiteListData)
+	assert.Equal(t, 1, len(ingestion.builders[TransactionsTableName].rows))
+
+	err := ingestion.Flush()
+	assert.NoError(t, err)
+
+	err = ingestion.Close()
+	assert.NoError(t, err)
+
+	// Check if the transaction fee saved as 0 instead of 999
+	var tx history.Transaction
+	_ = q.TransactionByHash(&tx, transaction.TransactionHash)
+	assert.Equal(t, tx.FeePaid, int32(0))
+	assert.NotEqual(t, tx.FeePaid, int32(999))
+	assert.NoError(t, err)
+
+}
 func TestTimeBoundsMaxBig(t *testing.T) {
 	ingestion := Ingestion{
 		DB: &db.Session{

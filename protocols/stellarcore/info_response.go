@@ -4,12 +4,12 @@ package stellarcore
 // endpoint.
 type InfoResponse struct {
 	Info struct {
-		Build           string     `json:"build"`
-		Network         string     `json:"network"`
-		ProtocolVersion int        `json:"protocol_version"`
-		State           string     `json:"state"`
-		Ledger          LedgerInfo `json:"ledger"`
-
+		Build            string     `json:"build"`
+		Network          string     `json:"network"`
+		ProtocolVersion  int        `json:"protocol_version"`
+		State            string     `json:"state"`
+		Ledger           LedgerInfo `json:"ledger"`
+		WhiteListAccount string     `json:"whitelist"`
 		// TODO: all the other fields
 	}
 }

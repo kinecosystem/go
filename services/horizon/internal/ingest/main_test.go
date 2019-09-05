@@ -55,12 +55,12 @@ func TestTick(t *testing.T) {
 	sys := sys(tt, false)
 
 	// ingest by tick
-	s := sys.Tick()
+	s := sys.Tick("GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV")
 	tt.Require.NoError(s.Err)
 	tt.Require.Nil(sys.current)
 
 	tt.UpdateLedgerState()
-	s = sys.Tick()
+	s = sys.Tick("GBD53ST2UUC5VESGEFIPSNZPSVIHIVV5G3SFCCMGNWD7ETMDV3HNA2JV")
 	tt.Require.NotNil(s)
 	tt.Require.NoError(s.Err)
 }

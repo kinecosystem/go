@@ -1,7 +1,14 @@
 package core
 
+// unsigned char * deref_uchar(void * ptr) { return (unsigned char*) ptr; }
+// #cgo pkg-config: libsodium
+// #include <stdlib.h>
+// #include <sodium.h>
+import "C"
 import (
+	"encoding/base32"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 
 	"strings"
@@ -35,8 +42,38 @@ func (tx *Transaction) EnvelopeXDR() string {
 }
 
 // Fee returns the fee that was paid for `tx`
-func (tx *Transaction) Fee() int32 {
+func (tx *Transaction) Fee(whiteListData map[string]string) int32 {
+	if tx.isTxWhitelisted(whiteListData) {
+		return int32(0)
+	}
 	return int32(tx.Envelope.Tx.Fee)
+}
+
+func (tx *Transaction) isTxWhitelisted(whiteListData map[string]string) bool {
+	// First check if the source account is a Whitelist account.
+	// TODO This check will be valid when this Jira task will be solved : https://kin.atlassian.net/browse/BC-814
+	//if _, found := whiteListData[tx.Envelope.Tx.SourceAccount.Address()]; found {
+	//	return true
+	//}
+	////If source account is not whitelisted and Tx has only one signature then the Tx is not whitelisted
+	//if len(tx.Envelope.Signatures) == 1 {
+	//	return false
+	//}
+	// Check for each Whitelist account if it matches to one of the signatures.
+	DecodedTxHash, _ := hex.DecodeString(tx.TransactionHash)
+	for Account := range whiteListData {
+		PK, _ := base32.StdEncoding.DecodeString(Account)
+		DecodedPublicKey := PK[1:32]
+		for _, sig := range tx.Envelope.Signatures {
+			if sig.Signature == nil {
+				continue
+			}
+			if C.crypto_sign_verify_detached((*C.uchar)(&sig.Signature[0]), (*C.uchar)(&DecodedTxHash[0]), (C.ulonglong)(len(DecodedTxHash)), (*C.uchar)(&DecodedPublicKey[0])) == 0 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // IsSuccessful returns true when the transaction was successful.
