@@ -3,13 +3,13 @@ dep:
 	dep ensure -v
 
 build:
-	docker build --build-arg DATE="1-9-19" --build-arg VERSION="1.2.3" --target=builder -f services/horizon/Dockerfile .
+	docker build --build-arg DATE="1-9-19" --build-arg VERSION="1.2.3" --target=builder -f services/horizon/Dockerfile -t builder .
 
 test: 
 	@$(MAKE) test_teardown
 	docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
-		&& docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon ./support/scripts/run_tests
-	@$(MAKE) test_teardown
+		&& docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon
+
 
 test_teardown:
 	docker-compose -f support/images/horizon/docker-compose.yml down -v \
@@ -33,7 +33,6 @@ static: vet lint
 docker_tag:
 
 docker_push:
-
 
 clean:
 	go clean -cache -modcache -i -r
