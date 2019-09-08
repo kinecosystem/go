@@ -81,7 +81,7 @@ pipeline {
                 cd go/src/github.com/kinecosystem/go
                 make test_teardown
             '''
-            junit 'build/reports/**/*.xml'
+            junit '**/*.xml'
         }
     }
 }

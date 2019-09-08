@@ -9,5 +9,6 @@ then
       | sed 's/.*/&\/.../g' \
       | xargs -I {} -P 4 go test -race {}
 else
-    go test -v $(go list ./... | grep -v /vendor/) -coverprofile cover.out 2>&1 | go2xunit |tee  tests.xml
+     2>&1  go test -v $(go list ./... | grep -v /vendor/) -coverprofile cover.out| go2xunit -output unit_tests.xml
+
 fi
