@@ -9,7 +9,7 @@ build:
 test: 
 	@$(MAKE) test_teardown
 	docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
-		&& docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon bash -c "./support/scripts/run_tests"
+		&& docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon bash -c "go get github.com/tebeka/go2xunit; ./support/scripts/run_tests"
 
 
 dev-test:
@@ -40,7 +40,7 @@ docker_tag:
 
 docker_push:
 
-clean:
+dev_clean_go:
 	go clean -cache -modcache -i -r
 
-.PHONY: clean dep run build test test_setup test_teardown test_xunit
+.PHONY: dev_clean_go dep run build test test_setup test_teardown test_xunit dev-test
