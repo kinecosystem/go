@@ -23,56 +23,64 @@ pipeline {
             steps {
                 echo "Checking out ${BRANCH}"
                 // Install the desired Go version
-                def root = tool name: 'Go 1.11', type: 'go'
+                // def root = tool name: 'Go 1.11', type: 'go'
 
                 // Export environment variables pointing to the directory where Go was installed
-                withEnv(["GOROOT=${root}", "PATH+GO=${root}/bin"]) {
                     sh '''
-                        go version
-                        mkdir -p $GOPATH/src/github.com/kinecosystem
-                        cd $_
+                        mkdir -p go/src/github.com/kinecosystem/
+                        cd go/src/github.com/kinecosystem
                         git clone -b ${BRANCH} https://github.com/kinecosystem/go.git
                     '''
 
                 }
-            }
         }
-        stage('Import dependencies') {
+        stage('Building') {
                 steps {
-                    echo "importing dependencies"
+                    echo "importing dependencies and building project"
                     sh '''
-                        export GOPATH=$PWD/go
-                        cd $GOPATH/src/github.com/kinecosystem/go
-                        make dep
+                        cd go/src/github.com/kinecosystem/go
+                        make build
                     '''
-                }
-        }
-        stage ('Building'){
-                steps {
-                    echo 'building project"}'
                 }
         }
 
         stage ('Run tests'){
                 steps {
                     echo 'Running tests'
-
+                    sh '''
+                        cd go/src/github.com/kinecosystem/go
+                        make test | tee a test_results.txt
+                    '''
                 }
         }
-        stage ('Collecting results'){
+        stage ('Collecting and publishing results'){
                 steps {
                     echo 'Collecting results'
                 }
         }
-        stage ('Packaging'){
+        stage ('Packaging/Tagging'){
                 steps {
                     echo 'packaging with version ${VERSION}'
                 }
         }
         stage ('Pushing to Docker hub'){
                 steps {
-                    echo 'Pushing to Docker hub"}'
+                    echo 'Pushing to Docker hub'
                 }
+        }
+        stage ('Deploy to env'){
+            steps{
+                echo "Deploying to env -TBD"
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Cleanup environment'
+            sh '''
+                cd go/src/github.com/kinecosystem/go
+                make test_teardown
+            '''
         }
     }
 }

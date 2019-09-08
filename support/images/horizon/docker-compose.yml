@@ -3,16 +3,22 @@ version: "3"
 
 services:
   # go development environment to build and run unit tests in
-  horizon:
-    image: builder
+  dev-horizon:
+    build: .
     environment:
       MYSQL_HOST: 127.0.0.1
     volumes:
       - ../../../:/go/src/github.com/kinecosystem/go
       - .:/var/run/postgresql
     network_mode: host
-    command: "./support/scripts/run_tests"
-
+ # Run unit tests in CI
+  horizon:
+    image: builder
+    environment:
+      MYSQL_HOST: 127.0.0.1
+    volumes:
+      - .:/var/run/postgresql
+    network_mode: host
 
   postgresql:
     image: postgres:10-alpine

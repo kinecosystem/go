@@ -24,15 +24,18 @@ WORKDIR "/go/src/github.com/kinecosystem/go"
 
 ADD  . /go/src/github.com/kinecosystem/go/
 
-#TODO: mount local vendor folder in development for cache?
+#TODO: mount local vendor folder in dddevelopment for cache?
 RUN /bin/bash -c "/go/bin/dep ensure -v"
 RUN /bin/bash -c "cd services/horizon; go build -ldflags='-X github.com/kinecosystem/go/support/app.buildTime=$DATE -X github.com/kinecosystem/go/support/app.version=$VERSION'"
 
 
+# testing layer
+#FROM builder as tester
+#ENTRYPOINT ["./support/scripts/run_tests"]
 #VOLUME "/go/src/github.com/kinecosystem/go/services/horizon/"
 
 
-
+#production
 FROM ubuntu:16.04
 
 COPY  --from=builder "/go/src/github.com/kinecosystem/go/services/horizon/horizon" /usr/local/bin/

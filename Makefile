@@ -3,13 +3,19 @@ dep:
 	dep ensure -v
 
 build:
-	docker build --build-arg DATE="1-9-19" --build-arg VERSION="1.2.3" --target=builder -f services/horizon/Dockerfile -t builder .
+	@$(MAKE) test_teardown
+	docker build --build-arg DATE=$(DATE) --build-arg VERSION=$(VERSION) --target=builder -f services/horizon/Dockerfile -t builder .
 
 test: 
 	@$(MAKE) test_teardown
 	docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
-		&& docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon
+		&& docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon bash -c "./support/scripts/run_tests"
 
+
+dev-test:
+	@$(MAKE) test_teardown
+	docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
+		&& docker-compose -f support/images/horizon/docker-compose.yml run --no-deps dev-horizon bash -c "./support/scripts/run_tests"
 
 test_teardown:
 	docker-compose -f support/images/horizon/docker-compose.yml down -v \
