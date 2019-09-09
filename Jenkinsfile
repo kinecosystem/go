@@ -5,7 +5,6 @@ pipeline {
         //parameters for the environment creation
 
         //parameters for the load test
-        string(name: 'VERSION', defaultValue: '1.0.0', description: 'tag/version for dockerhub image')
         string(name: 'BRANCH', defaultValue: 'jenkins', description: 'git branch (default: master)')
         string(name: 'VERSION', defaultValue: '', description: 'docker and horizon version \n Overrides automatic versioning')
         string(name: 'MOUNT_POINT', defaultValue: '"/jenkins_home/workspace/horizon/go/src/github.com/kinecosystem/go/"', \
@@ -34,7 +33,9 @@ pipeline {
                 }
         }
         stage ('Unit tests'){
-            echo "placeholder for unit tests"
+            steps{
+                echo "placeholder for unit tests"
+            }
         }
         stage('Building docker image') {
             steps {
