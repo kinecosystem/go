@@ -3,20 +3,12 @@ version: "3"
 
 services:
   # go development environment to build and run unit tests in
-  dev-horizon:
+  horizon:
     build: .
     environment:
       MYSQL_HOST: 127.0.0.1
     volumes:
-      - ../../../:/go/src/github.com/kinecosystem/go
-      - .:/var/run/postgresql
-    network_mode: host
- # Run unit tests in CI
-  horizon:
-    image: builder
-    environment:
-      MYSQL_HOST: 127.0.0.1
-    volumes:
+      - ${HOST_MOUNT_POINT}:/go/src/github.com/kinecosystem/go
       - .:/var/run/postgresql
     network_mode: host
 
@@ -37,6 +29,3 @@ services:
   redis:
     image: redis:5
     network_mode: host
-
-volumes:
-  dev-postgres-run:

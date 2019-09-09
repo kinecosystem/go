@@ -5,12 +5,16 @@ pipeline {
         //parameters for the environment creation
 
         //parameters for the load test
-        string(name: 'VERSION', defaultValue: '1.0.0', description: 'tag/version for docjerhub image')
+        string(name: 'VERSION', defaultValue: '1.0.0', description: 'tag/version for dockerhub image')
         string(name: 'BRANCH', defaultValue: 'jenkins', description: 'git branch (default: master)')
+        string(name: 'VERSION', defaultValue: '', description: 'docker and horizon version \n Overrides automatic versioning')
+        string(name: 'MOUNT_POINT', defaultValue: '"/jenkins_home/workspace/horizon/go/src/github.com/kinecosystem/go/"', \
+            description: 'local mount point for docker images')
+
     }
 
     stages {
-        stage ('Preparation'){
+        stage ('Cleanup'){
             steps {
                 echo "Preparation"
                 sh '''
@@ -22,55 +26,55 @@ pipeline {
         stage ('Checkout code'){
             steps {
                 echo "Checking out ${BRANCH}"
-                // Install the desired Go version
-                // def root = tool name: 'Go 1.11', type: 'go'
-
-                // Export environment variables pointing to the directory where Go was installed
-                    sh '''
-                        mkdir -p go/src/github.com/kinecosystem/
-                        cd go/src/github.com/kinecosystem
-                        git clone -b ${BRANCH} https://github.com/kinecosystem/go.git
-                    '''
-
+                sh '''
+                    mkdir -p go/src/github.com/kinecosystem/
+                    cd go/src/github.com/kinecosystem
+                    git clone -b ${BRANCH} https://github.com/kinecosystem/go.git
+                '''
                 }
         }
-        stage('Building') {
-                steps {
-                    echo "importing dependencies and building project"
-                    sh '''
-                        cd go/src/github.com/kinecosystem/go
-                        make build
-                    '''
-                }
+        stage ('Unit tests'){
+            echo "placeholder for unit tests"
         }
-
+        stage('Building docker image') {
+            steps {
+                echo "importing dependencies and building docker image with version ${VERSION}"
+                // DATE='1-1-1970' VERSION="1.2.3" MOUNT_POINT="/Home/ubuntu/go/src/github.com/kinecosystem/go/" make build
+                //TODO: get version automatically
+                //TODO: get vendor (kinecosystem) as parameter
+                sh '''
+                    DATE=`date +%F-%T`
+                    VERSION="0.0.1-dev"
+                    cd go/src/github.com/kinecosystem/go
+                    DATE="${DATE}"" VERSION="${VERSION}" MOUNT_POINT=${MOUNT_POINT} make build
+                '''
+            }
+        }
         stage ('Run tests'){
-                steps {
-                    echo 'Running tests'
-                    sh '''
-                        cd go/src/github.com/kinecosystem/go
-                        make test | tee a test_results.txt
-                    '''
-                }
+            steps {
+                echo 'Running tests and coverage'
+                sh '''
+                    cd go/src/github.com/kinecosystem/go
+                    MOUNT_POINT=${MOUNT_POINT} make test
+                '''
+            }
         }
         stage ('Collecting and publishing results'){
-                steps {
-                    echo 'Collecting results'
-                }
-        }
-        stage ('Packaging/Tagging'){
-                steps {
-                    echo 'packaging with version ${VERSION}'
-                }
+            steps {
+                echo 'Collecting results - TBD'
+            }
         }
         stage ('Pushing to Docker hub'){
-                steps {
-                    echo 'Pushing to Docker hub'
+            steps {
+                echo 'Pushing Docker image, version $env.GIT_REVISION to dockerhub'
+                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+                    sh 'make push'
                 }
+            }
         }
         stage ('Deploy to env'){
             steps{
-                echo "Deploying to env -TBD"
+                echo "Deploying to env - TBD"
             }
         }
     }
@@ -81,7 +85,7 @@ pipeline {
                 cd go/src/github.com/kinecosystem/go
                 make test_teardown
             '''
-            junit '**/*.xml'
+            junit 'test-results.xml'
         }
     }
 }
