@@ -7,19 +7,21 @@ dev-dep:
 IMAGE := "kinecosystem/horizon"
 build:
 	@$(MAKE) test_teardown
-	docker build --build-arg DATE=$(DATE) --build-arg VERSION=$(VERSION) --target=package -f services/horizon/Dockerfile -t $(IMAGE):$(VERSION) .
+	docker build --build-arg DATE=$(DATE) --build-arg VERSION=$(VERSION) -f services/horizon/Dockerfile -t $(IMAGE):$(VERSION) .
 
 
 #MOUNT_POINT="/jenkins_home/workspace/horizon/go/src/github.com/kinecosystem/go/"
 test: 
 	@$(MAKE) test_teardown
-	export HOST_MOUNT_POINT=$(MOUNT_POINT); docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
+	export HOST_MOUNT_POINT=$(MOUNT_POINT); \
+	docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
 		&& docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon bash -c "dep ensure -v; go get github.com/tebeka/go2xunit; ./support/scripts/run_tests"
 
 
 
 test_teardown:
-	export HOST_MOUNT_POINT=$(MOUNT_POINT); docker-compose -f support/images/horizon/docker-compose.yml down -v \
+	export HOST_MOUNT_POINT=$(MOUNT_POINT); \
+	docker-compose -f support/images/horizon/docker-compose.yml down -v \
 		&& rm -rf support/images/horizon/volumes
 
 

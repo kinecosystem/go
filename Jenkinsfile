@@ -46,8 +46,7 @@ pipeline {
                 sh '''
                     DATE=`date +%F-%T`
                     VERSION="0.0.1-dev"
-                    cd go/src/github.com/kinecosystem/go
-                    DATE="${DATE}"" VERSION="${VERSION}" MOUNT_POINT=${MOUNT_POINT} make build
+                    DATE="${DATE}" VERSION="${VERSION}" MOUNT_POINT="${MOUNT_POINT}" make build
                 '''
             }
         }
