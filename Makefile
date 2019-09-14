@@ -13,28 +13,28 @@ build:
 
 
 #MOUNT_POINT="/jenkins_home/workspace/horizon/go/src/github.com/kinecosystem/go/"
-test: 
+test:
 	@$(MAKE) test_teardown
 	docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
-		&& HOST_MOUNT_POINT=$(MOUNT_POINT); \
-		docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
-		bash -c \
-		"dep ensure -v; \
-		go get github.com/tebeka/go2xunit; \
-		 ./support/scripts/run_tests"
+                && HOST_MOUNT_POINT=$(MOUNT_POINT); \
+                docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
+                bash -c \
+                "dep ensure -v; \
+                go get github.com/tebeka/go2xunit; \
+                 ./support/scripts/run_tests"
 
 
-
-test_teardown:
-	export HOST_MOUNT_POINT=$(MOUNT_POINT); \
-	docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
-		bash -c \
-		"ls -ltr; \
-		rm -rf *"
+tests_teardown:
+	HOST_MOUNT_POINT=$(MOUNT_POINT);
 	docker-compose -f support/images/horizon/docker-compose.yml down -v \
-		&& rm -rf support/images/horizon/volumes
+                && rm -rf support/images/horizon/volumes
 
 
+jenkins_teardown:
+	HOST_MOUNT_POINT=$(MOUNT_POINT);
+	docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
+                bash -c \
+                "rm -rf Gopkg.lock vendor cover.out test-results.xml"
 
 horizon: 
 	@cd services/horizon; ./horizon ${CMD}
@@ -57,4 +57,4 @@ docker_push:
 dev_clean_go:
 	go clean -cache -modcache -i -r
 
-.PHONY: dev_clean_go dev-dep run build test test_setup test_teardown docker_push horizon
+.PHONY: dev_clean_go dev-dep run build test test_setup test_teardown docker_push horizon jenkins_teardown

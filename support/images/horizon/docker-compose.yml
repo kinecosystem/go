@@ -7,9 +7,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        # VERSION: ${VERSION}
-        # DATE: ${DATE}
+        #      args:
+      # VERSION: ${VERSION}
+      # DATE: ${DATE}
     environment:
       MYSQL_HOST: 127.0.0.1
     volumes:
