@@ -19,7 +19,7 @@ pipeline {
                 sh '''
                     rm -rf *
                     docker system prune -f
-                    docker rmu horizon_horizon || true
+                    docker rmi horizon_horizon || true
                 '''
             }
         }
@@ -49,7 +49,7 @@ pipeline {
                     VERSION="0.0.1-dev"
                     export DATE="${DATE}" \
                     export VERSION="${VERSION}" \
-                    export MOUNT_POINT="${MOUNT_POINT}" make build
+                    MOUNT_POINT="${MOUNT_POINT}" make build
                     '''
             }
         }
@@ -88,7 +88,8 @@ pipeline {
             echo 'Cleanup environment'
             sh '''
                 cd go/src/github.com/kinecosystem/go
-                MOUNT_POINT=${MOUNT_POINT} make test_teardown
+                MOUNT_POINT=${MOUNT_POINT} make tests_teardown
+                MOUNT_POINT=${MOUNT_POINT} make jenkins_teardown
             '''
 
         }

@@ -30,7 +30,7 @@ tests_teardown:
 
 
 jenkins_teardown:
-	export HOST_MOUNT_POINT=$(MOUNT_POINT);
+	export HOST_MOUNT_POINT=$(MOUNT_POINT); \
 	docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
                 bash -c \
                 "rm -rf Gopkg.lock vendor cover.out test-results.xml"
