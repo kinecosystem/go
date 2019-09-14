@@ -16,7 +16,7 @@ build:
 test:
 	@$(MAKE) test_teardown
 	docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
-                && HOST_MOUNT_POINT=$(MOUNT_POINT); \
+                && export HOST_MOUNT_POINT=$(MOUNT_POINT); \
                 docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
                 bash -c \
                 "dep ensure -v; \
@@ -25,13 +25,13 @@ test:
 
 
 tests_teardown:
-	HOST_MOUNT_POINT=$(MOUNT_POINT);
+	export HOST_MOUNT_POINT=$(MOUNT_POINT);
 	docker-compose -f support/images/horizon/docker-compose.yml down -v \
                 && rm -rf support/images/horizon/volumes
 
 
 jenkins_teardown:
-	HOST_MOUNT_POINT=$(MOUNT_POINT);
+	export HOST_MOUNT_POINT=$(MOUNT_POINT);
 	docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
                 bash -c \
                 "rm -rf Gopkg.lock vendor cover.out test-results.xml"
