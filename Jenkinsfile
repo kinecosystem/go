@@ -15,10 +15,11 @@ pipeline {
     stages {
         stage ('Cleanup'){
             steps {
-                echo "Preparation"
+                echo "Environment cleanup"
                 sh '''
                     rm -rf *
                     docker system prune -f
+                    docker rmu horizon_horizon || true
                 '''
             }
         }
@@ -87,7 +88,7 @@ pipeline {
             echo 'Cleanup environment'
             sh '''
                 cd go/src/github.com/kinecosystem/go
-                make test_teardown
+                MOUNT_POINT=${MOUNT_POINT} make test_teardown
             '''
 
         }
