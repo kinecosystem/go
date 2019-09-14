@@ -30,7 +30,7 @@ test_teardown:
 	docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
 		bash -c \
 		"ls -ltr; \
-		"rm -rf *"
+		rm -rf *"
 	docker-compose -f support/images/horizon/docker-compose.yml down -v \
 		&& rm -rf support/images/horizon/volumes
 
