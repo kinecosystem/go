@@ -46,8 +46,10 @@ pipeline {
                 sh '''
                     DATE=`date +%F-%T`
                     VERSION="0.0.1-dev"
-                    DATE="${DATE}" VERSION="${VERSION}" MOUNT_POINT="${MOUNT_POINT}" make build
-                '''
+                    export DATE="${DATE}" \
+                    export VERSION="${VERSION}" \
+                    export MOUNT_POINT="${MOUNT_POINT}" make build
+                    '''
             }
         }
         stage ('Run tests'){
@@ -80,12 +82,14 @@ pipeline {
     }
     post {
         always {
+            echo "publishing reports"
+            junit '**/test-results.xml'
             echo 'Cleanup environment'
             sh '''
                 cd go/src/github.com/kinecosystem/go
                 make test_teardown
             '''
-            junit 'test-results.xml'
+
         }
     }
 }
