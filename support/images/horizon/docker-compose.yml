@@ -4,7 +4,12 @@ version: "3"
 services:
   # go development environment to build and run unit tests in
   horizon:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # VERSION: ${VERSION}
+        # DATE: ${DATE}
     environment:
       MYSQL_HOST: 127.0.0.1
     volumes:

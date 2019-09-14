@@ -29,7 +29,8 @@ test_teardown:
 	export HOST_MOUNT_POINT=$(MOUNT_POINT); \
 	docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
 		bash -c \
-		"rm -rf ."
+		ls -ltr; \
+		"rm -rf *"
 	docker-compose -f support/images/horizon/docker-compose.yml down -v \
 		&& rm -rf support/images/horizon/volumes
 

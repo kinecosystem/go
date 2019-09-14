@@ -12,3 +12,5 @@ RUN curl -sS https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 RUN mkdir -p /go/src/github.com/kinecosystem/go
 WORKDIR "/go/src/github.com/kinecosystem/go"
 VOLUME ["/go/src/github.com/kinecosystem/go"]
+
+RUN dep ensure -v
