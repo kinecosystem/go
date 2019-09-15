@@ -6,7 +6,7 @@ services:
   horizon:
     build:
       context: ${HOST_MOUNT_POINT}
-      dockerfile: ${HOST_MOUNT_POINT}/support/images/horizon/Dockerfile
+      dockerfile: ./support/images/horizon/Dockerfile
       target: base
     image: kinecosystem/horizon-base:latest
     environment:
