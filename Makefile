@@ -15,8 +15,11 @@ ifndef
 override IMAGE = "kinecosystem/horizon"
 endif
 
+ifndef
+override HOST_MOUNT_POINT = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+endif
+
 DATE := "$(shell date +'%y.%m.%d-%H.%M')"
-HOST_MOUNT_POINT := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 build:
 	@$(MAKE) tests_teardown
