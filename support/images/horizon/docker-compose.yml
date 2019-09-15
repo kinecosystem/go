@@ -1,15 +1,14 @@
 ---
-version: "3"
+version: "3.4"
 
 services:
   # go development environment to build and run unit tests in
   horizon:
     build:
-      context: .
-      dockerfile: Dockerfile
-        #      args:
-      # VERSION: ${VERSION}
-      # DATE: ${DATE}
+      context: ${HOST_MOUNT_POINT}
+      dockerfile: ${HOST_MOUNT_POINT}/support/images/horizon/Dockerfile
+      target: base
+    image: kinecosystem/horizon-base:latest
     environment:
       MYSQL_HOST: 127.0.0.1
     volumes:
