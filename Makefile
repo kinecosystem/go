@@ -23,10 +23,10 @@ DATE := "$(shell date +'%y.%m.%d-%H.%M')"
 
 build:
 	@$(MAKE) tests_teardown
-	export HOST_MOUNT_POINT=$(HOST_MOUNT_POINT); \
-     	export DATE=$(DATE); \
-        export VERSION=$(VERSION);\
-        export TARGET=$(TARGET);\
+	 HOST_MOUNT_POINT=$(HOST_MOUNT_POINT) \
+     	DATE=$(DATE) \
+         VERSION=$(VERSION)\
+         TARGET=$(TARGET)\
 	docker build -f support/images/horizon/Dockerfile \
 	--target=$(TARGET) \
         --build-arg DATE=$(DATE) \
@@ -35,7 +35,7 @@ build:
 	-t $(IMAGE)-$(TARGET):latest .
 
 get_horizon:
-	export TARGET=$(TARGET);\
+	TARGET=$(TARGET)\
 	docker rm -f builder || true ; \
 	docker run -d --name builder -it kinecosystem/horizon-$(TARGET):latest bash && \
 	docker cp builder://go/src/github.com/kinecosystem/go/services/horizon/horizon services/horizon && \
@@ -46,7 +46,7 @@ get_horizon:
 test:
 	@$(MAKE) tests_teardown
 	docker-compose -f support/images/horizon/docker-compose.yml up -d postgresql mysql redis \
-                && export HOST_MOUNT_POINT=$(HOST_MOUNT_POINT); \
+                && HOST_MOUNT_POINT=$(HOST_MOUNT_POINT) \
                 docker-compose -f support/images/horizon/docker-compose.yml run --no-deps  horizon \
                 bash -c \
                 "dep ensure -v; \
@@ -55,7 +55,7 @@ test:
 	@$(MAKE) tests_teardown
 
 docker_release: 
-	export VERSION=$(VERSION);\
+	VERSION=$(VERSION)\
 	docker build \
 	--target production \
 	-f support/images/horizon/Dockerfile \
@@ -68,12 +68,12 @@ docker_push:
 	#docker push $(IMAGE):latest . || true
 
 tests_teardown:
-	export HOST_MOUNT_POINT=$(HOST_MOUNT_POINT);
+	HOST_MOUNT_POINT=$(HOST_MOUNT_POINT) \
 	docker-compose -f support/images/horizon/docker-compose.yml down -v
 
 
 jenkins_teardown:
-	export HOST_MOUNT_POINT=$(HOST_MOUNT_POINT); \
+	HOST_MOUNT_POINT=$(HOST_MOUNT_POINT) \
 	docker-compose -f support/images/horizon/docker-compose.yml run --no-deps horizon \
                 bash -c \
                 "rm -rf Gopkg.lock vendor cover.out test-results.xml services/horizon/horizon"
