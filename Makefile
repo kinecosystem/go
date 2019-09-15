@@ -11,11 +11,11 @@ ifndef VERSION
 override VERSION = "0.0.1-internal"
 endif
 
-ifndef
+ifndef IMAGE
 override IMAGE = "kinecosystem/horizon"
 endif
 
-ifndef
+ifndef HOST_MOUNT_POINT
 override HOST_MOUNT_POINT = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 endif
 
