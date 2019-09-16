@@ -25,8 +25,8 @@ build:
 	@$(MAKE) tests_teardown
 	 HOST_MOUNT_POINT=$(HOST_MOUNT_POINT) \
      	DATE=$(DATE) \
-         VERSION=$(VERSION)\
-         TARGET=$(TARGET)\
+         VERSION=$(VERSION) \
+         TARGET=$(TARGET) \
 	docker build -f support/images/horizon/Dockerfile \
 	--target=$(TARGET) \
         --build-arg DATE=$(DATE) \
@@ -35,7 +35,7 @@ build:
 	-t $(IMAGE)-$(TARGET):latest .
 
 get_horizon:
-	TARGET=$(TARGET)\
+	TARGET=$(TARGET) \
 	docker rm -f builder || true ; \
 	docker run -d --name builder -it kinecosystem/horizon-$(TARGET):latest bash && \
 	docker cp builder://go/src/github.com/kinecosystem/go/services/horizon/horizon services/horizon && \
@@ -55,7 +55,7 @@ test:
 	@$(MAKE) tests_teardown
 
 docker_release: 
-	VERSION=$(VERSION)\
+	VERSION=$(VERSION) \
 	docker build \
 	--target production \
 	-f support/images/horizon/Dockerfile \
