@@ -7,8 +7,7 @@ pipeline {
         //parameters for the load test
         string(name: 'BRANCH', defaultValue: 'jenkins', description: 'git branch (default: master)')
         string(name: 'VERSION', defaultValue: '0.0.1-internal', description: 'docker and horizon version \n Overrides automatic versioning')
-        string(name: 'HOST_MOUNT_POINT', defaultValue: '"/jenkins_home/workspace/horizon/go/src/github.com/kinecosystem/go"', \
-            description: 'local mount point for docker images')
+
 
     }
 
@@ -38,9 +37,7 @@ pipeline {
                 echo 'Running tests and coverage'
                 sh '''
                     cd go/src/github.com/kinecosystem/go
-                    echo $(pwd) ;
-                    echo "${HOST_MOUNT_POINT}"
-                    HOST_MOUNT_POINT=${HOST_MOUNT_POINT} make test
+                    make test
                 '''
             }
         }
@@ -50,7 +47,6 @@ pipeline {
                 sh '''
                     export VERSION="${VERSION}";
                     export TARGET="builder" ;
-                    export HOST_MOUNT_POINT=${HOST_MOUNT_POINT};
                     make build
                     '''
                 echo 'copying horizon executable to local filesystem'
