@@ -42,6 +42,7 @@ type Account struct {
 	SubentryCount        int32             `json:"subentry_count"`
 	InflationDestination string            `json:"inflation_destination,omitempty"`
 	HomeDomain           string            `json:"home_domain,omitempty"`
+	LastModifiedLedger   uint32            `json:"last_modified_ledger"`
 	Thresholds           AccountThresholds `json:"thresholds"`
 	Flags                AccountFlags      `json:"flags"`
 	Balances             []Balance         `json:"balances"`
@@ -130,6 +131,7 @@ type Balance struct {
 	Limit              string `json:"limit,omitempty"`
 	BuyingLiabilities  string `json:"buying_liabilities"`
 	SellingLiabilities string `json:"selling_liabilities"`
+	LastModifiedLedger uint32 `json:"last_modified_ledger,omitempty"`
 	base.Asset
 }
 

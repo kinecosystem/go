@@ -8,19 +8,29 @@ import (
 )
 
 func TestAccountActions_Show(t *testing.T) {
-	ht := StartHTTPTest(t, "base")
+	ht := StartHTTPTest(t, "allow_trust")
 	defer ht.Finish()
 
 	// existing account
 	w := ht.Get(
-		"/accounts/GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
+		"/accounts/GCXKG6RN4ONIEPCMNFB732A436Z5PNDSRLGWK7GBLCMQLIFO4S7EYWVU",
 	)
 	if ht.Assert.Equal(200, w.Code) {
 
 		var result horizon.Account
 		err := json.Unmarshal(w.Body.Bytes(), &result)
 		ht.Require.NoError(err)
-		ht.Assert.Equal("3", result.Sequence)
+		ht.Assert.Equal("8589934593", result.Sequence)
+
+		ht.Assert.NotEqual(0, result.LastModifiedLedger)
+		for _, balance := range result.Balances {
+			if balance.Type == "native" {
+				ht.Assert.Equal(uint32(0), balance.LastModifiedLedger)
+			} else {
+				ht.Assert.NotEqual(uint32(0), balance.LastModifiedLedger)
+			}
+		}
+
 	}
 
 	// missing account
