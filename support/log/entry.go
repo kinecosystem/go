@@ -124,7 +124,7 @@ func (e *Entry) Panic(args ...interface{}) {
 // be recorded (rather than outputted).  The returned function concludes the
 // test, switches the logger back into normal mode and returns a slice of all
 // raw logrus entries that were created during the test.
-func (e *Entry) StartTest(level logrus.Level) func() []*logrus.Entry {
+func (e *Entry) StartTest(level logrus.Level) func() []logrus.Entry {
 	if e.isTesting {
 		panic("cannot start logger test: already testing")
 	}
@@ -140,7 +140,7 @@ func (e *Entry) StartTest(level logrus.Level) func() []*logrus.Entry {
 	oldLevel := e.Logger.Level
 	e.Logger.Level = level
 
-	return func() []*logrus.Entry {
+	return func() []logrus.Entry {
 		e.Logger.Level = oldLevel
 		e.Logger.Out = old
 		e.removeHook(hook)
