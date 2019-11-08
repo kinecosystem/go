@@ -265,6 +265,14 @@
   version = "v1.1"
 
 [[projects]]
+  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
+
+[[projects]]
   digest = "1:045300d96eca8646d57c4a039de9b47694ef328612f69ef0ade22a97a670a8d8"
   name = "github.com/kr/pretty"
   packages = ["."]
@@ -459,14 +467,14 @@
   revision = "83532ca1c1caa393179c677b6facf48e61f4ca5d"
 
 [[projects]]
-  digest = "1:39553373857c2f3d484b9e1e4474bf6f21a795fe14fe6b941362ee6b266416f3"
+  digest = "1:425d221445ea27aaad740ed99e2be7cb463528526e63f6c599ad7d28f7ecea45"
   name = "github.com/sirupsen/logrus"
   packages = [
     ".",
     "hooks/test",
   ]
   pruneopts = "T"
-  revision = "070c81def33f6362a8267b6a4e56fb7bf23fc6b5"
+  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
 
 [[projects]]
   digest = "1:e4ea18b52dd9211e7e7b551ecaef4c49c274b2d9d5df4a46f70a03281a8b3c45"

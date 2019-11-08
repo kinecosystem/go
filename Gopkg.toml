@@ -52,7 +52,7 @@
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
-  revision = "070c81def33f6362a8267b6a4e56fb7bf23fc6b5"
+  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
 
 [[constraint]]
   name = "github.com/throttled/throttled"
