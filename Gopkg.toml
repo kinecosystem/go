@@ -52,12 +52,16 @@
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
-  revision = "68cec9f21fbf3ea8d8f98c044bc6ce05f17b267a"
+  revision = "070c81def33f6362a8267b6a4e56fb7bf23fc6b5"
 
 [[constraint]]
   name = "github.com/throttled/throttled"
   source = "https://github.com/bartekn/throttled.git"
   revision = "c99eef3ad70a3be5a983770523e0e379699c805c"
+
+[[override]]
+  name = "golang.org/x/sys"
+  revision = "cc5685c2db1239775905f3911f0067c0fa74762f"
 
 [prune]
   go-tests = true
