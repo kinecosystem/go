@@ -37,6 +37,7 @@ type Account struct {
 	HomeDomain         null.String
 	Thresholds         xdr.Thresholds
 	Flags              xdr.AccountFlags
+	LastModified       uint32
 	BuyingLiabilities  xdr.Int64 `db:"buyingliabilities"`
 	SellingLiabilities xdr.Int64 `db:"sellingliabilities"`
 }
@@ -144,6 +145,7 @@ type Trustline struct {
 	Tlimit             xdr.Int64
 	Balance            xdr.Int64
 	Flags              int32
+	LastModified 	   uint32     `db:"lastmodified"`
 	BuyingLiabilities  xdr.Int64 `db:"buyingliabilities"`
 	SellingLiabilities xdr.Int64 `db:"sellingliabilities"`
 }
