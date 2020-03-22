@@ -93,6 +93,10 @@ func (r *System) clearBefore(seq int32) error {
 	if err != nil {
 		return err
 	}
+	err = clear(0, end, "history_trades", "id")
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

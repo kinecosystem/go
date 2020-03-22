@@ -158,7 +158,9 @@ var dbReapCmd = &cobra.Command{
 	Short: "reaps (i.e. removes) any reapable history data",
 	Long:  "reap removes any historical data that is earlier than the configured retention cutoff",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := initApp().DeleteUnretainedHistory()
+		app := initApp()
+		app.UpdateLedgerState()
+		err := app.DeleteUnretainedHistory()
 		if err != nil {
 			log.Fatal(err)
 		}
